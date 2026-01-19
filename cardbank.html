@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANTI-CRISIS MACHINE | Unified Cardbank</title>
+    <style>
+        :root {
+            --crisis: #e63946;
+            --vector: #457b9d;
+            --extraction: #e9c46a;
+            --performance: #9d4edd;
+            --oracle: #2a9d8f;
+            --filler: #6c757d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial Narrow', Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+        }
+
+        /* Screen UI */
+        .screen-ui {
+            max-width: 1200px;
+            margin: 0 auto 2rem auto;
+            padding: 1rem;
+            background: #222;
+            border: 1px solid #444;
+        }
+
+        .screen-ui h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .filters button {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filters button:hover,
+        .filters button.active {
+            background: var(--crisis);
+            border-color: var(--crisis);
+        }
+
+        .stats {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 1rem;
+        }
+
+        /* Print Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Universal Card */
+        .card {
+            width: 100%;
+            aspect-ratio: 2.5 / 3.5;
+            background: #fff;
+            color: #000;
+            border: 2px solid #000;
+            display: flex;
+            flex-direction: column;
+            font-size: 9px;
+            overflow: hidden;
+            page-break-inside: avoid;
+        }
+
+        .card-header {
+            padding: 6px 8px 4px 8px;
+            border-bottom: 1.5px solid #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 7px;
+            letter-spacing: 0.5px;
+        }
+
+        .card-header .suit-badge {
+            padding: 2px 6px;
+            color: #fff;
+            font-size: 6px;
+        }
+
+        .card.crisis .suit-badge {
+            background: var(--crisis);
+        }
+
+        .card.vector .suit-badge {
+            background: var(--vector);
+        }
+
+        .card.extraction .suit-badge {
+            background: var(--extraction);
+            color: #000;
+        }
+
+        .card.performance .suit-badge {
+            background: var(--performance);
+        }
+
+        .card.oracle .suit-badge {
+            background: var(--oracle);
+        }
+
+        .card.filler .suit-badge {
+            background: var(--filler);
+        }
+
+        .card-title {
+            padding: 6px 8px;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .card-body {
+            flex: 1;
+            padding: 6px 8px;
+            font-size: 8px;
+            line-height: 1.35;
+            overflow: hidden;
+        }
+
+        .card-footer {
+            padding: 4px 8px;
+            border-top: 1px solid #ddd;
+            font-size: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card-source {
+            opacity: 0.6;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+
+            .screen-ui {
+                display: none;
+            }
+
+            .card-grid {
+                gap: 0;
+                max-width: 100%;
+            }
+
+            .card {
+                border-width: 1px;
+            }
+
+            @page {
+                size: letter;
+                margin: 0.25in;
+            }
+        }
+
+        @media screen and (max-width: 600px) {
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="screen-ui">
+        <h1>⚡ Anti-Crisis Cardbank</h1>
+        <div class="filters">
+            <button class="active" data-filter="all">All Cards</button>
+            <button data-filter="crisis">⚡ Crisis</button>
+            <button data-filter="vector">◈ Vector</button>
+            <button data-filter="extraction">▣ Extraction</button>
+            <button data-filter="performance">⊗ Performance</button>
+            <button data-filter="oracle">∿ Oracle</button>
+            <button data-filter="filler">☒ System</button>
+        </div>
+        <div class="filters">
+            <button data-source="all">All Sources</button>
+            <button data-source="tm">Total Meltdown</button>
+            <button data-source="dew">DEW-Line</button>
+            <button data-source="feed">The Feed</button>
+            <button data-source="explain">Explain Yourself</button>
+        </div>
+        <div class="stats" id="stats">Loading cards...</div>
+        <button onclick="window.print()"
+            style="background: var(--crisis); color: #fff; border: none; padding: 0.75rem 1.5rem; font-weight: 700; cursor: pointer;">Print
+            Cards (9-up)</button>
+        <a href="print-production.html"
+            style="color: #fff; margin-left: 1rem; font-size: 0.85rem; background: #457b9d; padding: 0.75rem 1rem; text-decoration: none; font-weight: 700;">📄
+            12-UP + BACKS</a>
+        <a href="index.html" style="color: #888; margin-left: 1rem; font-size: 0.85rem;">← Back to Index</a>
+    </div>
+
+
+    <div class="card-grid" id="card-grid"></div>
+
+    <script>
+        // UNIFIED CARDBANK - All cards from all games mapped to metagame suits
+        const CARDBANK = [
+            // === TOTAL MELTDOWN (tm-00) ===
+            // SPARKS → CRISIS
+            { suit: "crisis", title: "The Trad-Wife IPO", body: "A 'Trad Wife' influencer is revealed as a CEO; her husband is her employee. Force immediate tribal alignment.", source: "tm", id: "TM-001" },
+            { suit: "crisis", title: "The Tankie's Dilemma", body: "An anti-imperialist streamer holds defense stock and denies genocide. Split the Left immediately.", source: "tm", id: "TM-002" },
+            { suit: "crisis", title: "EA Rugpull", body: "Tech billionaire embezzles pension funds to save 'future' trillions. Mathematical morality vs human ethics.", source: "tm", id: "TM-003" },
+            { suit: "crisis", title: "Doomer Merch Drop", body: "A celebrated nihilist launches a streetwear line made in sweatshops. Aestheticizing depression for clout.", source: "tm", id: "TM-004" },
+            { suit: "crisis", title: "Diversity Algorithm", body: "AI patches for equity cause a safety-critical failure. Force choice between Safety and Equity.", source: "tm", id: "TM-005" },
+            { suit: "crisis", title: "Red Pill Divorce", body: "'Alpha' coach livestreaming tears as wife leaves him for a 'Beta'. Reality punctures the bubble.", source: "tm", id: "TM-006" },
+            { suit: "crisis", title: "Infinite Gender Reveal", body: "A reveal party with an empty box accidentally ignites a wildfire. Symbolic neutrality vs physical destruction.", source: "tm", id: "TM-007" },
+            { suit: "crisis", title: "Green Jetsetters", body: "Climate org spends 80% of budget on private jets. Disconnect between rhetoric and behavior.", source: "tm", id: "TM-008" },
+            { suit: "crisis", title: "Just Asking Questions", body: "Podcaster hosts eugenicist for 'free speech', then sells supplements. The marketplace of ideas as a grift.", source: "tm", id: "TM-009" },
+            { suit: "crisis", title: "Medicare Socialist", body: "Elderly voters riot over 1% cuts while decrying student loan forgiveness. Generational resource war.", source: "tm", id: "TM-010" },
+            // ACCELERANTS → VECTOR
+            { suit: "vector", title: "Sealion Swarm", body: "Force opponent to discard hand by demanding endless evidence for self-evident claims. Block until 3 sources provided.", source: "tm", id: "TM-011" },
+            { suit: "vector", title: "Gish Gallop Overload", body: "Play 5 weak arguments. Opponent loses round unless they refute all in 30 seconds.", source: "tm", id: "TM-012" },
+            { suit: "vector", title: "Strawman Empath", body: "Cancel an attack by claiming it 'hurts the very people you're trying to help'. Tone policing.", source: "tm", id: "TM-013" },
+            { suit: "vector", title: "Context Collapse", body: "Decontextualize a card played 3 turns ago. Re-interpret in worst faith. -5 Social Credit to target.", source: "tm", id: "TM-014" },
+            { suit: "vector", title: "Motte & Bailey", body: "When successfully attacked, swap your radical position for a 'reasonable' one. Ignore all damage.", source: "tm", id: "TM-015" },
+            { suit: "vector", title: "Whataboutism", body: "Deflect any scandal by pointing to an unrelated crime of the opposing tribe. Damage reflected 100%.", source: "tm", id: "TM-016" },
+            { suit: "vector", title: "Rage-Farm Harvest", body: "Play a Lie. Gain +2 Monetization for every opponent who contests it.", source: "tm", id: "TM-017" },
+            { suit: "vector", title: "The Wojak Mask", body: "Describe opponent as 'Soyjak'. Target is silenced until they prove they are not a 'Soyjak'.", source: "tm", id: "TM-018" },
+            { suit: "vector", title: "Infinite Goalposts", body: "When a burden of proof is met, demand a higher standard. Cancel the opponent's success.", source: "tm", id: "TM-019" },
+            { suit: "vector", title: "Tone Police Badge", body: "Negate any argument made with emotion or profanity. Privilege the comfortable.", source: "tm", id: "TM-020" },
+            // MONETIZATION → EXTRACTION
+            { suit: "extraction", title: "Male Vitality Stack", body: "Sell dubious pills to reclaim birthright. Gain tokens for every Red-Pilled player who feels insecure.", source: "tm", id: "TM-021" },
+            { suit: "extraction", title: "Resist Funko Pop", body: "Mass-produced kitsch of anti-capitalist icons. Gain tokens from Woke players.", source: "tm", id: "TM-022" },
+            { suit: "extraction", title: "Trad-Wife Course", body: "$299 Sourdough Training. Escape the Matrix using an iPhone. Extract wealth from Trad seekers.", source: "tm", id: "TM-023" },
+            { suit: "extraction", title: "Doomer Prep Bucket", body: "Sell overpriced freeze-dried slop to those convinced society ends Tuesday. Gain tokens per Crisis.", source: "tm", id: "TM-024" },
+            { suit: "extraction", title: "Free Speech Paywall", body: "Charge $8/month for 'uncensored' content. Frame moderation as censorship to drive subs.", source: "tm", id: "TM-025" },
+            { suit: "extraction", title: "Corporate HR Seminar", body: "DEI consulting with no structural change. Gain immunity from Cancellation for 3 turns.", source: "tm", id: "TM-026" },
+            { suit: "extraction", title: "Alpha Crypto Pump", body: "Transfer all wealth from 'Beta' players to the 'Alpha' player via exit liquidity.", source: "tm", id: "TM-027" },
+            { suit: "extraction", title: "Political Dip Bowl", body: "Force opponents to buy useless branded items to prove they aren't traitors.", source: "tm", id: "TM-028" },
+            { suit: "extraction", title: "Rage-Bait Ad-Buy", body: "Convert Anger tokens into Money tokens at a 1:10 ratio. Friction is profit.", source: "tm", id: "TM-029" },
+            { suit: "extraction", title: "Anti-Woke Beer", body: "Rebrand generic lager as a 'Patriot' stance. Rally Red-Pilled players: +Strength, -Intelligence.", source: "tm", id: "TM-030" },
+            // FLUXUS → PERFORMANCE
+            { suit: "performance", title: "The Pronoun Audit", body: "Point to neighbor. They must list every pronoun used in a bio. Silence for 10s if they stumble.", source: "tm", id: "TM-031" },
+            { suit: "performance", title: "Salary Transparency", body: "Open banking app. Place phone in center. First person to look away loses Social Credit.", source: "tm", id: "TM-032" },
+            { suit: "performance", title: "Who Did You Vote For?", body: "Stand and toast your candidate. Name one policy you hate about the neighbor's candidate.", source: "tm", id: "TM-033" },
+            { suit: "performance", title: "History Excavation", body: "Neighbor searches your DM history for slurs or 'I hate'. Reads worst result aloud.", source: "tm", id: "TM-034" },
+            { suit: "performance", title: "Apology Video", body: "Record a 30s IG story apology using buzzwords: 'listening', 'growing', 'work'. Delete in 24h.", source: "tm", id: "TM-035" },
+            { suit: "performance", title: "Privilege Line-Up", body: "Physical privilege walk. Furthest back gets to slap the person furthest forward.", source: "tm", id: "TM-036" },
+            { suit: "performance", title: "Body Count Confess", body: "Estimate neighbor's partner count. Subject reveals true number. Drink if off by >3.", source: "tm", id: "TM-037" },
+            { suit: "performance", title: "Uninvited Guest", body: "Text random number: 'I'm at the party. It's awful. Can you pick me up?' Read reply.", source: "tm", id: "TM-038" },
+            { suit: "performance", title: "Is This Racist?", body: "Describe neighbor's outfit in an accent not your own. Group votes: Hate or Cringe?", source: "tm", id: "TM-039" },
+            { suit: "performance", title: "Ok Boomer Silence", body: "Oldest player explains home ownership. Others maintain blank NPC expressions until they stop.", source: "tm", id: "TM-040" },
+
+            // === THE FEED ===
+            // ALGORITHM → VECTOR
+            { suit: "vector", title: "Rage Bait", body: "Anger is the most renewable resource. Effect: Heat +4.", source: "feed", id: "FEED-007" },
+            { suit: "vector", title: "The Dopamine Loop", body: "Variable rewards create digital cages. Effect: Revenue +5.", source: "feed", id: "FEED-008" },
+            { suit: "vector", title: "Shadow Profile", body: "We knew you'd click this yesterday. Effect: Draw +1.", source: "feed", id: "FEED-009" },
+            { suit: "vector", title: "Echo Chamber", body: "Validation is more profitable than truth. Effect: Protect Slot.", source: "feed", id: "FEED-010" },
+            { suit: "vector", title: "Doomscroll", body: "Anxiety keeps the thumb moving. Effect: Revive a Card.", source: "feed", id: "FEED-011" },
+            { suit: "vector", title: "The Deepfake", body: "Reality is a legacy feature. Effect: Heat +10.", source: "feed", id: "FEED-012" },
+            { suit: "vector", title: "Sponsorship", body: "Drink verification can to continue. Effect: Revenue +10.", source: "feed", id: "FEED-013" },
+            { suit: "vector", title: "Strawman", body: "Look at how dumb the others are. Effect: Heat +6.", source: "feed", id: "FEED-014" },
+            { suit: "vector", title: "Accel Meme", body: "Nothing human makes it out. Effect: Crisis +20.", source: "feed", id: "FEED-015" },
+            { suit: "vector", title: "Parasocial Bond", body: "She's basically my best friend. Effect: Rev +3, Heat +3.", source: "feed", id: "FEED-016" },
+            // REALITY → CRISIS
+            { suit: "crisis", title: "Heatwave", body: "Record temps in the southwest. Base Heat: 1.", source: "feed", id: "FEED-017" },
+            { suit: "crisis", title: "Election Cycle", body: "Polling stations are crowded. Base Heat: 4.", source: "feed", id: "FEED-018" },
+            { suit: "crisis", title: "Celebrity Scandal", body: "Private texts leaked online. Base Heat: 2.", source: "feed", id: "FEED-019" },
+            { suit: "crisis", title: "New Pandemic", body: "Bio-signals are worrying. Base Heat: 5.", source: "feed", id: "FEED-020" },
+            { suit: "crisis", title: "Tech Layoffs", body: "15,000 fired via chatbot. Base Heat: 3.", source: "feed", id: "FEED-021" },
+            { suit: "crisis", title: "Police Incident", body: "Bodycam footage goes viral. Base Heat: 6.", source: "feed", id: "FEED-022" },
+            { suit: "crisis", title: "Stock Crash", body: "Numbers turn red globally. Base Heat: 4.", source: "feed", id: "FEED-023" },
+            { suit: "crisis", title: "Mars Discovery", body: "Water found, maybe life? Base Heat: 1.", source: "feed", id: "FEED-024" },
+            { suit: "crisis", title: "Cultural War", body: "A brand changes its logo. Base Heat: 5.", source: "feed", id: "FEED-025" },
+            { suit: "crisis", title: "Internet Blackout", body: "Cables cut in the Atlantic. Base Heat: 2.", source: "feed", id: "FEED-026" },
+            { suit: "crisis", title: "UFO Sighting", body: "Grainy video from a pilot. Base Heat: 3.", source: "feed", id: "FEED-027" },
+            { suit: "crisis", title: "Climate Protest", body: "Art defaced in a museum. Base Heat: 4.", source: "feed", id: "FEED-028" },
+            // BOT → ORACLE (resistance/nuance)
+            { suit: "oracle", title: "Fact Check", body: "Friction is the enemy of engagement. Effect: Heat -5.", source: "feed", id: "FEED-029" },
+            { suit: "oracle", title: "Touch Grass", body: "Physical reality asserts itself. Effect: Discard Card.", source: "feed", id: "FEED-030" },
+            { suit: "oracle", title: "Public Audit", body: "Transparency destroys margins. Effect: Profit -50%.", source: "feed", id: "FEED-031" },
+            { suit: "oracle", title: "Server Reset", body: "The hard reboot of democracy. Effect: Crisis -20.", source: "feed", id: "FEED-032" },
+
+            // === DEW-LINE (dew-00) ===
+            // CORE/PROBE → ORACLE
+            { suit: "oracle", title: "The Medium is the Message", body: "The medium is the message.", source: "dew", id: "DEW-004" },
+            { suit: "oracle", title: "Sudden Blindness", body: "To the blind all things are sudden.", source: "dew", id: "DEW-005" },
+            { suit: "oracle", title: "Mammaries", body: "Thanks for the mammaries.", source: "dew", id: "DEW-006" },
+            { suit: "oracle", title: "Silence", body: "Silence is all the sounds of the environment at once.", source: "dew", id: "DEW-007" },
+            { suit: "oracle", title: "Aquinas", body: "Should old Aquinas be forgot?", source: "dew", id: "DEW-008" },
+            { suit: "oracle", title: "Propaganda", body: "Propaganda is any culture in action.", source: "dew", id: "DEW-009" },
+            { suit: "oracle", title: "Said and Done", body: "When all is said and done more will have been said than done.", source: "dew", id: "DEW-010" },
+            { suit: "oracle", title: "Small Package", body: "A man wrapped up in himself makes a small package.", source: "dew", id: "DEW-011" },
+            { suit: "oracle", title: "Life Before Death", body: "Is there a life before death?", source: "dew", id: "DEW-012" },
+            { suit: "oracle", title: "Second Fiddle", body: "Hell hath no music like a woman playing second fiddle.", source: "dew", id: "DEW-013" },
+            { suit: "oracle", title: "Antenna", body: "Artists are the antennae of the race.", source: "dew", id: "DEW-014" },
+            { suit: "oracle", title: "The Stripper", body: "The stripper puts the audience on.", source: "dew", id: "DEW-015" },
+            { suit: "oracle", title: "March Backwards", body: "We march backwards into the future.", source: "dew", id: "DEW-021" },
+            { suit: "oracle", title: "Spaceship Earth", body: "Spaceship Earth.", source: "dew", id: "DEW-022" },
+            { suit: "oracle", title: "Credit Card", body: "Money is the poor man's credit card.", source: "dew", id: "DEW-023" },
+            { suit: "oracle", title: "Invention", body: "Invention is the mother of necessities.", source: "dew", id: "DEW-024" },
+            { suit: "oracle", title: "Time Vanished", body: "Time has ceased, space has vanished.", source: "dew", id: "DEW-025" },
+            { suit: "oracle", title: "Feedback Loop", body: "Feedback is the loop of the future.", source: "dew", id: "DEW-026" },
+            { suit: "oracle", title: "Content", body: "The content of a movie is a novel.", source: "dew", id: "DEW-027" },
+            { suit: "oracle", title: "User is Content", body: "The user is the content.", source: "dew", id: "DEW-028" },
+            { suit: "oracle", title: "Print", body: "Print is the technology of individualism.", source: "dew", id: "DEW-029" },
+            { suit: "oracle", title: "New Primitives", body: "We are the primitives of a new culture.", source: "dew", id: "DEW-030" },
+            { suit: "oracle", title: "War Education", body: "War is education.", source: "dew", id: "DEW-031" },
+            { suit: "oracle", title: "Art Radar", body: "Art is a Distant Early Warning system.", source: "dew", id: "DEW-055" },
+            // FLUX → PERFORMANCE
+            { suit: "performance", title: "Shadow", body: "Do not come out of your shadow.", source: "dew", id: "DEW-017" },
+            { suit: "performance", title: "Swallow", body: "Do not swallow.", source: "dew", id: "DEW-018" },
+            { suit: "performance", title: "Fraud", body: "Look like a fraud.", source: "dew", id: "DEW-019" },
+            { suit: "performance", title: "Leaf", body: "Quiver like a leaf.", source: "dew", id: "DEW-020" },
+            { suit: "performance", title: "Silence Score", body: "Do not speak.", source: "dew", id: "DEW-032" },
+            { suit: "performance", title: "Naive", body: "With inane but inappropriate naivety.", source: "dew", id: "DEW-033" },
+            { suit: "performance", title: "Willow", body: "Weep like a willow.", source: "dew", id: "DEW-034" },
+            { suit: "performance", title: "Mental", body: "Slow down mentally.", source: "dew", id: "DEW-035" },
+            { suit: "performance", title: "Immobile", body: "White and immobile.", source: "dew", id: "DEW-036" },
+            { suit: "performance", title: "Painful", body: "Outward, painfully.", source: "dew", id: "DEW-037" },
+            { suit: "performance", title: "Fingers", body: "With tears in your fingers.", source: "dew", id: "DEW-038" },
+            { suit: "performance", title: "Bored", body: "From a distance, bored.", source: "dew", id: "DEW-039" },
+            { suit: "performance", title: "Alone", body: "Courageously easy and obligingly alone.", source: "dew", id: "DEW-040" },
+
+            // === EXPLAIN YOURSELF ===
+            // EVIDENCE → ORACLE (incriminating objects that force interpretation)
+            { suit: "oracle", title: "Duct Tape", body: "50-yard roll. Silver, heavy duty. Visible sticky residue on the edges.", source: "explain", id: "EXP-011" },
+            { suit: "oracle", title: "Cucumber", body: "12-inch English long. Wrapped in tight shrink-wrap. Uncomfortably firm.", source: "explain", id: "EXP-012" },
+            { suit: "oracle", title: "Ski Mask", body: "Black knit wool. Three precisely cut holes. Smells like cold breath.", source: "explain", id: "EXP-013" },
+            { suit: "oracle", title: "Jar of Mayo", body: "Family size. Full fat. Warm from the sun. Sloshes audibly.", source: "explain", id: "EXP-014" },
+            { suit: "oracle", title: "Garden Shovel", body: "Pointed spade. Fresh damp soil on the blade. Heavy wooden handle.", source: "explain", id: "EXP-015" },
+            { suit: "oracle", title: "Handcuffs", body: "Real nickel-plated steel. Double locking. No key in sight.", source: "explain", id: "EXP-016" },
+            { suit: "oracle", title: "Vaseline", body: "13oz Tub. Petroleum jelly. Finger marks visible in the goo.", source: "explain", id: "EXP-017" },
+            { suit: "oracle", title: "Blue Tarp", body: "10x12 feet. Heavy polyethylene. Crinkles loudly.", source: "explain", id: "EXP-018" },
+            { suit: "oracle", title: "Rubber Gloves", body: "Bright yellow dishwashing style. Elbow length. Powdered.", source: "explain", id: "EXP-019" },
+            { suit: "oracle", title: "Eggplant", body: "Deep purple. Glossy. Perfectly curved. Significant heft.", source: "explain", id: "EXP-020" },
+            { suit: "oracle", title: "Binoculars", body: "10x50 magnification. High-powered. Foggy lenses.", source: "explain", id: "EXP-021" },
+            { suit: "oracle", title: "Bottle of Bleach", body: "Concentrated formula. Industrial strength. Leaking slightly.", source: "explain", id: "EXP-022" },
+            { suit: "oracle", title: "Bulk Lollipops", body: "Bag of 100. Assorted flavors. Clear crinkly bag.", source: "explain", id: "EXP-023" },
+            { suit: "oracle", title: "Video Camera", body: "Handheld camcorder. Red 'REC' light blinking.", source: "explain", id: "EXP-024" },
+            { suit: "oracle", title: "Meat Cleaver", body: "Heavy carbon steel. Full tang. Sharp enough to shave with.", source: "explain", id: "EXP-025" },
+            { suit: "oracle", title: "Knotted Rope", body: "6 feet of thick hemp. Pre-tied loops every 12 inches.", source: "explain", id: "EXP-026" },
+            { suit: "oracle", title: "Sleeping Pills", body: "Maximum strength. Over-the-counter. Half the bottle missing.", source: "explain", id: "EXP-027" },
+            { suit: "oracle", title: "Chainsaw", body: "Gas-powered. Oily chain. Pull-start handle is warm.", source: "explain", id: "EXP-045" },
+            { suit: "oracle", title: "Gasoline Can", body: "5-gallon red plastic. Vapor vent is open. High-octane arson.", source: "explain", id: "EXP-037" },
+            { suit: "oracle", title: "Rubber Chicken", body: "Squeaks when squeezed. Realistic lifeless eyes. Vibrant yellow.", source: "explain", id: "EXP-039" },
+            // SCENES → CRISIS (corrupt contexts)
+            { suit: "crisis", title: "Airport Security", body: "TSA agents staring. Long line of travelers. Plastic bins.", source: "explain", id: "EXP-091" },
+            { suit: "crisis", title: "Elementary School Lot", body: "3 PM pickup. Parents in minivans. Crossing guards.", source: "explain", id: "EXP-092" },
+            { suit: "crisis", title: "Church Confessional", body: "Dark velvet curtains. Whispered voices. Kneeling.", source: "explain", id: "EXP-093" },
+            { suit: "crisis", title: "First Date Dinner", body: "Candlelight. Expensive steak. High expectations.", source: "explain", id: "EXP-094" },
+            { suit: "crisis", title: "Interrogation Room", body: "Metal table. Two-way mirror. One bright lightbulb.", source: "explain", id: "EXP-095" },
+            { suit: "crisis", title: "Grandma's Funeral", body: "Open casket. Crying cousins. Somber organ music.", source: "explain", id: "EXP-096" },
+            { suit: "crisis", title: "Stuck Elevator", body: "Five strangers. Getting hot. Panic rising.", source: "explain", id: "EXP-097" },
+            { suit: "crisis", title: "Job Interview", body: "CEO's office. Polished mahogany desk. Tough questions.", source: "explain", id: "EXP-098" },
+            { suit: "crisis", title: "Public Restroom", body: "Gap in the stall door. Puddle on the floor. Echo.", source: "explain", id: "EXP-099" },
+            { suit: "crisis", title: "Nursing Home", body: "Bingo hall. Smell of lavender and medicine. Wheelchairs.", source: "explain", id: "EXP-100" },
+            { suit: "crisis", title: "Border Crossing", body: "Drug-sniffing dogs. Armed guards. Passport check.", source: "explain", id: "EXP-101" },
+            { suit: "crisis", title: "Daycare Center", body: "Nap time. Tiny beds. Staff watching closely.", source: "explain", id: "EXP-102" },
+            { suit: "crisis", title: "Emergency Room", body: "Sick people. Triage nurse. Fluorescent lights.", source: "explain", id: "EXP-103" },
+            { suit: "crisis", title: "Public Library", body: "Silent study area. Librarian shushing. Dusty books.", source: "explain", id: "EXP-104" },
+            { suit: "crisis", title: "Gym Locker Room", body: "Steam. Naked old men. Smell of chlorine.", source: "explain", id: "EXP-105" },
+            { suit: "crisis", title: "Wedding Altar", body: "Silence before the 'I do'. Everyone watching.", source: "explain", id: "EXP-106" },
+            { suit: "crisis", title: "Zoom Call", body: "Boss's camera is on. You are unmuted. HR is there.", source: "explain", id: "EXP-107" },
+            { suit: "crisis", title: "Art Gallery", body: "Priceless vase on a pedestal. No touching. Critics.", source: "explain", id: "EXP-108" },
+            { suit: "crisis", title: "Park Bench (2 AM)", body: "Flickering streetlight. Shadows in the trees. Empty.", source: "explain", id: "EXP-109" },
+            { suit: "crisis", title: "HOA Meeting", body: "Angry neighbors. Agenda items. Petty rules.", source: "explain", id: "EXP-110" },
+
+            // === FILLERS / SYSTEM OPERATORS ===
+            { suit: "filler", title: "Invert Premise", body: "Reverse the current core mechanic for one cycle.", source: "sys", id: "SYS-001" },
+            { suit: "filler", title: "Cut 30%", body: "Reduce the scope. Only affects one specific neighborhood.", source: "sys", id: "SYS-002" },
+            { suit: "filler", title: "Swap Roles", body: "The player to your left must finish the action.", source: "sys", id: "SYS-003" },
+            { suit: "filler", title: "Scale Outrage", body: "The crisis is now global. Triple victims, halve profit.", source: "sys", id: "SYS-004" },
+            { suit: "filler", title: "Make Physical", body: "The crisis manifests as a smell or sound.", source: "sys", id: "SYS-005" },
+            { suit: "filler", title: "Double Stakes", body: "A second disaster occurs. You must link them.", source: "sys", id: "SYS-006" },
+            { suit: "filler", title: "Mute the Victim", body: "No mention of people allowed. Focus on metrics.", source: "sys", id: "SYS-007" },
+            { suit: "filler", title: "Verify the Lie", body: "A 'blue checkmark' confirmed a false detail.", source: "sys", id: "SYS-008" },
+            { suit: "filler", title: "Inject Brain Rot", body: "Use at least three pieces of Gen-Alpha slang.", source: "sys", id: "SYS-009" },
+            { suit: "filler", title: "Pity the Devil", body: "Make the table feel sympathy for the billionaire.", source: "sys", id: "SYS-010" },
+            { suit: "filler", title: "AI Hallucination", body: "One detail is factually impossible. Accept it anyway.", source: "sys", id: "SYS-011" },
+            { suit: "filler", title: "The Rebrand", body: "The crisis is now a 'Wellness Retreat'. Explain the pivot.", source: "sys", id: "SYS-012" }
+        ];
+
+        let activeFilter = 'all';
+        let activeSource = 'all';
+
+        function render() {
+            const grid = document.getElementById('card-grid');
+            const filtered = CARDBANK.filter(c => {
+                const suitMatch = activeFilter === 'all' || c.suit === activeFilter;
+                const sourceMatch = activeSource === 'all' || c.source === activeSource;
+                return suitMatch && sourceMatch;
+            });
+
+            document.getElementById('stats').textContent = `Showing ${filtered.length} of ${CARDBANK.length} cards`;
+
+            grid.innerHTML = filtered.map(c => `
+            <div class="card ${c.suit}">
+                <div class="card-header">
+                    <span>${c.id}</span>
+                    <span class="suit-badge">${c.suit.toUpperCase()}</span>
+                </div>
+                <div class="card-title">${c.title}</div>
+                <div class="card-body">${c.body}</div>
+                <div class="card-footer">
+                    <span class="card-source">${c.source.toUpperCase()}</span>
+                </div>
+            </div>
+        `).join('');
+        }
+
+        document.querySelectorAll('[data-filter]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeFilter = btn.dataset.filter;
+                render();
+            });
+        });
+
+        document.querySelectorAll('[data-source]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-source]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeSource = btn.dataset.source;
+                render();
+            });
+        });
+
+        render();
+    </script>
+</body>
+
+</html>

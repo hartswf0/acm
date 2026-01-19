@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EXPLAIN YOURSELF - Pro Edition V1.9.1</title>
+    <style>
+        :root {
+            --text: #000000;
+            --trim: #000000;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font-main);
+            background: #e2e2e7;
+            color: var(--text);
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                color: #000;
+            }
+
+            .no-print,
+            /* Force ALL backgrounds white and borders thin */
+            * {
+                background: transparent !important;
+                background-color: #fff !important;
+                color: #000 !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
+            }
+
+            body {
+                background: #fff !important;
+            }
+
+            .nav-bar,
+            .nav-controls,
+            .no-print {
+                display: none !important;
+            }
+
+            /* Card specifics */
+            .card-face,
+            .card-pair {
+                background-color: #fff !important;
+                border-color: #000 !important;
+            }
+
+            /* Invert the black ID tags */
+            .card-id-tag {
+                background-color: #fff !important;
+                color: #000 !important;
+                border: 1px solid #000 !important;
+            }
+
+            /* Thin out heavy borders */
+            .card-title-main {
+                border-bottom: 2px solid #000 !important;
+            }
+
+            .back-box {
+                border: 2px solid #000 !important;
+            }
+
+            /* Handle SVGs - ensure strokes form the image, not fills */
+            svg {
+                fill: none !important;
+                stroke: #000 !important;
+            }
+
+            /* Ensure text is clearly black */
+            h1,
+            h2,
+            h3,
+            h4,
+            div,
+            span,
+            p {
+                color: #000 !important;
+            }
+        }
+
+        /* UI Navigation */
+        .no-print {
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border-bottom: 4px solid #000;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-bar {
+            background: #000;
+            color: #fff;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-title {
+            font-weight: 900;
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            font-style: italic;
+            letter-spacing: -1px;
+        }
+
+        .nav-credit {
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .nav-controls {
+            display: flex;
+            padding: 10px 24px;
+            gap: 8px;
+            background: #f5f5f5;
+            overflow-x: auto;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-btn {
+            background: #fff;
+            border: 2px solid #000;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .tab-btn.active {
+            background: #000;
+            color: #fff;
+        }
+
+        /* Interactive Views */
+        .view-section {
+            display: none;
+            padding: 20px;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        .mobile-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 80vh;
+            justify-content: flex-start;
+            padding-top: 40px;
+        }
+
+        .m-card {
+            width: 310px;
+            aspect-ratio: 2.5/3.5;
+            background: #fff;
+            border: 6px solid #000;
+            border-radius: 24px;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 14px 14px 0px #000;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .m-controls {
+            display: flex;
+            gap: 12px;
+            width: 310px;
+        }
+
+        .m-btn {
+            flex: 1;
+            padding: 18px;
+            font-weight: 900;
+            border: 3px solid #000;
+            background: #fff;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 4px 4px 0px #000;
+            font-size: 0.8rem;
+        }
+
+        .m-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+
+        /* Print Production Layout - Scissor Optimized */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: #fff;
+            }
+
+            .view-section {
+                padding: 0;
+                display: block !important;
+            }
+
+            .print-page {
+                width: 8.5in;
+                height: 11in;
+                padding: 0.5in 0;
+                page-break-after: always;
+                display: flex !important;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .page-header {
+                width: 5.25in;
+                margin-bottom: 10px;
+            }
+        }
+
+        #print-view {
+            background: #333;
+            padding: 40px 0;
+        }
+
+        .print-page {
+            background: #fff;
+            margin: 0 auto 40px auto;
+            width: 8.5in;
+            height: 11in;
+            padding: 0.5in 0;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .page-header {
+            width: 5.25in;
+            font-size: 10px;
+            border-bottom: 1.5pt solid #000;
+            padding-bottom: 5px;
+            font-weight: 900;
+            display: flex;
+            justify-content: space-between;
+            text-transform: uppercase;
+        }
+
+        /* Shared Lines Grid: Margin 0 makes cutting easier */
+        .card-pair {
+            display: flex;
+            width: 5.25in;
+            height: 3.75in;
+            margin: 0;
+            position: relative;
+            background: #fff;
+            border: 1pt solid #000;
+            /* This creates the shared line when stacked */
+        }
+
+        /* Prevent double borders when stacked */
+        .card-pair+.card-pair {
+            margin-top: -1pt;
+        }
+
+        .card-face {
+            width: 2.625in;
+            height: 3.75in;
+            padding: 0.3in;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        /* Card Content Styling */
+        .icon-svg {
+            width: 44px;
+            height: 44px;
+            margin-bottom: 12px;
+            stroke: #000;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+            fill: none;
+        }
+
+        .card-id-tag {
+            position: absolute;
+            top: 0.25in;
+            right: 0.25in;
+            font-size: 10px;
+            font-weight: 900;
+            background: #000;
+            color: #fff;
+            padding: 3px 7px;
+            z-index: 10;
+            border-radius: 4px;
+        }
+
+        .card-type-header {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+            color: #777;
+        }
+
+        .card-title-main {
+            font-size: 21px;
+            font-weight: 900;
+            text-transform: uppercase;
+            border-bottom: 5px solid #000;
+            padding-bottom: 5px;
+            margin-bottom: 14px;
+            line-height: 0.9;
+            letter-spacing: -0.5px;
+        }
+
+        .card-body-text {
+            font-size: 11.5px;
+            line-height: 1.45;
+            flex-grow: 1;
+            font-weight: 500;
+        }
+
+        .card-footer-flavor {
+            font-size: 9px;
+            font-weight: 800;
+            border-top: 1.5pt solid #000;
+            padding-top: 8px;
+            font-style: italic;
+            margin-top: 12px;
+            color: #444;
+        }
+
+        /* Back Design */
+        .back-box {
+            border: 6px solid #000;
+            margin: auto;
+            padding: 25px;
+            text-align: center;
+            width: 88%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #fff;
+        }
+
+        .back-logo-text {
+            font-weight: 900;
+            font-size: 24px;
+            font-style: italic;
+            line-height: 0.85;
+            letter-spacing: -1.5px;
+            margin-bottom: 8px;
+        }
+
+        .back-logo-sub {
+            font-size: 11px;
+            border-top: 4px solid #000;
+            margin-top: 10px;
+            padding-top: 8px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            width: 100%;
+            text-transform: uppercase;
+        }
+
+        .fold-center-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            border-left: 2.5pt dashed #ddd;
+            z-index: 20;
+        }
+
+        .fold-label {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) rotate(-90deg);
+            font-size: 9px;
+            font-weight: 900;
+            color: #bbb;
+            letter-spacing: 4px;
+            pointer-events: none;
+            text-transform: uppercase;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="no-print">
+        <div class="nav-bar">
+            <div>
+                <div class="nav-title">Explain Yourself: Pro Press</div>
+                <div class="nav-credit">Produced by Cool Radio Labs</div>
+            </div>
+            <div style="font-size: 11px; font-weight: 900; opacity: 0.8; text-align: right;">RELEASE V1.9.1 // 120 CARD
+                MASTER SET</div>
+        </div>
+        <div class="nav-controls">
+            <button class="tab-btn active" id="btn-mobile" onclick="showView('mobile')">Mobile Player</button>
+            <div style="flex-grow: 1;"></div>
+            <button class="tab-btn" onclick="preparePrint('ALL')">Full Set (120)</button>
+            <button class="tab-btn" onclick="preparePrint('PROTOCOL')">Protocol</button>
+            <button class="tab-btn" onclick="preparePrint('EVIDENCE')">Evidence</button>
+            <button class="tab-btn" onclick="preparePrint('SCENE')">Scenes</button>
+            <button class="tab-btn" style="background: #000; color: #fff;" onclick="window.print()">Export PDF</button>
+        </div>
+    </div>
+
+    <!-- Mobile Player -->
+    <div id="mobile-view" class="view-section active mobile-area">
+        <div id="m-card-target" class="m-card"></div>
+        <div class="m-controls">
+            <button class="m-btn" onclick="shiftCard(-1)">Prev</button>
+            <button class="m-btn" onclick="shiftCard(1)">Next</button>
+            <button class="m-btn" style="background:#000; color:#fff;" onclick="shuffleDeck()">Shuffle</button>
+        </div>
+    </div>
+
+    <!-- Print Preview -->
+    <div id="print-view" class="view-section"></div>
+
+    <script id="deck-data" type="application/json">
+{
+  "cards": [
+    {"id":"001","type":"PROTOCOL","title":"01: The Phantom","body":"When two objects (Evidence) collide in a corrupt context (Scene), a PHANTOM CONCEPT forms instantly in the Jury's mind. This is the worst, most scandalous interpretation of your presence. \n\nGoal: You must kill the Phantom before it takes root.","footer":"Suspicion is faster than light."},
+    {"id":"002","type":"PROTOCOL","title":"02: Kinetic Defense","body":"Defense is not about logic; it is about VELOCITY. You have 10 seconds to launch a defense. If you hesitate, the Phantom wins. \n\nStrategy: Pick a target project (e.g., 'I'm a restorer') and stick to it regardless of the items.","footer":"Confidence kills the Phantom."},
+    {"id":"003","type":"PROTOCOL","title":"03: The Turn","body":"1. SUSPECT draws 2 Evidence cards.\n2. JURY flips 1 Scene card.\n3. TIMER starts immediately (10s).\n4. SUSPECT speaks until the buzzer or until the Jury is convinced.","footer":"Intercept the narrative."},
+    {"id":"004","type":"PROTOCOL","title":"04: The Verdict","body":"After the defense, the Jury votes.\n\nINNOCENT: Thumbs up. Suspect keeps the Scene card (+1 point).\nGUILTY: Thumbs down. Suspect gets 0.\n\nTies are broken by the 'Nicest Try'—the Suspect wins if their story was more creative.","footer":"Social judgment is the only law."},
+    {"id":"005","type":"PROTOCOL","title":"05: Crisp Example","body":"• EVIDENCE: 'Large Sausage' + 'Stick of Butter'\n• SCENE: 'Job Interview'\n• THE PHANTOM: 'Something unprofessional and greasy.'\n• KINETIC DEFENSE: 'I am the candidate for the Head Chef position! This is my signature cured meat and a specific cultured butter I need for the tasting portion of the interview!'","footer":"Velocity over Veracity."},
+    {"id":"006","type":"PROTOCOL","title":"06: Game Flow","body":"A match lasts 3 full rounds per player. The player with the highest record of acquittals wins.\n\nAdvanced Mode: CROSS-EXAM. After the defense, the Jury asks 2 rapid-fire questions. Suspect must answer instantly.","footer":"Always be defending."},
+    {"id":"007","type":"PROTOCOL","title":"Theory: Social Panic","body":"The Suspect's primary obstacle is SOCIAL PANIC—the urge to say 'I don't know' or 'I just found it.' These are automatic admissions of guilt. \n\nRule: You MUST have a reason. Any reason.","footer":"Reason is your shield."},
+    {"id":"008","type":"PROTOCOL","title":"Theory: The Pivot","body":"If your current defense is failing, PIVOT. Transition to a new reason mid-sentence. '...actually, I'm not the caterer, I'm the funeral director and this is industrial sealant!'","footer":"Agility is survival."},
+    {"id":"009","type":"PROTOCOL","title":"Mode: Influencer","body":"Suspect must explain as if recording a 'Life Hack' video for social media. 'Hey guys! Tired of funeral leaks? Just use mayo and tape!' \n\nJury judges on: Charisma and Viral Potential.","footer":"The algorithm is the Jury."},
+    {"id":"010","type":"PROTOCOL","title":"The Jury's Duty","body":"The Jury should not vote based on what is 'true.' They should vote based on what is BELIEVABLE in the heat of the moment. \n\nIf the Suspect makes you laugh, they are usually Innocent.","footer":"Laughter is an acquittal."},
+    {"id":"011","type":"EVIDENCE","title":"Duct Tape","body":"50-yard roll. Silver, heavy duty. Visible sticky residue on the edges. Smells like industrial adhesive.","footer":"Fixes leaks. Silences neighbors."},
+    {"id":"012","type":"EVIDENCE","title":"Cucumber","body":"12-inch English long. Wrapped in tight shrink-wrap. Uncomfortably firm to the touch.","footer":"Just for a salad. A very long salad."},
+    {"id":"013","type":"EVIDENCE","title":"Ski Mask","body":"Black knit wool. Three precisely cut holes. Smells like cold breath and old wool.","footer":"It's a very windy July."},
+    {"id":"014","type":"EVIDENCE","title":"Jar of Mayo","body":"Family size. Full fat. Warm from the sun. Sloshes audibly when moved.","footer":"The sound of suspicious viscosity."},
+    {"id":"015","type":"EVIDENCE","title":"Garden Shovel","body":"Pointed spade. Fresh damp soil on the blade. Heavy wooden handle with a grip.","footer":"Digging deep for the truth."},
+    {"id":"016","type":"EVIDENCE","title":"Handcuffs","body":"Real nickel-plated steel. Double locking. No key in sight. Scratched metal.","footer":"Escapology is a difficult hobby."},
+    {"id":"017","type":"EVIDENCE","title":"Vaseline","body":"13oz Tub. Petroleum jelly. Finger marks visible in the semi-translucent goo.","footer":"Slippery when explained."},
+    {"id":"018","type":"EVIDENCE","title":"Blue Tarp","body":"10x12 feet. Heavy polyethylene. Crinkles loudly enough to be heard blocks away.","footer":"Nothing to hide under here."},
+    {"id":"019","type":"EVIDENCE","title":"Rubber Gloves","body":"Bright yellow dishwashing style. Elbow length. Powdered for ease of use.","footer":"Fingerprints are so 1990."},
+    {"id":"020","type":"EVIDENCE","title":"Eggplant","body":"Deep purple. Glossy. Perfectly curved. Significant heft and density.","footer":"The emoji brought to life."},
+    {"id":"021","type":"EVIDENCE","title":"Binoculars","body":"10x50 magnification. High-powered. Foggy lenses. Missing neck strap.","footer":"Just birdwatching. At 3 AM."},
+    {"id":"022","type":"EVIDENCE","title":"Bottle of Bleach","body":"Concentrated formula. Industrial strength. Nozzle is slightly leaking a white crust.","footer":"Removes stains. And DNA."},
+    {"id":"023","type":"EVIDENCE","title":"Bulk Lollipops","body":"Bag of 100. Assorted flavors. Visible through a clear, crinkly plastic bag.","footer":"Free candy. No strings attached."},
+    {"id":"024","type":"EVIDENCE","title":"Video Camera","body":"Handheld camcorder. Red 'REC' light blinking. Internal fan whirring.","footer":"Action! Keep it professional."},
+    {"id":"025","type":"EVIDENCE","title":"Meat Cleaver","body":"Heavy carbon steel. Full tang. Sharp enough to shave with. Wooden handle.","footer":"Chop chop. Don't slip."},
+    {"id":"026","type":"EVIDENCE","title":"Knotted Rope","body":"6 feet of thick hemp. Pre-tied loops every 12 inches. Frayed ends.","footer":"Nautical knots are educational."},
+    {"id":"027","type":"EVIDENCE","title":"Sleeping Pills","body":"Maximum strength. Over-the-counter. Half the bottle is missing.","footer":"Sweet dreams, Suspect."},
+    {"id":"028","type":"EVIDENCE","title":"D-Cell Batteries","body":"Pack of 12. Heavy duty. Industrial grade power. Leak-proof casing.","footer":"Powering the unmentionable."},
+    {"id":"029","type":"EVIDENCE","title":"Trench Coat","body":"Beige canvas. Floor length. Extra-deep pockets. Belted tight at the waist.","footer":"What's the weather like in there?"},
+    {"id":"030","type":"EVIDENCE","title":"Whipped Cream","body":"Double-sized aerosol can. Extra creamy. Shakes with a rhythmic rattle.","footer":"Dessert is served. Get messy."},
+    {"id":"031","type":"EVIDENCE","title":"Feather Duster","body":"Real ostrich feathers. 3-foot telescoping handle. Extremely soft and fluffy.","footer":"Tickle torture is a myth."},
+    {"id":"032","type":"EVIDENCE","title":"Hand Saw","body":"Cross-cut teeth. Rust spots on the blade. High-tension steel frame.","footer":"Cutting through the tension."},
+    {"id":"033","type":"EVIDENCE","title":"Baby Oil","body":"20oz bottle. Hypoallergenic. Cap is missing. Leaking slightly into the bag.","footer":"Smooth as a criminal's lie."},
+    {"id":"034","type":"EVIDENCE","title":"Polaroid Camera","body":"Retro instant film. Flash bulb charged and whining. Mechanical whir.","footer":"No digital trail. No cloud storage."},
+    {"id":"035","type":"EVIDENCE","title":"Sack of Lime","body":"50lb bag. Caustic white powder. Warning labels for severe skin contact.","footer":"Gardeners use it. Murderers too."},
+    {"id":"036","type":"EVIDENCE","title":"Single Crusty Sock","body":"White tube sock. Stands up on its own. Yellowed stripe at the top.","footer":"Where is its partner in crime?"},
+    {"id":"037","type":"EVIDENCE","title":"Gasoline Can","body":"5-gallon red plastic. Vapor vent is open. Smells like high-octane arson.","footer":"Fuel for the fire. Literally."},
+    {"id":"038","type":"EVIDENCE","title":"Extension Cord","body":"100-foot orange. Heavy gauge. Several tight knots along the length.","footer":"Reach out and touch someone."},
+    {"id":"039","type":"EVIDENCE","title":"Rubber Chicken","body":"Squeaks when squeezed. Realistic lifeless eyes. Vibrant yellow.","footer":"Comedy is a serious business."},
+    {"id":"040","type":"EVIDENCE","title":"Raw Hot Dogs","body":"Pack of 12. Jumbo size. Slippery inside the vacuum-sealed package.","footer":"Mystery meat for a mystery man."},
+    {"id":"041","type":"EVIDENCE","title":"Red Crowbar","body":"24-inch forged steel. Hooked end. Scratches on the red paint.","footer":"Leverage is everything."},
+    {"id":"042","type":"EVIDENCE","title":"Soggy Sponge","body":"Yellow industrial size. Dripping cold grey water. Smells like old mildew.","footer":"Clean up the evidence."},
+    {"id":"043","type":"EVIDENCE","title":"Glue Stick","body":"Purple-drying-clear. School grade. Cap is stuck with dried adhesive.","footer":"Stick to your story."},
+    {"id":"044","type":"EVIDENCE","title":"Chrome Toaster","body":"Wide slot. Burnt crumbs inside. Frayed black power cord.","footer":"Bath time buddy? Or just bagels."},
+    {"id":"045","type":"EVIDENCE","title":"Chainsaw","body":"Gas-powered. Oily chain. Pull-start handle is warm to the touch.","footer":"Tree surgery is loud work."},
+    {"id":"046","type":"EVIDENCE","title":"Styrofoam Head","body":"Mannequin style. No facial features. Wig pins stuck in the jaw.","footer":"Two heads are better than one."},
+    {"id":"047","type":"EVIDENCE","title":"Scented Lotion","body":"Cucumber-melon. Pump action. Squirts when bumped.","footer":"Moisturize the situation."},
+    {"id":"048","type":"EVIDENCE","title":"Soldering Iron","body":"Plugged in. Tip is glowing orange. Thin wire coils and flux.","footer":"Building a better mousetrap."},
+    {"id":"049","type":"EVIDENCE","title":"Taxidermy Squirrel","body":"Glass eyes. Rigid pose. Holding a single, polished acorn.","footer":"Nuts about your defense."},
+    {"id":"050","type":"EVIDENCE","title":"Synthetic Wig","body":"Bright pink bob. Itchy interior net. Smells heavily of hairspray.","footer":"A new you for a new crime."},
+    {"id":"051","type":"EVIDENCE","title":"USB Flash Drive","body":"Labeled 'PRIVATE'. Metallic casing. Bitten cap.","footer":"Gigabytes of incriminating data."},
+    {"id":"052","type":"EVIDENCE","title":"Aloe Tissues","body":"Pocket pack. Half-used. Crumpled wrappers in the same pocket.","footer":"Gesundheit. Wipe that smirk off."},
+    {"id":"053","type":"EVIDENCE","title":"Kielbasa","body":"2-foot links. Greasy. Deep red. Smells like garlic and smoke.","footer":"Sausage party of one."},
+    {"id":"054","type":"EVIDENCE","title":"Black Zip Ties","body":"Industrial strength. 12-inch length. Heavy bag of 100 pieces.","footer":"Temporary restraints. Permanent guilt."},
+    {"id":"055","type":"EVIDENCE","title":"Spiked Collar","body":"Leather. Chrome studs. Buckle is heavy and polished.","footer":"Who's a very bad boy?"},
+    {"id":"056","type":"EVIDENCE","title":"Mason Jar","body":"Filled with a clear, unidentified liquid. Fermenting with bubbles.","footer":"Grandma's secret recipe."},
+    {"id":"057","type":"EVIDENCE","title":"Roll of Cash","body":"$2,000 in twenty-dollar bills. Held by a thick rubber band.","footer":"Buying silence is expensive."},
+    {"id":"058","type":"EVIDENCE","title":"Pregnancy Test","body":"Plastic stick. Cap is off. Waiting for the definitive second line.","footer":"Life comes at you fast."},
+    {"id":"059","type":"EVIDENCE","title":"Gold Band","body":"Wedding ring. Inscription on the inside. Slightly scratched.","footer":"Till death do us part. Or sooner."},
+    {"id":"060","type":"EVIDENCE","title":"Megaphone","body":"Battery-powered. Siren function. Scratched white plastic casing.","footer":"TELL US EVERYTHING."},
+    {"id":"061","type":"EVIDENCE","title":"Claw Hammer","body":"Heavy steel head. Magnetic nail starter. Well-balanced grip.","footer":"If all you have is a hammer..."},
+    {"id":"062","type":"EVIDENCE","title":"Sewing Shears","body":"Large, sharp blades. Tailor-grade. High tension pivot.","footer":"Snip snip. Don't run with them."},
+    {"id":"063","type":"EVIDENCE","title":"Roll of Shag Carpet","body":"Oatmeal colored. 6 feet wide. Rolled tight and heavy.","footer":"Burial shroud for a living room."},
+    {"id":"064","type":"EVIDENCE","title":"Bone Saw","body":"Surgical grade stainless steel. Fine, aggressive teeth. Handle is ergonomic.","footer":"Medical curiosity or crime scene?"},
+    {"id":"065","type":"EVIDENCE","title":"Clown Mask","body":"Painted-on smile. One eye hole is larger. Smells like latex.","footer":"We're all laughing inside."},
+    {"id":"066","type":"EVIDENCE","title":"Medical Syringe","body":"Disposable. Plunger is depressed. Fine needle with cap.","footer":"Just a little prick. Don't flinch."},
+    {"id":"067","type":"EVIDENCE","title":"Bullwhip","body":"10-foot braided leather. Cracker is frayed. Weighted handle.","footer":"Crack that defense open."},
+    {"id":"068","type":"EVIDENCE","title":"Steel Oil Drum","body":"55-gallon capacity. Rusty lid. Heavy contents sloshing.","footer":"Storage for the long term."},
+    {"id":"069","type":"EVIDENCE","title":"Hacksaw","body":"Thin, flexible metal-cutting blade. High-tension steel frame.","footer":"Escape is only a few cuts away."},
+    {"id":"070","type":"EVIDENCE","title":"Brass Candlestick","body":"Heavy base. Ornate. Tarnish on the wax holder. Smeared wax.","footer":"Professor Plum would approve."},
+    {"id":"071","type":"EVIDENCE","title":"Rubber Ball Gag","body":"Bright red. Silicone. Leather strap with a buckle.","footer":"Silence is golden. And rubber."},
+    {"id":"072","type":"EVIDENCE","title":"Stick of Butter","body":"Unsalted. Room temperature. Half-unwrapped and soft.","footer":"The ultimate organic lubricant."},
+    {"id":"073","type":"EVIDENCE","title":"Fluffy White Towel","body":"Slightly damp. Smells like bleach and fresh detergent.","footer":"Cleaning up after a long day."},
+    {"id":"074","type":"EVIDENCE","title":"Steel-Toe Boots","body":"Size 12. Heavy tread. Mud dried in the laces and soles.","footer":"Stomping through the evidence."},
+    {"id":"075","type":"EVIDENCE","title":"Laser Pointer","body":"Green beam. Strong enough to see for miles. Single AAA battery.","footer":"Pointing the way to the crime."},
+    {"id":"076","type":"EVIDENCE","title":"Strike Matches","body":"Box of 500. Long stem. Sulphur smell when struck.","footer":"A spark of an idea."},
+    {"id":"077","type":"EVIDENCE","title":"Ethernet Cable","body":"50-foot blue cat6. Ends are crimped. Tangled mess.","footer":"Hardwired to the truth."},
+    {"id":"078","type":"EVIDENCE","title":"Live Hamster","body":"In a plastic ball. Squeaky wheel. Searching for freedom.","footer":"The silent witness. Nibbling."},
+    {"id":"079","type":"EVIDENCE","title":"Power Drill","body":"18V cordless. High-torque. Magnetic bit holder. Warm motor.","footer":"Drilling down into the details."},
+    {"id":"080","type":"EVIDENCE","title":"Piano Wire","body":"High-tensile steel. Coiled tight. Very thin and strong.","footer":"A sharp note to end on."},
+    {"id":"081","type":"EVIDENCE","title":"Ether Rag","body":"White cotton. Damp. Smells sweet and chemical. Cold.","footer":"Go to sleep, Suspect."},
+    {"id":"082","type":"EVIDENCE","title":"Ruby Grapefruit","body":"Cut in half. Serrated spoon nearby. Juicy and acidic.","footer":"A healthy interrogator's breakfast."},
+    {"id":"083","type":"EVIDENCE","title":"Straight Razor","body":"Barber-grade. Pearl handle. Extremely sharp and cold.","footer":"A close shave with the law."},
+    {"id":"084","type":"EVIDENCE","title":"Jug of Milk","body":"Whole milk. Expiration date is tomorrow. Cold sweating.","footer":"It does a body good. Briefly."},
+    {"id":"085","type":"EVIDENCE","title":"Black Trash Bags","body":"Contractor grade. 40-gallon. Scented to hide odors.","footer":"Taking out the trash."},
+    {"id":"086","type":"EVIDENCE","title":"Telescope","body":"Reflector type. 700mm focal length. Metal tripod.","footer":"Watching the watchers."},
+    {"id":"087","type":"EVIDENCE","title":"Desktop Safe","body":"Digital keypad. Heavy enough to require two hands. Locked.","footer":"Secrets in a steel box."},
+    {"id":"088","type":"EVIDENCE","title":"Spray Paint","body":"Matte black. Rattle ball is loud. Nozzle is clogged with paint.","footer":"Marking the territory."},
+    {"id":"089","type":"EVIDENCE","title":"Ribbed Condoms","body":"Box of 12. One wrapper is already open and empty.","footer":"Safety first, always."},
+    {"id":"090","type":"EVIDENCE","title":"Toilet Plunger","body":"Red rubber. Industrial suction. Used and wet.","footer":"Dealing with a lot of backup."},
+    {"id":"091","type":"SCENE","title":"Airport Security","body":"TSA agents staring. Long line of travelers. Plastic bins.","footer":"Empty your pockets, please."},
+    {"id":"092","type":"SCENE","title":"Elementary School Lot","body":"3 PM pickup. Parents in minivans. Crossing guards.","footer":"Not a safe place for toys."},
+    {"id":"093","type":"SCENE","title":"Church Confessional","body":"Dark velvet curtains. Whispered voices. Kneeling.","footer":"Forgive me, for I have toys."},
+    {"id":"094","type":"SCENE","title":"First Date Dinner","body":"Candlelight. Expensive steak. High expectations.","footer":"A night to remember, or forget."},
+    {"id":"095","type":"SCENE","title":"Interrogation Room","body":"Metal table. Two-way mirror. One bright lightbulb.","footer":"Start talking. Now."},
+    {"id":"096","type":"SCENE","title":"Grandma's Funeral","body":"Open casket. Crying cousins. Somber organ music.","footer":"Respect the dearly departed."},
+    {"id":"097","type":"SCENE","title":"Stuck Elevator","body":"Five strangers. Getting hot. Panic rising.","footer":"Ding. Between floors."},
+    {"id":"098","type":"SCENE","title":"Job Interview","body":"CEO's office. Polished mahogany desk. Tough questions.","footer":"What is your greatest weakness?"},
+    {"id":"099","type":"SCENE","title":"Public Restroom","body":"Gap in the stall door. Puddle on the floor. Echo.","footer":"Occupied. Go away."},
+    {"id":"100","type":"SCENE","title":"Nursery Home","body":"Bingo hall. Smell of lavender and medicine. Wheelchairs.","footer":"Visiting hour is nearly over."},
+    {"id":"101","type":"SCENE","title":"Border Crossing","body":"Drug-sniffing dogs. Armed guards. Passport check.","footer":"Nothing to declare?"},
+    {"id":"102","type":"SCENE","title":"Daycare Center","body":"Nap time. Tiny beds. Staff watching closely.","footer":"Shhh. The toddlers are sleeping."},
+    {"id":"103","type":"SCENE","title":"Emergency Room","body":"Sick people. Triage nurse. Fluorescent lights.","footer":"Take a number and wait."},
+    {"id":"104","type":"SCENE","title":"Public Library","body":"Silent study area. Librarian shushing. Dusty books.","footer":"Silence is strictly enforced."},
+    {"id":"105","type":"SCENE","title":"Gym Locker Room","body":"Steam. Naked old men. Smell of chlorine.","footer":"Eyes on your own locker."},
+    {"id":"106","type":"SCENE","title":"Wedding Altar","body":"Silence before the 'I do'. Everyone watching.","footer":"Speak now or forever hold your peace."},
+    {"id":"107","type":"SCENE","title":"Zoom Call","body":"Boss's camera is on. You are unmuted. HR is there.","footer":"Can you see my screen?"},
+    {"id":"108","type":"SCENE","title":"Art Gallery","body":"Priceless vase on a pedestal. No touching. Critics.","footer":"Is this modern art?"},
+    {"id":"109","type":"SCENE","title":"Park Bench (2 AM)","body":"Flickering streetlight. Shadows in the trees. Empty.","footer":"Not a soul in sight. Or is there?"},
+    {"id":"110","type":"SCENE","title":"HOA Meeting","body":"Angry neighbors. Agenda items. Petty rules.","footer":"This violates the bylaws."},
+    {"id":"111","type":"SCENE","title":"Witness Stand","body":"Under oath. Bible in hand. Hostile attorney.","footer":"Answer the question, Suspect."},
+    {"id":"112","type":"SCENE","title":"Sex Shop Counter","body":"Neon lights. Curtained back room. Bored cashier.","footer":"Will that be all for today?"},
+    {"id":"113","type":"SCENE","title":"Pawn Shop","body":"Cage on the counter. Stolen goods. Low offers.","footer":"I can give you twenty bucks for it."},
+    {"id":"114","type":"SCENE","title":"Cookie Table","body":"Girl Scouts. Cash box. Thin Mints. Parents.","footer":"Help us reach our goal!"},
+    {"id":"115","type":"SCENE","title":"Public Sauna","body":"Intense heat. Steam rising. Towels only.","footer":"Sweat it out. Don't stare."},
+    {"id":"116","type":"SCENE","title":"Crowded Subway","body":"Rush hour. No personal space. Bumping.","footer":"Please move to the center of the car."},
+    {"id":"117","type":"SCENE","title":"Vet Waiting Room","body":"Scared cats. Crying puppies. High bills.","footer":"The doctor will see you now."},
+    {"id":"118","type":"SCENE","title":"Open House","body":"Nosy neighbors. Free cookies. Hidden mold.","footer":"Make yourself at home. Don't snoop."},
+    {"id":"119","type":"SCENE","title":"Orphanage Hallway","body":"Echoing footsteps. Cold walls. Bedtime.","footer":"Oliver Twist vibes."},
+    {"id":"120","type":"SCENE","title":"Autopsy Suite","body":"Stainless steel. Scalpels. Cold storage.","footer":"The cause of death is clear."}
+  ]
+}
+</script>
+
+    <script>
+        const state = {
+            cards: [],
+            index: 0,
+            view: 'mobile'
+        };
+
+        const SVGS = {
+            PROTOCOL: `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>`,
+            EVIDENCE: `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>`,
+            SCENE: `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`
+        };
+
+        function init() {
+            try {
+                const data = JSON.parse(document.getElementById('deck-data').textContent);
+                state.cards = data.cards;
+                drawMobile();
+                showView('mobile');
+            } catch (e) {
+                console.error("Critical Deck Load Error", e);
+            }
+        }
+
+        function showView(v) {
+            state.view = v;
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(`${v}-view`).classList.add('active');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if (v === 'mobile') document.getElementById('btn-mobile').classList.add('active');
+        }
+
+        function drawMobile() {
+            const card = state.cards[state.index];
+            const el = document.getElementById('m-card-target');
+            el.innerHTML = `
+            <div class="card-id-tag">${card.id}</div>
+            ${SVGS[card.type]}
+            <div class="card-type-header">${card.type}</div>
+            <div class="card-title-main">${card.title}</div>
+            <div class="card-body-text">${card.body.replace(/\n/g, '<br>')}</div>
+            <div class="card-footer-flavor">${card.footer}</div>
+        `;
+        }
+
+        function shiftCard(n) {
+            state.index = (state.index + n + state.cards.length) % state.cards.length;
+            drawMobile();
+        }
+
+        function shuffleDeck() {
+            state.cards.sort(() => Math.random() - 0.5);
+            state.index = 0;
+            drawMobile();
+        }
+
+        function preparePrint(filter) {
+            showView('print');
+            const container = document.getElementById('print-view');
+            container.innerHTML = '';
+
+            const subset = filter === 'ALL' ? state.cards : state.cards.filter(c => c.type === filter);
+
+            // Chunk into groups of 2 pairs per page
+            for (let i = 0; i < subset.length; i += 2) {
+                const page = document.createElement('div');
+                page.className = 'print-page';
+
+                const header = document.createElement('div');
+                header.className = 'page-header';
+                header.innerHTML = `<span>EXPLAIN YOURSELF // ${filter} // SCISSOR EDITION</span> <span>PAGE ${Math.ceil((i + 1) / 2)}</span>`;
+                page.appendChild(header);
+
+                const pairSet = subset.slice(i, i + 2);
+                pairSet.forEach(c => {
+                    const pair = document.createElement('div');
+                    pair.className = 'card-pair';
+                    pair.innerHTML = `
+                    <div class="fold-center-line"></div>
+                    <div class="fold-label">FOLD HERE</div>
+                    <!-- FRONT -->
+                    <div class="card-face front-face">
+                        <div class="card-id-tag">${c.id}</div>
+                        ${SVGS[c.type]}
+                        <div class="card-type-header">${c.type}</div>
+                        <div class="card-title-main">${c.title}</div>
+                        <div class="card-body-text">${c.body.replace(/\n/g, '<br>')}</div>
+                        <div class="card-footer-flavor">${c.footer}</div>
+                    </div>
+                    <!-- BACK -->
+                    <div class="card-face back-face">
+                        <div class="back-box">
+                            ${SVGS[c.type]}
+                            <div class="back-logo-text">EXPLAIN YOURSELF</div>
+                            <div class="back-logo-sub">${c.type} DECK</div>
+                        </div>
+                        <div style="margin-top:auto; font-size:9px; text-align:center; font-weight:900; opacity:0.6;">CARD ID: ${c.id}</div>
+                    </div>
+                `;
+                    page.appendChild(pair);
+                });
+                container.appendChild(page);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+</body>
+
+</html>

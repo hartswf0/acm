@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANTI-CRISIS MACHINE | Card Press</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        :root {
+            /* Original game colors */
+            --spark: #d62828;
+            --accelerant: #f77f00;
+            --monetization: #fcbf49;
+            --fluxus: #7b2cbf;
+            --probe: #219ebc;
+            --flux: #8338ec;
+            --algorithm: #023047;
+            --reality: #006d77;
+            --bot: #83c5be;
+            --evidence: #264653;
+            --scene: #e76f51;
+            --protocol: #2a9d8f;
+            --filler: #495057;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #0d0d0d;
+            color: #fff;
+        }
+
+        /* Screen Controls */
+        .controls {
+            padding: 2rem;
+            background: #111;
+            border-bottom: 3px solid #333;
+        }
+
+        .controls h1 {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .control-row select,
+        .control-row button {
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.75rem 1.25rem;
+            border: 2px solid #333;
+            background: #1a1a1a;
+            color: #fff;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-row button:hover {
+            background: #333;
+        }
+
+        .control-row .primary {
+            background: #d62828;
+            border-color: #d62828;
+        }
+
+        .info {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 1rem;
+        }
+
+        .info a {
+            color: #888;
+            margin-right: 1.5rem;
+        }
+
+        /* Print Container */
+        .print-area {
+            background: #fff;
+            max-width: 8.5in;
+            margin: 2rem auto;
+        }
+
+        /* Sheet Layout */
+        .sheet {
+            width: 7.5in;
+            height: 10in;
+            margin: 0 auto;
+            padding: 0.5in;
+            /* Padding for crop marks */
+            display: grid;
+            grid-template-columns: repeat(3, 2.5in);
+            grid-template-rows: repeat(3, 3.33in);
+            gap: 0;
+            page-break-after: always;
+            position: relative;
+        }
+
+        .sheet.with-bleed {
+            grid-template-columns: repeat(3, 2.75in);
+            grid-template-rows: repeat(3, 3.58in);
+            gap: 0.125in;
+            /* Spacing for bleed cuts */
+            width: 8.5in;
+            /* Needs wider paper usually */
+            padding: 0.25in;
+        }
+
+        /* Cut marks */
+        .crop-mark {
+            position: absolute;
+            width: 0.5in;
+            height: 0.5in;
+            border: 1px solid transparent;
+        }
+
+        .crop-mark::before,
+        .crop-mark::after {
+            content: '';
+            position: absolute;
+            background: #000;
+        }
+
+        /* Top Left */
+        .tl {
+            top: 0;
+            left: 0;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Token Design */
+        .token-sheet {
+            width: 7.5in;
+            height: 10in;
+            margin: 0 auto;
+            padding: 0.5in;
+            display: grid;
+            grid-template-columns: repeat(5, 1.25in);
+            /* 5 columns */
+            grid-template-rows: repeat(6, 1.25in);
+            /* 6 rows */
+            gap: 0.1in;
+            page-break-after: always;
+            position: relative;
+            justify-content: center;
+            align-content: start;
+        }
+
+        .token {
+            width: 1.1in;
+            height: 1.1in;
+            border-radius: 50%;
+            border: 3px solid #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            background: #fff;
+            position: relative;
+        }
+
+        .token-val {
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .token-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            margin-top: 4px;
+            letter-spacing: 1px;
+        }
+
+        /* Token Colors */
+        .token.heat {
+            border-color: var(--spark);
+            color: var(--spark);
+        }
+
+        .token.revenue {
+            border-color: var(--monetization);
+            color: var(--monetization);
+        }
+
+        .token.nuance {
+            border-color: var(--probe);
+            color: var(--probe);
+        }
+
+        .token.aura {
+            border-color: var(--fluxus);
+            color: var(--fluxus);
+        }
+
+        /* Card Design - Bold & Thick */
+        .card {
+            width: 2.5in;
+            height: 3.33in;
+            border: 3px solid #000;
+            background: #fff;
+            color: #000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .card.bleed {
+            width: 2.75in;
+            height: 3.58in;
+            border: none;
+            /* Border usually interferes with bleed */
+            padding: 0.125in;
+            /* Safety margin visualization */
+        }
+
+        .card.bleed .card-stripe {
+            top: -0.125in;
+            left: 0;
+            width: 100%;
+            height: 0.375in;
+        }
+
+        /* Extend stripe */
+
+        .card-stripe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 8px;
+            height: 100%;
+        }
+
+        .card-header {
+            padding: 8px 10px 6px 20px;
+            border-bottom: 3px solid #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-type {
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .card-id {
+            font-size: 7px;
+            font-weight: 700;
+            color: #666;
+        }
+
+        .card-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .card-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .card-title {
+            padding: 8px 10px 6px 20px;
+            font-size: 13px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            line-height: 1.15;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .card-body {
+            flex: 1;
+            padding: 8px 10px 8px 20px;
+            font-size: 10px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        .card-footer {
+            padding: 6px 10px 6px 20px;
+            border-top: 2px solid #000;
+            font-size: 7px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-source {
+            color: #999;
+            font-weight: 700;
+        }
+
+        /* Type Colors */
+        .card[data-type="SPARK"] .card-stripe {
+            background: var(--spark);
+        }
+
+        .card[data-type="ACCELERANT"] .card-stripe {
+            background: var(--accelerant);
+        }
+
+        .card[data-type="MONETIZATION"] .card-stripe {
+            background: var(--monetization);
+        }
+
+        .card[data-type="FLUXUS"] .card-stripe {
+            background: var(--fluxus);
+        }
+
+        .card[data-type="PROBE"] .card-stripe {
+            background: var(--probe);
+        }
+
+        .card[data-type="FLUX"] .card-stripe {
+            background: var(--flux);
+        }
+
+        .card[data-type="ALGORITHM"] .card-stripe {
+            background: var(--algorithm);
+        }
+
+        .card[data-type="REALITY"] .card-stripe {
+            background: var(--reality);
+        }
+
+        .card[data-type="BOT"] .card-stripe {
+            background: var(--bot);
+        }
+
+        .card[data-type="EVIDENCE"] .card-stripe {
+            background: var(--evidence);
+        }
+
+        .card[data-type="SCENE"] .card-stripe {
+            background: var(--scene);
+        }
+
+        .card[data-type="PROTOCOL"] .card-stripe {
+            background: var(--protocol);
+        }
+
+        .card[data-type="FILLER"] .card-stripe {
+            background: var(--filler);
+        }
+
+        /* Card Back - with game/suit info */
+        .card-back {
+            width: 2.5in;
+            height: 3.33in;
+            border: 3px solid #000;
+            background: #fff;
+            color: #000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-back .back-stripe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 8px;
+            height: 100%;
+        }
+
+        .card-back .back-header {
+            padding: 6px 10px 6px 18px;
+            border-bottom: 2px solid #000;
+            font-size: 8px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card-back .back-center {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .back-logo {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 10px;
+        }
+
+        .back-logo svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .back-title {
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .back-sub {
+            font-size: 7px;
+            margin-top: 4px;
+            letter-spacing: 1px;
+            color: #666;
+        }
+
+        .card-back .back-footer {
+            padding: 6px 10px 6px 18px;
+            border-top: 2px solid #000;
+            font-size: 7px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #666;
+            text-align: center;
+        }
+
+        /* 3-UP LARGE FORMAT */
+        .sheet-3up {
+            width: 7.5in;
+            height: 10in;
+            margin: 0 auto;
+            padding: 0.25in 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0;
+            page-break-after: always;
+        }
+
+        .card-large {
+            width: 6in;
+            height: 3in;
+            border: 4px solid #000;
+            background: #fff;
+            color: #000;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-large .card-stripe {
+            width: 12px;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        .card-large .card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+
+        .card-large .card-header {
+            padding: 10px 14px 8px 14px;
+            border-bottom: 3px solid #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-large .card-type {
+            font-size: 11px;
+        }
+
+        .card-large .card-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .card-large .card-title {
+            padding: 10px 14px 8px 14px;
+            font-size: 18px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .card-large .card-body {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .card-large .card-footer {
+            padding: 8px 14px;
+            border-top: 3px solid #000;
+            font-size: 9px;
+        }
+
+        .card-back-large {
+            width: 6in;
+            height: 3in;
+            border: 4px solid #000;
+            background: #fff;
+            color: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .card-back-large .back-logo {
+            width: 80px;
+            height: 80px;
+        }
+
+        .card-back-large .back-title {
+            font-size: 14px;
+        }
+
+        /* Print */
+        @media print {
+            body {
+                background: #fff;
+            }
+
+            .controls {
+                display: none !important;
+            }
+
+            .print-area {
+                margin: 0;
+                max-width: none;
+            }
+
+            .sheet {
+                margin: 0;
+            }
+
+            @page {
+                size: letter;
+                margin: 0.5in;
+            }
+        }
+
+        @media screen {
+            .sheet {
+                margin: 20px auto;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="controls">
+        <h1>Card Press</h1>
+        <div class="control-row">
+            <select id="mode-select" style="background: #d62828; border-color: #d62828;">
+                <option value="original">ORIGINAL TYPES (Play Individual Games)</option>
+                <option value="unified">ANTI-CRISIS PROTOCOL (Unified Metagame)</option>
+            </select>
+        </div>
+        <div class="control-row" id="original-controls">
+            <select id="game-select">
+                <option value="all">All Games</option>
+                <option value="meltdown">Total Meltdown</option>
+                <option value="dew">DEW-Line</option>
+                <option value="feed">The Feed</option>
+                <option value="explain">Explain Yourself</option>
+            </select>
+            <select id="type-select">
+                <option value="all">All Types</option>
+                <optgroup label="Total Meltdown">
+                    <option value="SPARK">Spark</option>
+                    <option value="ACCELERANT">Accelerant</option>
+                    <option value="MONETIZATION">Monetization</option>
+                    <option value="FLUXUS">Fluxus</option>
+                </optgroup>
+                <optgroup label="DEW-Line">
+                    <option value="PROBE">Probe</option>
+                    <option value="FLUX">Flux</option>
+                </optgroup>
+                <optgroup label="The Feed">
+                    <option value="ALGORITHM">Algorithm</option>
+                    <option value="REALITY">Reality</option>
+                    <option value="BOT">Bot</option>
+                </optgroup>
+                <optgroup label="Explain Yourself">
+                    <option value="EVIDENCE">Evidence</option>
+                    <option value="SCENE">Scene</option>
+                    <option value="PROTOCOL">Protocol</option>
+                </optgroup>
+            </select>
+        </div>
+        <div class="control-row" id="unified-controls" style="display: none;">
+            <select id="suit-select">
+                <option value="all">All Suits (Unified Deck)</option>
+                <option value="CRISIS">CRISIS (Inciting Incidents)</option>
+                <option value="VECTOR">VECTOR (Amplification)</option>
+                <option value="EXTRACTION">EXTRACTION (Monetization)</option>
+                <option value="PERFORMANCE">PERFORMANCE (Physical Scores)</option>
+                <option value="ORACLE">ORACLE (Pattern Interrupts)</option>
+            </select>
+        </div>
+        <div class="control-row">
+            <select id="view-select">
+                <option value="fronts">Fronts (9-up)</option>
+                <option value="backs">Backs (9-up)</option>
+                <option value="fronts3">Fronts (3-up Large)</option>
+                <option value="backs3">Backs (3-up Large)</option>
+                <option value="tokens">Tokens (Sheet)</option>
+                <option value="box">Tuck Box (Template)</option>
+            </select>
+            <div
+                style="display: flex; gap: 10px; align-items: center; background: #1a1a1a; padding: 0 1rem; border: 2px solid #333;">
+                <label style="font-size: 0.8rem; font-weight: 700;"><input type="checkbox" id="bleed-toggle">
+                    BLEED</label>
+                <label style="font-size: 0.8rem; font-weight: 700;"><input type="checkbox" id="crop-toggle" checked>
+                    CROPS</label>
+            </div>
+            <button class="primary" onclick="window.print()">PRINT</button>
+        </div>
+        <div id="stats" class="info">Loading...</div>
+        <div class="info">
+            <a href="cardbank.html">Standard View</a>
+
+            <a href="anti-crisis-protocol.html">Metagame Rules</a>
+            <a href="index.html">Index</a>
+        </div>
+    </div>
+
+    <div class="print-area" id="print-area"></div>
+
+    <script>
+        // SVG Icons
+        const ICONS = {
+            SPARK: `<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
+            ACCELERANT: `<svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>`,
+            MONETIZATION: `<svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`,
+            FLUXUS: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0110 10"/></svg>`,
+            PROBE: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>`,
+            FLUX: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10"/><path d="M12 8v8M8 12h8"/></svg>`,
+            ALGORITHM: `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>`,
+            REALITY: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>`,
+            BOT: `<svg viewBox="0 0 24 24"><path d="M12 2L2 19h20L12 2z"/></svg>`,
+            EVIDENCE: `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18"/><path d="M3 9h18M9 3v18"/></svg>`,
+            SCENE: `<svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8h20"/></svg>`,
+            PROTOCOL: `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>`,
+            FILLER: `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18"/></svg>`
+        };
+
+        const BACK_LOGO = `<svg viewBox="0 0 100 100" fill="none" stroke="black" stroke-width="4">
+        <rect x="10" y="10" width="80" height="80"/>
+        <path d="M10 10L90 90M90 10L10 90"/>
+        <circle cx="50" cy="50" r="20" fill="white" stroke="black"/>
+    </svg>`;
+
+        // Card Data with Original Types
+        const CARDS = [
+            // TOTAL MELTDOWN - SPARKS
+            { game: "meltdown", type: "SPARK", title: "The Trad-Wife IPO", body: "A 'Trad Wife' influencer is revealed as a CEO; her husband is her employee. Force immediate tribal alignment.", id: "TM-001" },
+            { game: "meltdown", type: "SPARK", title: "The Tankie's Dilemma", body: "An anti-imperialist streamer holds defense stock and denies genocide. Split the Left immediately.", id: "TM-002" },
+            { game: "meltdown", type: "SPARK", title: "EA Rugpull", body: "Tech billionaire embezzles pension funds to save 'future' trillions. Mathematical morality vs human ethics.", id: "TM-003" },
+            { game: "meltdown", type: "SPARK", title: "Doomer Merch Drop", body: "A celebrated nihilist launches a streetwear line made in sweatshops. Aestheticizing depression for clout.", id: "TM-004" },
+            { game: "meltdown", type: "SPARK", title: "Diversity Algorithm", body: "AI patches for equity cause a safety-critical failure. Force choice between Safety and Equity.", id: "TM-005" },
+            { game: "meltdown", type: "SPARK", title: "Red Pill Divorce", body: "'Alpha' coach livestreaming tears as wife leaves him for a 'Beta'. Reality punctures the bubble.", id: "TM-006" },
+            { game: "meltdown", type: "SPARK", title: "Gender Reveal Fire", body: "A reveal party with an empty box accidentally ignites a wildfire. Symbolic neutrality vs physical destruction.", id: "TM-007" },
+            { game: "meltdown", type: "SPARK", title: "Green Jetsetters", body: "Climate org spends 80% of budget on private jets. Disconnect between rhetoric and behavior.", id: "TM-008" },
+            { game: "meltdown", type: "SPARK", title: "Just Asking Questions", body: "Podcaster hosts eugenicist for 'free speech', then sells supplements. The marketplace of ideas as a grift.", id: "TM-009" },
+            { game: "meltdown", type: "SPARK", title: "Medicare Socialist", body: "Elderly voters riot over 1% cuts while decrying student loan forgiveness. Generational resource war.", id: "TM-010" },
+            // TOTAL MELTDOWN - ACCELERANTS
+            { game: "meltdown", type: "ACCELERANT", title: "Sealion Swarm", body: "Force opponent to discard hand by demanding endless evidence for self-evident claims. Block until 3 sources provided.", id: "TM-011" },
+            { game: "meltdown", type: "ACCELERANT", title: "Gish Gallop Overload", body: "Play 5 weak arguments. Opponent loses round unless they refute all in 30 seconds.", id: "TM-012" },
+            { game: "meltdown", type: "ACCELERANT", title: "Strawman Empath", body: "Cancel an attack by claiming it 'hurts the very people you're trying to help'. Tone policing.", id: "TM-013" },
+            { game: "meltdown", type: "ACCELERANT", title: "Context Collapse", body: "Decontextualize a card played 3 turns ago. Re-interpret in worst faith. -5 Social Credit to target.", id: "TM-014" },
+            { game: "meltdown", type: "ACCELERANT", title: "Motte and Bailey", body: "When successfully attacked, swap your radical position for a 'reasonable' one. Ignore all damage.", id: "TM-015" },
+            { game: "meltdown", type: "ACCELERANT", title: "Whataboutism", body: "Deflect any scandal by pointing to an unrelated crime of the opposing tribe. Damage reflected 100%.", id: "TM-016" },
+            { game: "meltdown", type: "ACCELERANT", title: "Rage-Farm Harvest", body: "Play a Lie. Gain +2 Monetization for every opponent who contests it.", id: "TM-017" },
+            { game: "meltdown", type: "ACCELERANT", title: "The Wojak Mask", body: "Describe opponent as 'Soyjak'. Target is silenced until they prove they are not a 'Soyjak'.", id: "TM-018" },
+            { game: "meltdown", type: "ACCELERANT", title: "Infinite Goalposts", body: "When a burden of proof is met, demand a higher standard. Cancel the opponent's success.", id: "TM-019" },
+            { game: "meltdown", type: "ACCELERANT", title: "Tone Police Badge", body: "Negate any argument made with emotion or profanity. Privilege the comfortable.", id: "TM-020" },
+            // TOTAL MELTDOWN - MONETIZATION
+            { game: "meltdown", type: "MONETIZATION", title: "Male Vitality Stack", body: "Sell dubious pills to reclaim birthright. Gain tokens for every Red-Pilled player who feels insecure.", id: "TM-021" },
+            { game: "meltdown", type: "MONETIZATION", title: "Resist Funko Pop", body: "Mass-produced kitsch of anti-capitalist icons. Gain tokens from Woke players.", id: "TM-022" },
+            { game: "meltdown", type: "MONETIZATION", title: "Trad-Wife Course", body: "$299 Sourdough Training. Escape the Matrix using an iPhone. Extract wealth from Trad seekers.", id: "TM-023" },
+            { game: "meltdown", type: "MONETIZATION", title: "Doomer Prep Bucket", body: "Sell overpriced freeze-dried slop to those convinced society ends Tuesday. Gain tokens per Crisis.", id: "TM-024" },
+            { game: "meltdown", type: "MONETIZATION", title: "Free Speech Paywall", body: "Charge $8/month for 'uncensored' content. Frame moderation as censorship to drive subs.", id: "TM-025" },
+            { game: "meltdown", type: "MONETIZATION", title: "Corporate HR Seminar", body: "DEI consulting with no structural change. Gain immunity from Cancellation for 3 turns.", id: "TM-026" },
+            { game: "meltdown", type: "MONETIZATION", title: "Alpha Crypto Pump", body: "Transfer all wealth from 'Beta' players to the 'Alpha' player via exit liquidity.", id: "TM-027" },
+            { game: "meltdown", type: "MONETIZATION", title: "Political Dip Bowl", body: "Force opponents to buy useless branded items to prove they aren't traitors.", id: "TM-028" },
+            { game: "meltdown", type: "MONETIZATION", title: "Rage-Bait Ad-Buy", body: "Convert Anger tokens into Money tokens at a 1:10 ratio. Friction is profit.", id: "TM-029" },
+            { game: "meltdown", type: "MONETIZATION", title: "Anti-Woke Beer", body: "Rebrand generic lager as a 'Patriot' stance. Rally Red-Pilled players: +Strength, -Intelligence.", id: "TM-030" },
+            // TOTAL MELTDOWN - FLUXUS
+            { game: "meltdown", type: "FLUXUS", title: "The Pronoun Audit", body: "Point to neighbor. They must list every pronoun used in a bio. Silence for 10s if they stumble.", id: "TM-031" },
+            { game: "meltdown", type: "FLUXUS", title: "Salary Transparency", body: "Open banking app. Place phone in center. First person to look away loses Social Credit.", id: "TM-032" },
+            { game: "meltdown", type: "FLUXUS", title: "Who Did You Vote For?", body: "Stand and toast your candidate. Name one policy you hate about the neighbor's candidate.", id: "TM-033" },
+            { game: "meltdown", type: "FLUXUS", title: "History Excavation", body: "Neighbor searches your DM history for slurs or 'I hate'. Reads worst result aloud.", id: "TM-034" },
+            { game: "meltdown", type: "FLUXUS", title: "Apology Video", body: "Record a 30s IG story apology using buzzwords: 'listening', 'growing', 'work'. Delete in 24h.", id: "TM-035" },
+            { game: "meltdown", type: "FLUXUS", title: "Privilege Line-Up", body: "Physical privilege walk. Furthest back gets to slap the person furthest forward.", id: "TM-036" },
+            { game: "meltdown", type: "FLUXUS", title: "Body Count Confess", body: "Estimate neighbor's partner count. Subject reveals true number. Drink if off by >3.", id: "TM-037" },
+            { game: "meltdown", type: "FLUXUS", title: "Uninvited Guest", body: "Text random number: 'I'm at the party. It's awful. Can you pick me up?' Read reply.", id: "TM-038" },
+            { game: "meltdown", type: "FLUXUS", title: "Is This Racist?", body: "Describe neighbor's outfit in an accent not your own. Group votes: Hate or Cringe?", id: "TM-039" },
+            { game: "meltdown", type: "FLUXUS", title: "Ok Boomer Silence", body: "Oldest player explains home ownership. Others maintain blank NPC expressions.", id: "TM-040" },
+
+            // DEW-LINE - PROBES (Complete - 24 cards)
+            { game: "dew", type: "PROBE", title: "The Medium is the Message", body: "The medium is the message.", id: "DEW-004" },
+            { game: "dew", type: "PROBE", title: "Sudden Blindness", body: "To the blind all things are sudden.", id: "DEW-005" },
+            { game: "dew", type: "PROBE", title: "Mammaries", body: "Thanks for the mammaries.", id: "DEW-006" },
+            { game: "dew", type: "PROBE", title: "Silence", body: "Silence is all the sounds of the environment at once.", id: "DEW-007" },
+            { game: "dew", type: "PROBE", title: "Aquinas", body: "Should old Aquinas be forgot?", id: "DEW-008" },
+            { game: "dew", type: "PROBE", title: "Propaganda", body: "Propaganda is any culture in action.", id: "DEW-009" },
+            { game: "dew", type: "PROBE", title: "Said and Done", body: "When all is said and done more will have been said than done.", id: "DEW-010" },
+            { game: "dew", type: "PROBE", title: "Small Package", body: "A man wrapped up in himself makes a small package.", id: "DEW-011" },
+            { game: "dew", type: "PROBE", title: "Life Before Death", body: "Is there a life before death?", id: "DEW-012" },
+            { game: "dew", type: "PROBE", title: "Second Fiddle", body: "Hell hath no music like a woman playing second fiddle.", id: "DEW-013" },
+            { game: "dew", type: "PROBE", title: "Antenna", body: "Artists are the antennae of the race.", id: "DEW-014" },
+            { game: "dew", type: "PROBE", title: "The Stripper", body: "The stripper puts the audience on.", id: "DEW-015" },
+            { game: "dew", type: "PROBE", title: "March Backwards", body: "We march backwards into the future.", id: "DEW-021" },
+            { game: "dew", type: "PROBE", title: "Spaceship Earth", body: "Spaceship Earth.", id: "DEW-022" },
+            { game: "dew", type: "PROBE", title: "Credit Card", body: "Money is the poor man's credit card.", id: "DEW-023" },
+            { game: "dew", type: "PROBE", title: "Invention", body: "Invention is the mother of necessities.", id: "DEW-024" },
+            { game: "dew", type: "PROBE", title: "Time Vanished", body: "Time has ceased, space has vanished.", id: "DEW-025" },
+            { game: "dew", type: "PROBE", title: "Feedback Loop", body: "Feedback is the loop of the future.", id: "DEW-026" },
+            { game: "dew", type: "PROBE", title: "Content", body: "The content of a movie is a novel.", id: "DEW-027" },
+            { game: "dew", type: "PROBE", title: "User is Content", body: "The user is the content.", id: "DEW-028" },
+            { game: "dew", type: "PROBE", title: "Print", body: "Print is the technology of individualism.", id: "DEW-029" },
+            { game: "dew", type: "PROBE", title: "New Primitives", body: "We are the primitives of a new culture.", id: "DEW-030" },
+            { game: "dew", type: "PROBE", title: "War Education", body: "War is education.", id: "DEW-031" },
+            { game: "dew", type: "PROBE", title: "Art Radar", body: "Art is a Distant Early Warning system.", id: "DEW-055" },
+            // DEW-LINE - FLUX (Complete - 13 cards)
+            { game: "dew", type: "FLUX", title: "Shadow", body: "Do not come out of your shadow.", id: "DEW-017" },
+            { game: "dew", type: "FLUX", title: "Swallow", body: "Do not swallow.", id: "DEW-018" },
+            { game: "dew", type: "FLUX", title: "Fraud", body: "Look like a fraud.", id: "DEW-019" },
+            { game: "dew", type: "FLUX", title: "Leaf", body: "Quiver like a leaf.", id: "DEW-020" },
+            { game: "dew", type: "FLUX", title: "Silence Score", body: "Do not speak.", id: "DEW-032" },
+            { game: "dew", type: "FLUX", title: "Naive", body: "With inane but inappropriate naivety.", id: "DEW-033" },
+            { game: "dew", type: "FLUX", title: "Willow", body: "Weep like a willow.", id: "DEW-034" },
+            { game: "dew", type: "FLUX", title: "Mental", body: "Slow down mentally.", id: "DEW-035" },
+            { game: "dew", type: "FLUX", title: "Immobile", body: "White and immobile.", id: "DEW-036" },
+            { game: "dew", type: "FLUX", title: "Painful", body: "Outward, painfully.", id: "DEW-037" },
+            { game: "dew", type: "FLUX", title: "Fingers", body: "With tears in your fingers.", id: "DEW-038" },
+            { game: "dew", type: "FLUX", title: "Bored", body: "From a distance, bored.", id: "DEW-039" },
+            { game: "dew", type: "FLUX", title: "Alone", body: "Courageously easy and obligingly alone.", id: "DEW-040" },
+
+            // THE FEED - ALGORITHM (Complete)
+            { game: "feed", type: "ALGORITHM", title: "Rage Bait", body: "Anger is the most renewable resource. Effect: Heat +4.", id: "FEED-007" },
+            { game: "feed", type: "ALGORITHM", title: "The Dopamine Loop", body: "Variable rewards create digital cages. Effect: Revenue +5.", id: "FEED-008" },
+            { game: "feed", type: "ALGORITHM", title: "Shadow Profile", body: "We knew you'd click this yesterday. Effect: Draw +1.", id: "FEED-009" },
+            { game: "feed", type: "ALGORITHM", title: "Echo Chamber", body: "Validation is more profitable than truth. Effect: Protect Slot.", id: "FEED-010" },
+            { game: "feed", type: "ALGORITHM", title: "Doomscroll", body: "Anxiety keeps the thumb moving. Effect: Revive a Card.", id: "FEED-011" },
+            { game: "feed", type: "ALGORITHM", title: "The Deepfake", body: "Reality is a legacy feature. Effect: Heat +10.", id: "FEED-012" },
+            { game: "feed", type: "ALGORITHM", title: "Sponsorship", body: "Drink verification can to continue. Effect: Revenue +10.", id: "FEED-013" },
+            { game: "feed", type: "ALGORITHM", title: "Strawman", body: "Look at how dumb the others are. Effect: Heat +6.", id: "FEED-014" },
+            { game: "feed", type: "ALGORITHM", title: "Accel Meme", body: "Nothing human makes it out. Effect: Crisis +20.", id: "FEED-015" },
+            { game: "feed", type: "ALGORITHM", title: "Parasocial Bond", body: "She's basically my best friend. Effect: Rev +3, Heat +3.", id: "FEED-016" },
+            // THE FEED - REALITY (Complete)
+            { game: "feed", type: "REALITY", title: "Heatwave", body: "Record temps in the southwest. Base Heat: 1.", id: "FEED-017" },
+            { game: "feed", type: "REALITY", title: "Election Cycle", body: "Polling stations are crowded. Base Heat: 4.", id: "FEED-018" },
+            { game: "feed", type: "REALITY", title: "Celebrity Scandal", body: "Private texts leaked online. Base Heat: 2.", id: "FEED-019" },
+            { game: "feed", type: "REALITY", title: "New Pandemic", body: "Bio-signals are worrying. Base Heat: 5.", id: "FEED-020" },
+            { game: "feed", type: "REALITY", title: "Tech Layoffs", body: "15,000 fired via chatbot. Base Heat: 3.", id: "FEED-021" },
+            { game: "feed", type: "REALITY", title: "Police Incident", body: "Bodycam footage goes viral. Base Heat: 6.", id: "FEED-022" },
+            { game: "feed", type: "REALITY", title: "Stock Crash", body: "Numbers turn red globally. Base Heat: 4.", id: "FEED-023" },
+            { game: "feed", type: "REALITY", title: "Mars Discovery", body: "Water found, maybe life? Base Heat: 1.", id: "FEED-024" },
+            { game: "feed", type: "REALITY", title: "Cultural War", body: "A brand changes its logo. Base Heat: 5.", id: "FEED-025" },
+            { game: "feed", type: "REALITY", title: "Internet Blackout", body: "Cables cut in the Atlantic. Base Heat: 2.", id: "FEED-026" },
+            { game: "feed", type: "REALITY", title: "UFO Sighting", body: "Grainy video from a pilot. Base Heat: 3.", id: "FEED-027" },
+            { game: "feed", type: "REALITY", title: "Climate Protest", body: "Art defaced in a museum. Base Heat: 4.", id: "FEED-028" },
+            // THE FEED - BOT
+            { game: "feed", type: "BOT", title: "Fact Check", body: "Friction is the enemy of engagement. Effect: Heat -5.", id: "FEED-029" },
+            { game: "feed", type: "BOT", title: "Touch Grass", body: "Physical reality asserts itself. Effect: Discard Card.", id: "FEED-030" },
+            { game: "feed", type: "BOT", title: "Public Audit", body: "Transparency destroys margins. Effect: Profit -50%.", id: "FEED-031" },
+            { game: "feed", type: "BOT", title: "Server Reset", body: "The hard reboot of democracy. Effect: Crisis -20.", id: "FEED-032" },
+
+            // EXPLAIN YOURSELF - EVIDENCE (20 cards)
+            { game: "explain", type: "EVIDENCE", title: "Duct Tape", body: "50-yard roll. Silver, heavy duty. Visible sticky residue.", id: "EXP-011" },
+            { game: "explain", type: "EVIDENCE", title: "Cucumber", body: "12-inch English long. Wrapped in tight shrink-wrap.", id: "EXP-012" },
+            { game: "explain", type: "EVIDENCE", title: "Ski Mask", body: "Black knit wool. Three precisely cut holes.", id: "EXP-013" },
+            { game: "explain", type: "EVIDENCE", title: "Jar of Mayo", body: "Family size. Full fat. Warm from the sun.", id: "EXP-014" },
+            { game: "explain", type: "EVIDENCE", title: "Garden Shovel", body: "Pointed spade. Fresh damp soil on the blade.", id: "EXP-015" },
+            { game: "explain", type: "EVIDENCE", title: "Handcuffs", body: "Real nickel-plated steel. Double locking. No key.", id: "EXP-016" },
+            { game: "explain", type: "EVIDENCE", title: "Vaseline", body: "13oz Tub. Petroleum jelly. Finger marks visible.", id: "EXP-017" },
+            { game: "explain", type: "EVIDENCE", title: "Blue Tarp", body: "10x12 feet. Heavy polyethylene. Crinkles loudly.", id: "EXP-018" },
+            { game: "explain", type: "EVIDENCE", title: "Rubber Gloves", body: "Bright yellow dishwashing style. Elbow length.", id: "EXP-019" },
+            { game: "explain", type: "EVIDENCE", title: "Eggplant", body: "Deep purple. Glossy. Perfectly curved.", id: "EXP-020" },
+            { game: "explain", type: "EVIDENCE", title: "Binoculars", body: "10x50 magnification. High-powered. Foggy lenses.", id: "EXP-021" },
+            { game: "explain", type: "EVIDENCE", title: "Bottle of Bleach", body: "Industrial strength. Leaking slightly.", id: "EXP-022" },
+            { game: "explain", type: "EVIDENCE", title: "Bulk Lollipops", body: "Bag of 100. Assorted flavors. Clear bag.", id: "EXP-023" },
+            { game: "explain", type: "EVIDENCE", title: "Video Camera", body: "Handheld camcorder. Red 'REC' light blinking.", id: "EXP-024" },
+            { game: "explain", type: "EVIDENCE", title: "Meat Cleaver", body: "Heavy carbon steel. Sharp enough to shave.", id: "EXP-025" },
+            { game: "explain", type: "EVIDENCE", title: "Knotted Rope", body: "6 feet of thick hemp. Pre-tied loops.", id: "EXP-026" },
+            { game: "explain", type: "EVIDENCE", title: "Sleeping Pills", body: "Maximum strength. Half the bottle missing.", id: "EXP-027" },
+            { game: "explain", type: "EVIDENCE", title: "Gasoline Can", body: "5-gallon red plastic. Vapor vent open.", id: "EXP-037" },
+            { game: "explain", type: "EVIDENCE", title: "Rubber Chicken", body: "Squeaks when squeezed. Lifeless eyes.", id: "EXP-039" },
+            { game: "explain", type: "EVIDENCE", title: "Chainsaw", body: "Gas-powered. Oily chain. Handle is warm.", id: "EXP-045" },
+
+            // EXPLAIN YOURSELF - SCENE (20 cards)
+            { game: "explain", type: "SCENE", title: "Airport Security", body: "TSA agents staring. Plastic bins.", id: "EXP-091" },
+            { game: "explain", type: "SCENE", title: "Elementary School Lot", body: "3 PM pickup. Crossing guards.", id: "EXP-092" },
+            { game: "explain", type: "SCENE", title: "Church Confessional", body: "Dark curtains. Whispered voices.", id: "EXP-093" },
+            { game: "explain", type: "SCENE", title: "First Date Dinner", body: "Candlelight. Expensive steak.", id: "EXP-094" },
+            { game: "explain", type: "SCENE", title: "Interrogation Room", body: "Metal table. Two-way mirror.", id: "EXP-095" },
+            { game: "explain", type: "SCENE", title: "Grandma's Funeral", body: "Open casket. Crying cousins.", id: "EXP-096" },
+            { game: "explain", type: "SCENE", title: "Stuck Elevator", body: "Five strangers. Getting hot.", id: "EXP-097" },
+            { game: "explain", type: "SCENE", title: "Job Interview", body: "CEO's office. Tough questions.", id: "EXP-098" },
+            { game: "explain", type: "SCENE", title: "Public Restroom", body: "Gap in the stall. Puddle on floor.", id: "EXP-099" },
+            { game: "explain", type: "SCENE", title: "Nursing Home", body: "Bingo hall. Smell of lavender.", id: "EXP-100" },
+            { game: "explain", type: "SCENE", title: "Border Crossing", body: "Drug-sniffing dogs. Armed guards.", id: "EXP-101" },
+            { game: "explain", type: "SCENE", title: "Daycare Center", body: "Nap time. Staff watching closely.", id: "EXP-102" },
+            { game: "explain", type: "SCENE", title: "Emergency Room", body: "Sick people. Fluorescent lights.", id: "EXP-103" },
+            { game: "explain", type: "SCENE", title: "Public Library", body: "Silent study. Librarian shushing.", id: "EXP-104" },
+            { game: "explain", type: "SCENE", title: "Gym Locker Room", body: "Steam. Naked old men. Chlorine.", id: "EXP-105" },
+            { game: "explain", type: "SCENE", title: "Wedding Altar", body: "Before 'I do'. Everyone watching.", id: "EXP-106" },
+            { game: "explain", type: "SCENE", title: "Zoom Call", body: "You are unmuted. HR is there.", id: "EXP-107" },
+            { game: "explain", type: "SCENE", title: "Art Gallery", body: "Priceless vase. No touching.", id: "EXP-108" },
+            { game: "explain", type: "SCENE", title: "Park Bench (2 AM)", body: "Flickering light. Shadows.", id: "EXP-109" },
+            { game: "explain", type: "SCENE", title: "HOA Meeting", body: "Angry neighbors. Petty rules.", id: "EXP-110" },
+
+            // EXPLAIN YOURSELF - PROTOCOL (10 cards - THE RULES!)
+            { game: "explain", type: "PROTOCOL", title: "01: The Phantom", body: "When Evidence + Scene collide, a PHANTOM forms in the Jury's mind. Goal: Kill the Phantom before it takes root.", id: "EXP-001" },
+            { game: "explain", type: "PROTOCOL", title: "02: Kinetic Defense", body: "Defense is about VELOCITY. You have 10 seconds. Pick a target project and stick to it regardless of items.", id: "EXP-002" },
+            { game: "explain", type: "PROTOCOL", title: "03: The Turn", body: "1. Draw 2 Evidence. 2. Flip 1 Scene. 3. Timer starts (10s). 4. Speak until buzzer or conviction.", id: "EXP-003" },
+            { game: "explain", type: "PROTOCOL", title: "04: The Verdict", body: "INNOCENT: Thumbs up, keep Scene (+1). GUILTY: Thumbs down (0). Ties broken by creativity.", id: "EXP-004" },
+            { game: "explain", type: "PROTOCOL", title: "05: Crisp Example", body: "'Large Sausage' + 'Butter' in 'Job Interview' → 'I'm the Head Chef candidate! This is for the tasting!'", id: "EXP-005" },
+            { game: "explain", type: "PROTOCOL", title: "06: Game Flow", body: "3 rounds per player. Most acquittals wins. Advanced Mode: CROSS-EXAM with 2 rapid-fire questions.", id: "EXP-006" },
+            { game: "explain", type: "PROTOCOL", title: "Theory: Social Panic", body: "'I don't know' and 'I just found it' are automatic guilt. You MUST have a reason. Any reason.", id: "EXP-007" },
+            { game: "explain", type: "PROTOCOL", title: "Theory: The Pivot", body: "If failing, PIVOT mid-sentence: '...actually I'm the funeral director and this is industrial sealant!'", id: "EXP-008" },
+            { game: "explain", type: "PROTOCOL", title: "Mode: Influencer", body: "Explain as if recording a 'Life Hack' video. 'Hey guys! Tired of funeral leaks? Just use mayo!'", id: "EXP-009" },
+            { game: "explain", type: "PROTOCOL", title: "The Jury's Duty", body: "Vote on what is BELIEVABLE, not true. If the Suspect makes you laugh, they are usually Innocent.", id: "EXP-010" },
+
+            // SYSTEM OPERATORS (12 cards - Metagame Modifiers)
+            { game: "sys", type: "FILLER", title: "Invert Premise", body: "Reverse the current core mechanic for one cycle.", id: "SYS-001" },
+            { game: "sys", type: "FILLER", title: "Cut 30%", body: "Reduce the scope. Only affects one specific neighborhood.", id: "SYS-002" },
+            { game: "sys", type: "FILLER", title: "Swap Roles", body: "The player to your left must finish the action.", id: "SYS-003" },
+            { game: "sys", type: "FILLER", title: "Scale Outrage", body: "The crisis is now global. Triple victims, halve profit.", id: "SYS-004" },
+            { game: "sys", type: "FILLER", title: "Make Physical", body: "The crisis manifests as a smell or sound.", id: "SYS-005" },
+            { game: "sys", type: "FILLER", title: "Double Stakes", body: "A second disaster occurs. You must link them.", id: "SYS-006" },
+            { game: "sys", type: "FILLER", title: "Mute the Victim", body: "No mention of people allowed. Focus on metrics.", id: "SYS-007" },
+            { game: "sys", type: "FILLER", title: "Verify the Lie", body: "A 'blue checkmark' confirmed a false detail.", id: "SYS-008" },
+            { game: "sys", type: "FILLER", title: "Inject Brain Rot", body: "Use at least three pieces of Gen-Alpha slang.", id: "SYS-009" },
+            { game: "sys", type: "FILLER", title: "Pity the Devil", body: "Make the table feel sympathy for the billionaire.", id: "SYS-010" },
+            { game: "sys", type: "FILLER", title: "AI Hallucination", body: "One detail is factually impossible. Accept it anyway.", id: "SYS-011" },
+            { game: "sys", type: "FILLER", title: "The Rebrand", body: "The crisis is now a 'Wellness Retreat'. Explain the pivot.", id: "SYS-012" },
+
+            // RULES REFERENCE (5 cards)
+            { game: "sys", type: "RULE", title: "Turn Sequence", body: "1. Crisis Injection (Draw)\n2. Vector App (Play)\n3. Oracle (Consult)\n4. Defense (10s)\n5. Judgment\n6. Bot\n7. Scroll", id: "RULE-01" },
+            { game: "sys", type: "RULE", title: "Win Conditions", body: "COLLAPSE: Crisis 100 (Max Rev wins)\nSINGULARITY: Predict via Oracle\nTEFLON: 5 Consecutive Acquittals\nHEALS: Nuance > Heat", id: "RULE-02" },
+            { game: "sys", type: "RULE", title: "Token Economy", body: "HEAT: Friction/Crisis Step\nREVENUE: Score/Buy Actions\nNUANCE: Bot Power/Healing\nAURA: Social Credit/Re-rolls", id: "RULE-03" },
+            { game: "sys", type: "RULE", title: "Unified Suits", body: "CRISIS ⚡ (Inciting)\nVECTOR ◈ (Amplify)\nEXTRACTION ▣ (Profit)\nPERFORMANCE ⊗ (Action)\nORACLE ∿ (Truth)", id: "RULE-04" },
+            { game: "sys", type: "RULE", title: "Source Icons", body: "△ Total Meltdown\n⊕ DEW-Line\n▢ The Feed\n💡 Explain Yourself\n\nCombine all for Protocol.", id: "RULE-05" }
+        ];
+
+
+        function createCard(c) {
+            const icon = ICONS[c.type] || ICONS.FILLER;
+            return `<div class="card" data-type="${c.type}">
+            <div class="card-stripe"></div>
+            <div class="card-header">
+                <span class="card-type">${c.type}</span>
+                <span class="card-icon">${icon}</span>
+            </div>
+            <div class="card-title">${c.title}</div>
+            <div class="card-body">${c.body}</div>
+            <div class="card-footer">
+                <span>${c.type}</span>
+                <span class="card-source">${c.id}</span>
+            </div>
+        </div>`;
+        }
+
+        const GAME_NAMES = {
+            meltdown: 'TOTAL MELTDOWN',
+            dew: 'DEW-LINE',
+            feed: 'THE FEED',
+            explain: 'EXPLAIN YOURSELF',
+            sys: 'SYSTEM'
+        };
+
+        // Game-specific icons (outline only for ink efficiency)
+        const GAME_ICONS = {
+            meltdown: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 5L5 35h30L20 5z"/>
+                <circle cx="20" cy="25" r="5"/>
+            </svg>`,
+            dew: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="20" cy="20" r="15"/>
+                <path d="M5 20h30M20 5v30"/>
+                <circle cx="20" cy="20" r="5"/>
+            </svg>`,
+            feed: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="5" y="8" width="30" height="24" rx="2"/>
+                <path d="M5 14h30"/>
+                <path d="M10 20h8M10 26h12"/>
+            </svg>`,
+            explain: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="20" cy="18" r="8"/>
+                <path d="M20 28v4M16 36h8"/>
+            </svg>`,
+            sys: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="8" y="8" width="24" height="24"/>
+                <path d="M8 8L32 32M32 8L8 32"/>
+            </svg>`
+        };
+
+        function createBack(c) {
+            const gameName = GAME_NAMES[c.game] || 'ANTI-CRISIS';
+            const gameIcon = GAME_ICONS[c.game] || GAME_ICONS.sys;
+            const typeIcon = ICONS[c.type] || ICONS.FILLER;
+            return `<div class="card-back" data-type="${c.type}">
+            <div class="back-stripe"></div>
+            <div class="back-header">
+                <span>${c.type}</span>
+                <span>${c.id}</span>
+            </div>
+            <div class="back-center">
+                <div class="back-type-icon" style="width: 24px; height: 24px; margin-bottom: 8px;">${typeIcon}</div>
+                <div class="back-title">ANTI-CRISIS</div>
+                <div class="back-sub">PROTOCOL</div>
+                <div class="back-game-icon" style="width: 32px; height: 32px; margin-top: 12px; color: #999;">${gameIcon}</div>
+            </div>
+            <div class="back-footer">${gameName}</div>
+        </div>`;
+        }
+
+
+        function createCardLarge(c) {
+            const icon = ICONS[c.type] || ICONS.FILLER;
+            return `<div class="card-large" data-type="${c.type}">
+            <div class="card-stripe"></div>
+            <div class="card-content">
+                <div class="card-header">
+                    <span class="card-type">${c.type}</span>
+                    <span class="card-icon">${icon}</span>
+                </div>
+                <div class="card-title">${c.title}</div>
+                <div class="card-body">${c.body}</div>
+                <div class="card-footer">
+                    <span>${c.type}</span>
+                    <span class="card-source">${c.id}</span>
+                </div>
+            </div>
+        </div>`;
+        }
+
+        function createBackLarge(c) {
+            const gameName = GAME_NAMES[c.game] || 'ANTI-CRISIS';
+            const gameIcon = GAME_ICONS[c.game] || GAME_ICONS.sys;
+            const typeIcon = ICONS[c.type] || ICONS.FILLER;
+            return `<div class="card-back-large" data-type="${c.type}">
+            <div class="back-stripe" style="width: 12px; position: absolute; left: 0; top: 0; height: 100%;"></div>
+            <div style="position: absolute; top: 10px; left: 20px; font-size: 9px; font-weight: 900;">${c.type}</div>
+            <div style="position: absolute; top: 10px; right: 14px; font-size: 8px; color: #666;">${c.id}</div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="width: 30px; height: 30px;">${typeIcon}</div>
+                <div style="text-align: center;">
+                    <div class="back-title">ANTI-CRISIS PROTOCOL</div>
+                    <div class="back-sub" style="margin-top: 4px;">${gameName}</div>
+                </div>
+                <div style="width: 40px; height: 40px; color: #888;">${gameIcon}</div>
+            </div>
+        </div>`;
+        }
+
+
+        function render() {
+            const container = document.getElementById('print-area');
+            const modeSelect = document.getElementById('mode-select').value;
+            const gameFilter = document.getElementById('game-select').value;
+            const typeFilter = document.getElementById('type-select').value;
+            const suitFilter = document.getElementById('suit-select').value;
+            const viewMode = document.getElementById('view-select').value;
+
+            // Type to Unified Suit mapping
+            const TYPE_TO_SUIT = {
+                SPARK: 'CRISIS', REALITY: 'CRISIS', SCENE: 'CRISIS',
+                ACCELERANT: 'VECTOR', ALGORITHM: 'VECTOR', PROBE: 'VECTOR',
+                MONETIZATION: 'EXTRACTION',
+                FLUXUS: 'PERFORMANCE', FLUX: 'PERFORMANCE',
+                BOT: 'ORACLE', EVIDENCE: 'ORACLE', PROTOCOL: 'ORACLE',
+                FILLER: 'SYSTEM', RULE: 'SYSTEM'
+            };
+
+            const SUIT_ICONS = {
+                CRISIS: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+                VECTOR: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-14 9V3z"/></svg>',
+                EXTRACTION: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
+                PERFORMANCE: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>',
+                ORACLE: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>',
+                SYSTEM: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18"/></svg>'
+            };
+
+            const SUIT_NAMES = {
+                CRISIS: 'CRISIS', VECTOR: 'VECTOR', EXTRACTION: 'EXTRACTION',
+                PERFORMANCE: 'PERFORMANCE', ORACLE: 'ORACLE', SYSTEM: 'SYSTEM'
+            };
+
+            let cards = CARDS.map(c => ({
+                ...c,
+                suit: TYPE_TO_SUIT[c.type] || 'SYSTEM'
+            }));
+
+            // Apply filters based on mode
+            if (modeSelect === 'original') {
+                if (gameFilter !== 'all') cards = cards.filter(c => c.game === gameFilter);
+                if (typeFilter !== 'all') cards = cards.filter(c => c.type === typeFilter);
+            } else {
+                if (suitFilter !== 'all') cards = cards.filter(c => c.suit === suitFilter);
+            }
+
+            const is3up = viewMode.includes('3');
+            const cardsPerPage = is3up ? 3 : 9;
+
+            // Pad to multiple
+            const padded = [...cards];
+            while (padded.length % cardsPerPage !== 0) {
+                padded.push({ game: 'sys', type: 'FILLER', suit: 'SYSTEM', title: 'RESERVED', body: 'Reserved slot.', id: '---' });
+            }
+
+            const modeLabel = modeSelect === 'original' ? 'ORIGINAL TYPES' : 'UNIFIED METAGAME';
+            document.getElementById('stats').textContent = `${cards.length} cards / ${Math.ceil(padded.length / cardsPerPage)} sheets (${modeLabel})`;
+
+            // Dynamic card creation based on mode
+            function createCardDynamic(c) {
+                const displayType = modeSelect === 'unified' ? c.suit : c.type;
+                const icon = modeSelect === 'unified' ? SUIT_ICONS[c.suit] : (ICONS[c.type] || ICONS.FILLER);
+                const gameName = GAME_NAMES[c.game] || 'SYSTEM';
+
+                return `<div class="card" data-type="${c.type}" data-suit="${c.suit}">
+                <div class="card-stripe"></div>
+                <div class="card-header">
+                    <span class="card-type">${displayType}</span>
+                    <span class="card-icon">${icon}</span>
+                </div>
+                <div class="card-title">${c.title}</div>
+                <div class="card-body">${c.body}</div>
+                <div class="card-footer">
+                    <span>${modeSelect === 'unified' ? gameName : c.type}</span>
+                    <span class="card-source">${c.id}</span>
+                </div>
+            </div>`;
+            }
+
+            function createBackDynamic(c) {
+                const displayType = modeSelect === 'unified' ? c.suit : c.type;
+                const typeIcon = modeSelect === 'unified' ? SUIT_ICONS[c.suit] : (ICONS[c.type] || ICONS.FILLER);
+                const gameName = GAME_NAMES[c.game] || 'ANTI-CRISIS';
+                const gameIcon = GAME_ICONS[c.game] || GAME_ICONS.sys;
+
+                return `<div class="card-back" data-type="${c.type}" data-suit="${c.suit}">
+                <div class="back-stripe"></div>
+                <div class="back-header">
+                    <span>${displayType}</span>
+                    <span>${c.id}</span>
+                </div>
+                <div class="back-center">
+                    <div class="back-type-icon" style="width: 24px; height: 24px; margin-bottom: 8px;">${typeIcon}</div>
+                    <div class="back-title">${modeSelect === 'unified' ? 'ANTI-CRISIS' : gameName}</div>
+                    <div class="back-sub">${modeSelect === 'unified' ? 'PROTOCOL' : c.type}</div>
+                    <div class="back-game-icon" style="width: 32px; height: 32px; margin-top: 12px; color: #999;">${gameIcon}</div>
+                </div>
+                <div class="back-footer">${gameName}</div>
+            </div>`;
+            }
+
+            const showBleed = document.getElementById('bleed-toggle').checked;
+            const showCrops = document.getElementById('crop-toggle').checked;
+
+            let html = '';
+            const sheetLabel = modeSelect === 'unified'
+                ? (suitFilter !== 'all' ? suitFilter : 'UNIFIED DECK')
+                : (typeFilter !== 'all' ? typeFilter : (gameFilter !== 'all' ? GAME_NAMES[gameFilter] : 'ALL CARDS'));
+
+            const cropsHTML = showCrops ? `
+                <div class="crop-mark crop-tl"></div>
+                <div class="crop-mark crop-tr"></div>
+                <div class="crop-mark crop-bl"></div>
+                <div class="crop-mark crop-br"></div>
+            ` : '';
+
+            if (viewMode === 'tokens') {
+                // Generate Tokens
+                const tokens = [];
+                // Heat (30)
+                for (let i = 0; i < 10; i++) tokens.push({ type: 'heat', val: 1 });
+                for (let i = 0; i < 10; i++) tokens.push({ type: 'heat', val: 5 });
+                for (let i = 0; i < 10; i++) tokens.push({ type: 'heat', val: 10 });
+                // Revenue (30)
+                for (let i = 0; i < 10; i++) tokens.push({ type: 'revenue', val: 1 });
+                for (let i = 0; i < 10; i++) tokens.push({ type: 'revenue', val: 5 });
+                for (let i = 0; i < 10; i++) tokens.push({ type: 'revenue', val: 10 });
+                // Nuance (15)
+                for (let i = 0; i < 10; i++) tokens.push({ type: 'nuance', val: 1 });
+                for (let i = 0; i < 5; i++) tokens.push({ type: 'nuance', val: 5 });
+                // Aura (15)
+                for (let i = 0; i < 10; i++) tokens.push({ type: 'aura', val: 1 });
+                for (let i = 0; i < 5; i++) tokens.push({ type: 'aura', val: 5 });
+
+                const tokensPerPage = 30; // 5x6
+
+                for (let i = 0; i < tokens.length; i += tokensPerPage) {
+                    const page = tokens.slice(i, i + tokensPerPage);
+                    html += `<div class="token-sheet">
+                        ${page.map(t => `<div class="token ${t.type}">
+                            <div class="token-val">${t.val}</div>
+                            <div class="token-label">${t.type}</div>
+                        </div>`).join('')}
+                    </div>`;
+                }
+
+                container.innerHTML = html;
+                document.getElementById('stats').textContent = `${tokens.length} tokens generated.`;
+                return; // Exit render loop for tokens
+            }
+
+            if (viewMode === 'box') {
+                // Generate Box Template
+                // 180 cards * 0.3mm = 54mm ~ 2.15in depth
+                // Width: 2.5in + 0.1in clearance = 2.6in
+                // Height: 3.33in + 0.1in clearance = 3.43in -> Let's say 3.5in
+                // Depth: 2.2in
+                const W = 2.6;
+                const H = 3.5;
+                const D = 2.2;
+
+                html = `
+                <div class="sheet" style="display:flex; justify-content:center; align-items:center; height: 11in; width: 8.5in;">
+                    <svg width="100%" height="100%" viewBox="0 0 1000 1200" style="stroke:black; fill:none; stroke-width:2;">
+                        <!-- Main Structure centered roughly -->
+                        <g transform="translate(100, 100) scale(35)"> 
+                            <!-- Scale factor: 1 unit = 1 inch? No, viewBox is 1000. 8.5in * 96dpi = 816px. Let's use simpler SVG coords -->
+                        </g>
+                        <!-- Using absolute inches with native SVG units (96dpi) -->
+                         <g transform="translate(50, 50) scale(96)">
+                            <!-- Layout: Side-Front-Side-Back row -->
+                            <!-- Flaps above and below -->
+                            
+                            <!-- Front Panel (at D, H+0.5) -->
+                            <!-- Let's map coordinates: x,y -->
+                            <!-- Flap Side 1 | Front | Side 2 | Back | Glue Tab -->
+                            
+                            <!-- Coordinates Shift variables -->
+                            <!-- x0=0, x1=D, x2=D+W, x3=2D+W, x4=2D+2W -->
+                            
+                            <!-- Actually standard tuck box:
+                                     [Top Flap]
+                               [Dust]         [Dust]
+                               [Side] [Front] [Side] [Back] [Glue]
+                                     [Bottom]
+                            -->
+                            
+                             <!-- Re-calculating for landscape letter fit -->
+                             <!-- Width needed: D + W + D + W + Glue = 2.2 + 2.6 + 2.2 + 2.6 + 0.5 = 10.1 in. Too wide for portrait. Landscape 11in works. -->
+                             <!-- Rotated 90 degrees -->
+                             
+                             <g transform="rotate(90, 400, 400) translate(0, -6)">
+                             
+                                <path d="
+                                    M 0,2.2 L 2.2,2.2 L 2.2,0 L 4.8,0 L 4.8,2.2 L 7,2.2 L 7,0 L 9.6,0 L 9.6,2.2 L 10.1,2.2
+                                    L 10.1,5.7 L 9.6,5.7 L 9.6,7.9 L 7,7.9 L 7,5.7 L 4.8,5.7 L 4.8,7.9 L 2.2,7.9 L 2.2,5.7 L 0,5.7 Z
+                                " stroke="black" fill="none" />
+                                
+                                <!-- Crease Lines (Dashed) -->
+                                <path d="
+                                    M 2.2,2.2 L 2.2,5.7
+                                    M 4.8,0 L 4.8,7.9
+                                    M 7,2.2 L 7,5.7
+                                    M 9.6,0 L 9.6,7.9
+                                    M 2.2,2.2 L 9.6,2.2
+                                    M 2.2,5.7 L 9.6,5.7
+                                " stroke="black" stroke-dasharray="0.1, 0.1" />
+                                
+                                <!-- Content -->
+                                <text x="3.5" y="4" font-size="0.4" font-family="Inter" font-weight="900" text-anchor="middle" fill="black">ANTI-CRISIS</text>
+                                <text x="3.5" y="4.5" font-size="0.4" font-family="Inter" font-weight="900" text-anchor="middle" fill="black">MACHINE</text>
+                                <text x="3.5" y="5" font-size="0.15" font-family="Inter" text-anchor="middle" fill="black">166 CARDS + EXTRACTION TOOLS</text>
+                                
+                                <text x="8.3" y="4" font-size="0.2" font-family="Inter" text-anchor="middle" fill="black" transform="rotate(180, 8.3, 4)">CONTAINS 4 GAMES</text>
+                                <text x="8.3" y="3.6" font-size="0.15" font-family="Inter" text-anchor="middle" fill="black" transform="rotate(180, 8.3, 3.6)">MELTDOWN • DEW-LINE</text>
+                                <text x="8.3" y="3.4" font-size="0.15" font-family="Inter" text-anchor="middle" fill="black" transform="rotate(180, 8.3, 3.4)">THE FEED • EXPLAIN YOURSELF</text>
+                                
+                                <!-- Spine Text -->
+                                <text x="1.1" y="4" font-size="0.2" font-family="Inter" font-weight="bold" text-anchor="middle" fill="black" transform="rotate(-90, 1.1, 4)">ANTI-CRISIS PROTOCOL</text>
+                                <text x="5.9" y="4" font-size="0.2" font-family="Inter" font-weight="bold" text-anchor="middle" fill="black" transform="rotate(90, 5.9, 4)">ANTI-CRISIS PROTOCOL</text>
+
+                             </g>
+                        </g>
+                    </svg>
+                </div>
+                `;
+                container.innerHTML = html;
+                document.getElementById('stats').textContent = `Tuck Box Template (Rotate Page Landscape)`;
+                return;
+            }
+
+            for (let i = 0; i < padded.length; i += cardsPerPage) {
+                const page = padded.slice(i, i + cardsPerPage);
+                const pageNum = Math.floor(i / cardsPerPage) + 1;
+                const totalPages = Math.ceil(padded.length / cardsPerPage);
+                const sheetClass = showBleed ? 'sheet with-bleed' : 'sheet';
+
+                // Helper to inject bleed class into card generator
+                const cardClass = showBleed ? ' bleed' : '';
+
+                // Wrap generators to inject bleed class
+                // We use a regex replace hack or pass a flag if we updated the functions.
+                // Simpler: Just update the functions to respect a global or arg. 
+                // Let's rely on CSS cascade or update the generator calls. 
+                // Actually, I can just replace the class strings in the output string.
+
+                let pageContent = '';
+                if (viewMode === 'fronts') {
+                    pageContent = page.map(createCardDynamic).join('');
+                } else if (viewMode === 'backs') {
+                    pageContent = page.map(createBackDynamic).join('');
+                } else if (viewMode === 'fronts3') {
+                    pageContent = `<div class="sheet-3up">${page.map(createCardLarge).join('')}</div>`;
+                } else if (viewMode === 'backs3') {
+                    pageContent = `<div class="sheet-3up">${page.map(c => createBackLarge(c)).join('')}</div>`;
+                }
+
+                if (showBleed) {
+                    pageContent = pageContent.replace(/class="card"/g, 'class="card bleed"')
+                        .replace(/class="card-back"/g, 'class="card-back bleed"');
+                }
+
+                if (viewMode.includes('3')) {
+                    // 3-up logic is different, skip for now or adapt
+                    html += pageContent;
+                } else {
+                    html += `<div class="${sheetClass}">
+                        ${cropsHTML}
+                        <div class="sheet-header" style="top: ${showBleed ? '0' : '-20px'}; left: ${showBleed ? '0.25in' : '0'}; right: ${showBleed ? '0.25in' : '0'};">
+                            <span>${sheetLabel} - ${viewMode.toUpperCase().includes('BACK') ? 'BACKS' : 'FRONTS'}</span>
+                            <span>PAGE ${pageNum}/${totalPages}</span>
+                        </div>
+                        ${pageContent}
+                    </div>`;
+                }
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Mode switching
+        document.getElementById('mode-select').addEventListener('change', (e) => {
+            const isUnified = e.target.value === 'unified';
+            document.getElementById('original-controls').style.display = isUnified ? 'none' : 'flex';
+            document.getElementById('unified-controls').style.display = isUnified ? 'flex' : 'none';
+            render();
+        });
+
+        document.getElementById('game-select').addEventListener('change', render);
+        document.getElementById('type-select').addEventListener('change', render);
+        document.getElementById('suit-select').addEventListener('change', render);
+        document.getElementById('view-select').addEventListener('change', render);
+
+        document.getElementById('bleed-toggle').addEventListener('change', render);
+        document.getElementById('crop-toggle').addEventListener('change', render);
+
+        render();
+    </script>
+</body>
+
+</html>

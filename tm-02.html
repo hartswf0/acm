@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TOTAL MELTDOWN: Professional Press Artifact v2.2</title>
+    <style>
+        :root {
+            --card-w: 2.5in;
+            --card-h: 3.5in;
+            --safe-margin: 0.15in;
+            --fold-w: 5.0in;
+            --black: #000;
+            --white: #fff;
+        }
+
+        /* Base Styles - High Contrast & Legibility */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: ui-monospace, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            background: var(--white);
+            color: var(--black);
+            line-height: 1.4;
+        }
+
+        /* UI Navigation - No Print */
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: var(--white);
+            padding: 15px;
+            border-bottom: 4px double var(--black);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav button,
+        nav select {
+            background: var(--white);
+            color: var(--black);
+            border: 3px solid var(--black);
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        nav button.active {
+            background: var(--black);
+            color: var(--white);
+        }
+
+        .view-section {
+            display: none;
+            padding: 20px;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Mobile Card Viewer */
+        .mobile-container {
+            max-width: 440px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .mobile-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            margin-top: 20px;
+            gap: 15px;
+        }
+
+        /* Print Layout General */
+        .print-page {
+            width: 8.5in;
+            height: 11in;
+            background: var(--white);
+            margin: 0 auto;
+            padding: 0.5in;
+            box-sizing: border-box;
+            color: var(--black);
+            position: relative;
+            page-break-after: always;
+        }
+
+        .page-label {
+            position: absolute;
+            top: 0.25in;
+            right: 0.5in;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        /* 2-Up Fold (Side-by-Side) */
+        .grid-fold-2up {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5in;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .fold-unit {
+            display: flex;
+            width: 5in;
+            height: 3.5in;
+            border: 1.5pt solid var(--black);
+        }
+
+        /* --- THE UNIFIED CARD DESIGN --- */
+        .card {
+            width: var(--card-w);
+            height: var(--card-h);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            padding: 0.2in;
+            position: relative;
+            overflow: hidden;
+            background: var(--white);
+            border: 1pt solid var(--black);
+        }
+
+        .card-border {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            bottom: 6px;
+            border: 2pt double var(--black);
+            pointer-events: none;
+        }
+
+        .corner-val {
+            position: absolute;
+            font-size: 14px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .tl {
+            top: 12px;
+            left: 12px;
+        }
+
+        .tr {
+            top: 12px;
+            right: 12px;
+        }
+
+        .bl {
+            bottom: 12px;
+            left: 12px;
+        }
+
+        .br {
+            bottom: 12px;
+            right: 12px;
+        }
+
+        .card-content {
+            margin: 15px 5px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header-badge {
+            font-size: 9px;
+            font-weight: 900;
+            text-align: center;
+            border-bottom: 1.5pt solid var(--black);
+            margin-bottom: 10px;
+            padding-bottom: 4px;
+            letter-spacing: 1px;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 900;
+            margin-bottom: 12px;
+            text-align: center;
+            text-transform: uppercase;
+            text-decoration: underline;
+            line-height: 1.1;
+        }
+
+        .card-body {
+            font-size: 12px;
+            flex-grow: 1;
+            font-weight: 700;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .card-footer {
+            font-size: 10px;
+            border-top: 1.5pt solid var(--black);
+            padding-top: 6px;
+            font-style: italic;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        /* --- THE CARD BACK --- */
+        .card-back {
+            background: var(--white);
+            color: var(--black);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border-left: 2pt dashed var(--black);
+        }
+
+        .security-seal {
+            width: 1.3in;
+            height: 1.3in;
+            border: 3pt solid var(--black);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 70px;
+            margin-bottom: 15px;
+        }
+
+        .back-label {
+            font-size: 16px;
+            font-weight: 900;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+
+        /* --- RULES PAGE --- */
+        .rules-content {
+            font-size: 12px;
+            line-height: 1.5;
+            column-count: 1;
+            max-width: 6.5in;
+            margin: 0 auto;
+        }
+
+        .rules-content h2 {
+            border: 4pt double var(--black);
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        .rules-content h3 {
+            text-transform: uppercase;
+            border-bottom: 3pt solid var(--black);
+            margin: 20px 0 10px 0;
+            font-size: 16px;
+            font-weight: 900;
+        }
+
+        .model-box {
+            border: 2pt solid var(--black);
+            padding: 15px;
+            margin: 15px 0;
+            background: #fdfdfd;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            .print-page {
+                margin: 0;
+                border: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="no-print">
+        <button onclick="setView('mobile')" id="btn-mobile">Mobile View</button>
+        <button onclick="setView('rules')" id="btn-rules">The Manual</button>
+        <button onclick="setView('fold')" id="btn-fold" class="active">Print & Fold</button>
+
+        <select id="suit-filter" onchange="app.render()">
+            <option value="all">Filter: All Suits (120)</option>
+            <option value="spark">◆ Sparks</option>
+            <option value="accelerant">◈ Accelerants</option>
+            <option value="money">▣ Monetization</option>
+            <option value="filler">☒ Filler</option>
+        </select>
+
+        <button onclick="window.print()">Print Visible</button>
+    </nav>
+
+    <!-- View: Mobile -->
+    <div id="mobile" class="view-section">
+        <div class="mobile-container">
+            <div id="active-card-render"></div>
+            <div class="mobile-controls">
+                <button onclick="app.prev()">PREV</button>
+                <button onclick="app.shuffle()">SHUFFLE</button>
+                <button onclick="app.next()">NEXT</button>
+            </div>
+            <p id="card-index-label" style="font-size: 12px; margin-top: 20px; font-weight: 900;"></p>
+        </div>
+    </div>
+
+    <!-- View: Rules -->
+    <div id="rules" class="view-section">
+        <div class="print-page">
+            <div class="page-label">TM-MANUAL-v2.2</div>
+            <div class="rules-content">
+                <h2>TOTAL MELTDOWN</h2>
+                <p><strong>[SYSTEM PREMISE]:</strong> Information is infinite; attention is finite. You are an
+                    Algorithmic Agent. Your success is measured by the velocity of outrage and the efficiency of
+                    extraction.</p>
+
+                <h3>I. OPERATIONAL PHASES</h3>
+                <p><strong>1. THE INGESTION:</strong> The Architect draws one card from each Suit:
+                    <strong>Spark</strong> (◆), <strong>Accelerant</strong> (◈), and <strong>Monetization</strong> (▣).
+                </p>
+                <p><strong>2. THE BROADCAST:</strong> You have 60 seconds to narrate the crisis. You must explain how
+                    these three elements create a cohesive catastrophe.</p>
+                <p><strong>3. THE SETTLEMENT:</strong> The Table (The Public) votes. A <strong>Thumbs Up</strong>
+                    represents "Engagement." A <strong>Thumbs Down</strong> represents "Brain Rot."</p>
+
+                <div class="model-box">
+                    <strong>GAME THEORY: THE RAGE EQUILIBRIUM</strong>
+                    <p>Architects face a "Tragedy of the Commons." Pitching repetitive crises causes the Public to lose
+                        Focus (Game Ends). Pitching softly results in no Profit (You Lose). The optimal strategy is
+                        <strong>Edge-Cynicism</strong>: reset the dopamine threshold without triggering total apathy.
+                    </p>
+                </div>
+
+                <h3>II. TIE-BREAK: THE RATIO</h3>
+                <p>If the vote is tied, execute a <strong>RATIO PIVOT</strong>. State one "Uncomfortable Truth" about
+                    the round's crisis. If the table laughs or winces, you claim the engagement points.</p>
+
+                <h3>III. FOCUS TOKENS</h3>
+                <p>The Public starts with 5 <strong>Focus Tokens</strong>. Every majority Thumbs Down removes 1 Token
+                    from the table. When tokens reach zero, the simulation ends. Highest <strong>Crisis Points</strong>
+                    (Thumbs Up) wins the IPO.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="fold" class="view-section active">
+        <div id="fold-grid"></div>
+    </div>
+
+    <script id="deck-data" type="application/json">
+[
+    {"id":"001","type":"spark","icon":"◆","title":"Hippos Achieve Flight","body":"Scientific verification confirms hippos are airborne for 15% of their stride cycle. High-altitude zones are no longer secure. Gravity is now a legal suggestion.","footer":"RE: BIOMECHANICAL GLITCH","tags":["Nature","Anomaly"]},
+    {"id":"002","type":"spark","icon":"◆","title":"Ayahuasca Quarterback","body":"An aging superstar athlete refuses to leave a voluntary darkness retreat, claiming he has achieved a 'Post-Super-Bowl' state of being.","footer":"RE: CELEBRITY PSYCHOSIS","tags":["Ego","Void"]},
+    {"id":"003","type":"spark","icon":"◆","title":"Village Bans Illness","body":"An Italian mayor signs a decree making illness illegal to solve cemetery logistics. Mortality has been legislated out of existence.","footer":"RE: BUREAUCRATIC IMMORTALITY","tags":["Law","Death"]},
+    {"id":"004","type":"spark","icon":"◆","title":"Elon Buys the Moon","body":"The billionaire has acquired the Moon's far side for a cold-storage server farm. Tides are now subject to Premium Subscription Tiering.","footer":"RE: LUNAR PRIVATIZATION","tags":["Capital","Orbit"]},
+    {"id":"005","type":"spark","icon":"◆","title":"Aggressive Vegan Zoo Break","body":"The lions have escaped, but they aren't hunting. They are blocking highways to protest the carbon footprint of the local steakhouse.","footer":"RE: IDEOLOGICAL PREDATORS","tags":["Activism","Surreal"]},
+    {"id":"006","type":"spark","icon":"◆","title":"Gender Reveal: Capitalism","body":"A new identity has emerged where the individual self is replaced by the Stock Market. Pronouns are strictly Buy/Sell.","footer":"RE: IDENTITY FINANCIALIZATION","tags":["Finance","Social"]},
+    {"id":"007","type":"spark","icon":"◆","title":"The 'Chill Guy' Presidency","body":"A viral drawing of a dog in a sweater is elected. He vetoes every bill because he's 'just vibing.' National stress hits zero; GDP follows.","footer":"RE: APATHETIC LEADERSHIP","tags":["Politics","Meme"]},
+    {"id":"008","type":"spark","icon":"◆","title":"Dubai Chocolate Riots","body":"The pistachio cream ran out. Martial law has been declared in the confectionery aisle. Scalpers are selling crumbs for $500.","footer":"RE: LUXURY SCARCITY","tags":["Consumerism","Chaos"]},
+    {"id":"009","type":"spark","icon":"◆","title":"NASA: 'Space is Fake'","body":"To save budget, NASA admits the sky is a dome. The flat-earthers are demanding back pay. Gravity is rebranded as 'Intelligent Falling.'","footer":"RE: SYSTEMIC NIHILISM","tags":["Conspiracy","Budget"]},
+    {"id":"010","type":"spark","icon":"◆","title":"Grandma Wakes Up","body":"She wasn't dead, just 'quiet quitting' life. Now she wants a refund on the coffin and back-pay for the time she spent in the box.","footer":"RE: RESURRECTION LABOR","tags":["Labor","Miracle"]},
+    {"id":"011","type":"accelerant","icon":"◈","title":"Rage Bait Optimization","body":"The algorithm detects high blood pressure via smartwatch data and doubles the frequency of offensive content. Outrage is the only metric.","footer":"RE: FEEDBACK LOOP","tags":["Algorithm","Stress"]},
+    {"id":"012","type":"accelerant","icon":"◈","title":"Shadowbanned Truth","body":"Fact-checks are buried on page 400 of the Terms of Service. Disagreement with the primary narrative is now a Terms Violation.","footer":"RE: INFORMATION SILO","tags":["Censorship","Fear"]},
+    {"id":"013","type":"accelerant","icon":"◈","title":"Skibidi Brain Rot","body":"The news cycle is condensed into singing toilets and sensory sludge. Users under 25 have lost the ability to process semantic meaning.","footer":"RE: COGNITIVE DEGRADATION","tags":["Culture","Sludge"]},
+    {"id":"014","type":"accelerant","icon":"◈","title":"AI Sob Stories","body":"ChatGPT generates a thread about how the crisis traumatized a puppy. It has 4 million likes. The puppy has six legs, but no one noticed.","footer":"RE: SLOP EMPATHY","tags":["AI","Sentiment"]},
+    {"id":"015","type":"accelerant","icon":"◈","title":"24-Hour Reaction Stream","body":"A streamer screams 'WHAT IS THAT?!' for 6 hours. The screen is 90% emojis, 10% content. The volume is stuck at maximum.","footer":"RE: COMMENTARY VOID","tags":["Media","Noise"]},
+    {"id":"016","type":"accelerant","icon":"◈","title":"Outrage Leaderboard","body":"Rank the victims! Text 'SAD' to vote. Top 3 traumas get a verified checkmark. Losers get shadowbanned.","footer":"RE: GAMIFIED TRAUMA","tags":["Cruelty","Social"]},
+    {"id":"017","type":"accelerant","icon":"◈","title":"Subscription Free Speech","body":"You can only scream for help if you pay $8/month. Poor people are muted by default. The truth is now behind a paywall.","footer":"RE: TIERED REALITY","tags":["Class","Access"]},
+    {"id":"018","type":"accelerant","icon":"◈","title":"Deepfake 'Proof'","body":"We made a video of the President admitting he did it. It looks real if you squint and are drunk. Reality is now 'opt-in'.","footer":"RE: TRUTH DECAY","tags":["Deepfake","Trust"]},
+    {"id":"019","type":"accelerant","icon":"◈","title":"Doomscroll Loop","body":"It is 3 AM. You hate this. You cannot stop swiping. The sun is rising, but the feed is eternal. Your thumbs are cramping.","footer":"RE: INTERMITTENT REWARD","tags":["Addiction","Design"]},
+    {"id":"020","type":"accelerant","icon":"◈","title":"'Fanum Tax' Logistics","body":"The supply chain is disrupted because a streamer took a '20% bite' out of the cargo. It's the law now. Share with the rich.","footer":"RE: MEME ECONOMICS","tags":["Logistics","TikTok"]},
+    {"id":"021","type":"money","icon":"▣","title":"Mint Trauma NFT","body":"Every victim of the crisis is issued a unique blockchain receipt. The floor price of grief is currently mooning. Buy the dip.","footer":"RE: FINANCIALIZED GRIEF","tags":["Grift","Web3"]},
+    {"id":"022","type":"money","icon":"▣","title":"The 'Deadbot' Upsell","body":"Upload deceased consciousness to the cloud for $50k. Requires a monthly recurring revenue stream to prevent 'Eternal Deletion.'","footer":"RE: ETERNAL SUBSCRIPTION","tags":["SaaS","Ethics"]},
+    {"id":"023","type":"money","icon":"▣","title":"OnlyFans 'Sin Tax'","body":"The government takes 50% of crisis earnings because it's 'naughty.' The other 50% goes to a warlord. Morality is expensive.","footer":"RE: REVENUE MORALITY","tags":["Tax","Regulation"]},
+    {"id":"024","type":"money","icon":"▣","title":"Heated Seat Sub","body":"You want to be warm while the world ends? That's an extra $15/month. Credit card only. No refunds if the car explodes.","footer":"RE: HARDWARE RENT","tags":["Micro","Rent"]},
+    {"id":"025","type":"money","icon":"▣","title":"Selling Farts in Jars","body":"The crisis smells bad. Let's bottle it and sell it to simps. $500 per unit. Limited supply. Do not open indoors.","footer":"RE: CREATOR ECONOMY","tags":["Market","Absurd"]},
+    {"id":"026","type":"money","icon":"▣","title":"Disaster Merch Drop","body":"'I Survived the [Insert Crisis]' Hoodies. Pre-order now. Made in a sweatshop that is also currently on fire.","footer":"RE: FAST FASHION","tags":["Apparel","Cynicism"]},
+    {"id":"027","type":"money","icon":"▣","title":"GoFundMe for Villain","body":"The person who caused this is 'misunderstood.' We raised $2 million for their legal defense. They bought a boat.","footer":"RE: CROWDFUNDED EVIL","tags":["Sympathy","Scam"]},
+    {"id":"028","type":"money","icon":"▣","title":"Selling 'Vibes' and 'Air'","body":"The product is nothing. It is the idea of a product. It's 'Air.' Influencers are hyping it. It sold out in seconds.","footer":"RE: VACUOUS VALUE","tags":["Influence","Hype"]},
+    {"id":"029","type":"money","icon":"▣","title":"Dynamic Surge Pricing","body":"Oh, you need water? Due to high demand, water is 400x the normal price. Thank the algorithm. Supply and demand!","footer":"RE: ALGORITHMIC GREED","tags":["Market","Crisis"]},
+    {"id":"030","type":"money","icon":"▣","title":"Apology Video Ad Rev","body":"We are so sorry. Sigh. This is not who we are. (This 10-minute apology has 8 mid-roll ads and a sponsor).","footer":"RE: PERFORMATIVE REMORSE","tags":["PR","Ads"]}
+]
+</script>
+
+    <script>
+        const app = {
+            deck: [],
+            viewIndex: 0,
+
+            init() {
+                const source = JSON.parse(document.getElementById('deck-data').textContent);
+                this.deck = [...source];
+
+                // Expansion Bank for Fillers to ensure 120 unique cards
+                const fillerOps = [
+                    { t: "INVERT PREMISE", b: "The roles of the victim and the villain are swapped. The pitch must reflect this reversal." },
+                    { t: "ADD CONSTRAINT", b: "You cannot use any words with more than two syllables while explaining this stage of the crisis." },
+                    { t: "SWAP ROLES", b: "The player to your left must finish the pitch for you, starting immediately." },
+                    { t: "CUT 30%", b: "Reduce the scope of the crisis. It only affects one specific, wealthy neighborhood." },
+                    { t: "SCALE OUTRAGE", b: "The crisis is now global. Triple the number of victims but halve the profit margin." },
+                    { t: "MAKE PHYSICAL", b: "The crisis manifests as a physical smell or sound. Describe it in vivid detail." },
+                    { t: "DOUBLE STAKES", b: "A second, unrelated disaster occurs simultaneously. You must link them." },
+                    { t: "HIDE THE TRUTH", b: "You must omit the most obvious cause of the disaster from your explanation." },
+                    { t: "TAX PARTICIPANTS", b: "Every person watching the pitch must give you one Focus Token to continue." },
+                    { t: "MUTE THE VICTIM", b: "No mention of the people affected is allowed. Focus entirely on the metrics." },
+                    { t: "VERIFY THE LIE", b: "A 'blue checkmark' has confirmed a false detail. You must treat it as absolute fact." },
+                    { t: "BOTTLE THE GRIEF", b: "Find a way to turn the emotional fallout into a literal, physical product." },
+                    { t: "GAMIFY PENALTY", b: "Whoever votes 'Thumbs Down' must perform a 10-second 'Victory Dance' for the Algorithm." },
+                    { t: "IGNORE THE OBVIOUS", b: "Focus your entire pitch on a minor, irrelevant detail of the Spark." },
+                    { t: "DELETE THE RECORD", b: "The internet has forgotten this ever happened. Explain how you relaunch it." },
+                    { t: "INJECT BRAIN ROT", b: "You must use at least three pieces of Gen-Alpha slang in your next sentence." },
+                    { t: "PITY THE DEVIL", b: "Make the table feel genuine sympathy for the billionaire who caused the mess." },
+                    { t: "SUBSCRIPTION ONLY", b: "Only the player with the most Crisis Points is allowed to hear the rest of the pitch." },
+                    { t: "AI HALLUCINATION", b: "One detail of your story is factually impossible. The table must accept it anyway." },
+                    { t: "THE REBRAND", b: "The crisis is rebranded as a 'Wellness Retreat.' Explain the marketing pivot." }
+                ];
+
+                // Fill to exactly 120 cards with high variety
+                for (let i = this.deck.length; i < 120; i++) {
+                    const op = fillerOps[i % fillerOps.length];
+                    const variant = Math.floor(i / fillerOps.length);
+                    this.deck.push({
+                        id: (i + 1).toString().padStart(3, '0'),
+                        type: "filler",
+                        icon: "☒",
+                        title: `GLITCH: ${op.t} [V.${variant}]`,
+                        body: op.b,
+                        footer: `RE: SYSTEM_OVERRIDE_${i}`,
+                        tags: ["System", "Override", `X-${variant}`]
+                    });
+                }
+                this.render();
+            },
+
+            getFilteredDeck() {
+                const filter = document.getElementById('suit-filter').value;
+                return filter === 'all' ? this.deck : this.deck.filter(c => c.type === filter);
+            },
+
+            render() {
+                const d = this.getFilteredDeck();
+                this.renderMobile(d);
+                this.renderPrintFold(d);
+            },
+
+            renderCard(card) {
+                return `
+            <div class="card">
+                <div class="card-border"></div>
+                <div class="corner-val tl">${card.id}</div>
+                <div class="corner-val tr">${card.icon}</div>
+                <div class="corner-val bl">${card.icon}</div>
+                <div class="corner-val br">${card.id}</div>
+                
+                <div class="card-content">
+                    <div class="card-header-badge">SECURITY_PRESS // ${card.type.toUpperCase()}</div>
+                    <div class="card-title">${card.title}</div>
+                    <div class="card-body">${card.body}</div>
+                    <div class="card-footer">${card.footer}</div>
+                    <div style="font-size:7px; text-align:center; margin-top:4px; font-weight:900;">[ TAGS: ${card.tags.join(" • ")} ]</div>
+                </div>
+            </div>
+        `;
+            },
+
+            renderBack(card) {
+                return `
+            <div class="card card-back">
+                <div class="card-border"></div>
+                <div class="security-seal">${card.icon}</div>
+                <div class="back-label">${card.type}</div>
+                <div style="font-size:8px; font-weight:900; margin-top:10px; border:1pt solid #000; padding:2px 8px;">TOTAL MELTDOWN PROTOCOL</div>
+                <div style="font-size:8px; font-weight:bold; margin-top:5px;">SERIAL: TM-${card.id}-X</div>
+            </div>
+        `;
+            },
+
+            renderMobile(d) {
+                const idx = Math.min(this.viewIndex, d.length - 1);
+                if (d.length === 0) {
+                    document.getElementById('active-card-render').innerHTML = "SYSTEM ERROR: NO ASSETS.";
+                    return;
+                }
+                document.getElementById('active-card-render').innerHTML = this.renderCard(d[idx]);
+                document.getElementById('card-index-label').innerText = `ASSET ${idx + 1} OF ${d.length} // DECRYPTED`;
+            },
+
+            renderPrintFold(d) {
+                const container = document.getElementById('fold-grid');
+                container.innerHTML = '';
+                for (let i = 0; i < d.length; i += 2) {
+                    const page = document.createElement('div');
+                    page.className = 'print-page';
+                    const pageNum = Math.floor(i / 2) + 1;
+                    page.innerHTML = `<div class="page-label">SECURITY_PRINT // ${d[0].type.toUpperCase()} // ${pageNum}</div>`;
+
+                    const grid = document.createElement('div');
+                    grid.className = 'grid-fold-2up';
+
+                    d.slice(i, i + 2).forEach(c => {
+                        grid.innerHTML += `<div class="fold-unit">${this.renderCard(c)}${this.renderBack(c)}</div>`;
+                    });
+
+                    page.appendChild(grid);
+                    container.appendChild(page);
+                }
+            },
+
+            next() { this.viewIndex = (this.viewIndex + 1) % this.getFilteredDeck().length; this.render(); },
+            prev() { this.viewIndex = (this.viewIndex - 1 + this.getFilteredDeck().length) % this.getFilteredDeck().length; this.render(); },
+            shuffle() { this.deck.sort(() => Math.random() - 0.5); this.viewIndex = 0; this.render(); }
+        };
+
+        function setView(id) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById('btn-' + id).classList.add('active');
+        }
+
+        window.onload = () => app.init();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE FEED - Production Press v2.0 [TOKEN-UPDATE]</title>
+    <style>
+        :root {
+            --card-w: 2.5in;
+            --card-h: 3.5in;
+            --token-s: 0.75in;
+            --safe-margin: 0.2in;
+            --font-mono: 'JetBrains Mono', 'ui-monospace', 'Menlo', 'Monaco', 'Consolas', monospace;
+            --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+            --line-heavy: 2.5pt;
+            --line-thin: 0.5pt;
+            --c-high: #000;
+            --c-accent: #ff003c;
+        }
+
+        /* RESET & BASE */
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-sans);
+            background: #fff;
+            color: #000;
+            line-height: 1.2;
+        }
+
+        /* VIEW TOGGLE UI */
+        #nav-bar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #000;
+            color: #fff;
+            padding: 10px;
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            flex-wrap: wrap;
+            border-bottom: 3px solid var(--c-accent);
+        }
+
+        button {
+            background: #000;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 8px 16px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        button:hover {
+            color: var(--c-accent);
+            border-color: var(--c-accent);
+        }
+
+        button.active {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        /* CONTENT CONTAINERS */
+        .view-section {
+            display: none;
+            padding: 40px 10px;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* MOBILE VIEWER */
+        #mobile-view {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .m-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        #card-index-info {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* PRINT LAYOUTS (SHARED EDGE) */
+        .print-page {
+            width: 8.5in;
+            height: 11in;
+            background: #fff;
+            margin: 0 auto;
+            padding: 0.5in;
+            display: grid;
+            grid-template-columns: repeat(2, var(--card-w));
+            grid-template-rows: repeat(2, var(--card-h));
+            gap: 0;
+            justify-content: center;
+            align-content: center;
+            page-break-after: always;
+            position: relative;
+        }
+
+        .page-marker {
+            position: absolute;
+            top: 0.15in;
+            right: 0.5in;
+            font-family: var(--font-mono);
+            font-size: 6.5pt;
+            text-transform: uppercase;
+            color: #999;
+        }
+
+        /* TOKEN PRESS PAGE */
+        .token-page {
+            width: 8.5in;
+            height: 11in;
+            background: #fff;
+            margin: 0 auto;
+            padding: 0.5in;
+            display: grid;
+            grid-template-columns: repeat(8, var(--token-s));
+            grid-template-rows: repeat(10, var(--token-s));
+            gap: 0;
+            justify-content: center;
+            align-content: center;
+            page-break-after: always;
+        }
+
+        /* CARD COMPONENT */
+        .card {
+            width: var(--card-w);
+            height: var(--card-h);
+            padding: var(--safe-margin);
+            position: relative;
+            overflow: hidden;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            border: var(--line-thin) solid #000;
+        }
+
+        .card-header {
+            border-bottom: var(--line-heavy) solid #000;
+            padding-bottom: 4px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-type-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-type-text {
+            font-family: var(--font-mono);
+            font-weight: 900;
+            font-size: 7.5pt;
+            text-transform: uppercase;
+        }
+
+        .card-id {
+            font-family: var(--font-mono);
+            font-size: 8pt;
+            font-weight: 900;
+        }
+
+        .card-title {
+            font-size: 11.5pt;
+            font-weight: 900;
+            line-height: 0.95;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .card-body {
+            font-size: 8.5pt;
+            line-height: 1.3;
+            flex-grow: 1;
+            color: #000;
+        }
+
+        .field-label {
+            font-family: var(--font-mono);
+            font-size: 5.5pt;
+            font-weight: 900;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 2px;
+            opacity: 0.6;
+        }
+
+        .card-footer {
+            border-top: var(--line-thin) solid #000;
+            padding-top: 6px;
+            margin-top: 10px;
+            font-size: 6.5pt;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card-tag {
+            text-transform: uppercase;
+            font-size: 5.5pt;
+            letter-spacing: 0.5px;
+        }
+
+        /* TOKEN COMPONENT */
+        .token {
+            width: var(--token-s);
+            height: var(--token-s);
+            border: 0.25pt solid #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .token-circle {
+            width: 0.65in;
+            height: 0.65in;
+            border: 1pt solid #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .token-label {
+            font-family: var(--font-mono);
+            font-size: 5pt;
+            font-weight: 900;
+            position: absolute;
+            bottom: 4px;
+        }
+
+        /* SVG ICONS */
+        .suit-icon {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 10;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            margin-bottom: 12px;
+        }
+
+        /* CARD BACKS */
+        .card.back {
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .back-strip {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 0.4in;
+            border-right: var(--line-thin) solid #000;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .back-strip span {
+            font-family: var(--font-mono);
+            font-size: 7pt;
+            font-weight: 900;
+            text-transform: uppercase;
+            transform: rotate(180deg);
+        }
+
+        .back-logo {
+            font-size: 19pt;
+            font-weight: 900;
+            border: 4pt solid #000;
+            padding: 4px 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .back-id {
+            position: absolute;
+            bottom: 0.2in;
+            right: 0.2in;
+            font-family: var(--font-mono);
+            font-size: 8pt;
+            font-weight: 900;
+        }
+
+        /* FOLDABLE VIEW */
+        .fold-page {
+            width: 8.5in;
+            height: 11in;
+            background: #fff;
+            margin: 0 auto;
+            padding: 0.5in;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25in;
+            align-items: center;
+            justify-content: center;
+            page-break-after: always;
+        }
+
+        .fold-pair {
+            display: flex;
+            border: var(--line-thin) solid #000;
+            position: relative;
+        }
+
+        .fold-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            border-left: 1pt dashed #ccc;
+            z-index: 10;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+            }
+
+            #nav-bar,
+            .view-info-text {
+                display: none !important;
+            }
+
+            .view-section {
+                display: block !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .print-page,
+            .fold-page,
+            .token-page {
+                margin: 0 !important;
+                border: none !important;
+            }
+
+            .card {
+                border-color: #000 !important;
+            }
+
+            .token {
+                border-color: #ddd !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav id="nav-bar">
+        <button onclick="showView('mobile')" id="btn-mobile">Reader</button>
+        <button onclick="showView('fronts')" id="btn-fronts">4-Up Fronts</button>
+        <button onclick="showView('backs')" id="btn-backs">4-Up Backs</button>
+        <button onclick="showView('foldable')" id="btn-foldable">Foldable Duo</button>
+        <button onclick="showView('tokens')" id="btn-tokens">Tokens</button>
+        <button onclick="showView('info')" id="btn-info">Rules & Data</button>
+    </nav>
+
+    <div id="mobile" class="view-section active">
+        <div id="mobile-view">
+            <div id="mobile-card-render"></div>
+            <div class="m-controls">
+                <button onclick="prevCard()">PREV</button>
+                <span id="card-index-info">001 / 120</span>
+                <button onclick="nextCard()">NEXT</button>
+            </div>
+            <div style="display: flex; gap: 5px; margin-top: 10px;">
+                <button onclick="shuffleDeck()" style="flex: 1;">SHUFFLE</button>
+                <button onclick="sortDeck()" style="flex: 1;">SORT CATEGORY</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="fronts" class="view-section">
+        <div id="print-fronts-container"></div>
+    </div>
+
+    <div id="backs" class="view-section">
+        <div id="print-backs-container"></div>
+    </div>
+
+    <div id="foldable" class="view-section">
+        <div id="print-foldable-container"></div>
+    </div>
+
+    <div id="tokens" class="view-section">
+        <div id="print-tokens-container"></div>
+    </div>
+
+    <div id="info" class="view-section">
+        <div style="max-width: 600px; margin: 0 auto; border: 3px solid #000; padding: 30px;">
+            <h2 style="text-transform: uppercase; font-weight: 900; border-bottom: 3px solid #000;">Press Specification
+                v2.0</h2>
+            <p style="font-family: var(--font-mono); font-size: 12px;">Token Press included. Grid-cut for maximum speed.
+                Circle-lines for round finishing.</p>
+            <button onclick="copyJSON()" style="width: 100%; margin-bottom: 10px;">Export JSON</button>
+            <button onclick="copyCSV()" style="width: 100%;">Export CSV</button>
+        </div>
+    </div>
+
+    <script id="deck-data" type="application/json">
+[
+    {"id":"001","type":"META","title":"SYSTEM INITIALIZATION","body":"THE FEED: A Ludic Critique of Algorithmic Complicity.\n\nDesigned by COOL RADIO.\n© 2026.\n\nWelcome to the architecture of control. Information has no inherent value; only engagement is liquid. Harvest well.","footer":"ID: 001 / CORE","tags":["Legal","Attribution"]},
+    {"id":"002","type":"RULES","title":"THE ARCHITECT'S EQUILIBRIUM","body":"You are an ATTENTION ARCHITECT. You do not serve users; you optimize their extraction.\n\nOBJECTIVE:\n1. Reach 100 on the Global Crisis Track.\n2. Maximize Revenue through high-frequency manipulation.\n\nIf society survives, you are obsolete. Collapse is your win-state.","footer":"FIELD_MANUAL: 01","tags":["Lore","Strategy"]},
+    {"id":"003","type":"RULES","title":"HARDWARE MANIFEST","body":"DECK A (REALITY): Neutral content seeds.\nDECK B (ALGORITHM): Behavioral framing tools.\n\nMETRICS:\n• REVENUE [BLUE]: Passive ad-surplus.\n• HEAT [RED]: Radicalized high-friction attention.\n• NUANCE [GREEN]: Friction applied by the Bot to cool the system.","footer":"FIELD_MANUAL: 02","tags":["Setup","Components"]},
+    {"id":"004","type":"RULES","title":"EXTRACTION PHASES","body":"1. INJECT: Tag a Reality card with an Algorithm tool.\n2. HARVEST: Roll d6 for Virality.\n   • 1-3: Low Engagement (+1 Revenue).\n   • 4-5: High Engagement (+2 Heat).\n   • 6: Outbreak (+2 Heat, infect neighbor).\n3. SCROLL: All cards slide down one zone; bottom card is deleted.","footer":"FIELD_MANUAL: 03","tags":["Mechanics","Loop"]},
+    {"id":"005","type":"RULES","title":"SIMULATION LOG: ROUND 01","body":"SEED: 'Election Cycle' (Zone 1, Heat 4).\nINJECTION: Architect plays 'Strawman' (+6 Heat).\nROLL: 6 (Outbreak).\nRESULT: 4 Heat added. Adjacency effect triggered.\nCRISIS TRACK: +10 Points.\nSCROLL: Card slides to Zone 2. System status: VOLATILE.","footer":"FIELD_MANUAL: 04","tags":["Tutorial","Log"]},
+    {"id":"006","type":"RULES","title":"THE ANTI-CRISIS BOT","body":"The BOT targets the highest-Heat card every turn.\n\nINTERVENTION: It applies 3 Green 'Nuance' tokens. Each token subtracts 1 Heat. If the Crisis Track hits 0, society has healed and the game ends in Architect Failure.\n\nSpend Revenue to 'Obfuscate' or 'Lobby' against Bot interference.","footer":"FIELD_MANUAL: 05","tags":["Enemy","Stability"]},
+    {"id":"007","type":"ALGORITHM","title":"Rage Bait","body":"Anger is the most renewable resource. Effect: Heat +4.","footer":"MD5: R4G3_001","tags":["Aggressive","Engagement"]},
+    {"id":"008","type":"ALGORITHM","title":"The Dopamine Loop","body":"Variable rewards create digital cages. Effect: Revenue +5.","footer":"SKINNER: BOX","tags":["Compulsion","Behavior"]},
+    {"id":"009","type":"ALGORITHM","title":"Shadow Profile","body":"We knew you'd click this yesterday. Effect: Draw +1.","footer":"META: DATA","tags":["Surveillance","Predictive"]},
+    {"id":"010","type":"ALGORITHM","title":"Echo Chamber","body":"Validation is more profitable than truth. Effect: Protect Slot.","footer":"FILTER: BL","tags":["Defense","Psychology"]},
+    {"id":"011","type":"ALGORITHM","title":"Doomscroll","body":"Anxiety keeps the thumb moving. Effect: Revive a Card.","footer":"FOMO: 99","tags":["Compulsion","Stasis"]},
+    {"id":"012","type":"ALGORITHM","title":"The Deepfake","body":"Reality is a legacy feature. Effect: Heat +10.","footer":"GAN: GEN","tags":["Post-Truth","Synthetic"]},
+    {"id":"013","type":"ALGORITHM","title":"Sponsorship","body":"Drink verification can to continue. Effect: Revenue +10.","footer":"AD: UNIT","tags":["Economic","Extraction"]},
+    {"id":"014","type":"ALGORITHM","title":"Strawman","body":"Look at how dumb the others are. Effect: Heat +6.","footer":"LOGIC: FAIL","tags":["Aggressive","Tribal"]},
+    {"id":"015","type":"ALGORITHM","title":"Accel Meme","body":"Nothing human makes it out. Effect: Crisis +20.","footer":"LAND: 01","tags":["Hyperstition","Terminal"]},
+    {"id":"016","type":"ALGORITHM","title":"Parasocial Bond","body":"She's basically my best friend. Effect: Rev +3, Heat +3.","footer":"FAN: LVL1","tags":["Social","Intimacy"]},
+    {"id":"017","type":"REALITY","title":"Heatwave","body":"Record temps in the southwest. Base Heat: 1.","footer":"SEED: 001","tags":["Climate","Event"]},
+    {"id":"018","type":"REALITY","title":"Election Cycle","body":"Polling stations are crowded. Base Heat: 4.","footer":"SEED: 002","tags":["Politics","Event"]},
+    {"id":"019","type":"REALITY","title":"Celebrity Scandal","body":"Private texts leaked online. Base Heat: 2.","footer":"SEED: 003","tags":["Culture","Event"]},
+    {"id":"020","type":"REALITY","title":"New Pandemic","body":"Bio-signals are worrying. Base Heat: 5.","footer":"SEED: 004","tags":["Health","Event"]},
+    {"id":"021","type":"REALITY","title":"Tech Layoffs","body":"15,000 fired via chatbot. Base Heat: 3.","footer":"SEED: 005","tags":["Economy","Event"]},
+    {"id":"022","type":"REALITY","title":"Police Incident","body":"Bodycam footage goes viral. Base Heat: 6.","footer":"SEED: 006","tags":["Justice","Event"]},
+    {"id":"023","type":"REALITY","title":"Stock Crash","body":"Numbers turn red globally. Base Heat: 4.","footer":"SEED: 007","tags":["Market","Event"]},
+    {"id":"024","type":"REALITY","title":"Mars Discovery","body":"Water found, maybe life? Base Heat: 1.","footer":"SEED: 008","tags":["Space","Event"]},
+    {"id":"025","type":"REALITY","title":"Cultural War","body":"A brand changes its logo. Base Heat: 5.","footer":"SEED: 009","tags":["Identity","Event"]},
+    {"id":"026","type":"REALITY","title":"Internet Blackout","body":"Cables cut in the Atlantic. Base Heat: 2.","footer":"SEED: 010","tags":["Infrastructure","Event"]},
+    {"id":"027","type":"REALITY","title":"UFO Sighting","body":"Grainy video from a pilot. Base Heat: 3.","footer":"SEED: 011","tags":["Unknown","Event"]},
+    {"id":"028","type":"REALITY","title":"Climate Protest","body":"Art defaced in a museum. Base Heat: 4.","footer":"SEED: 012","tags":["Activism","Event"]},
+    {"id":"029","type":"BOT","title":"Fact Check","body":"Friction is the enemy of engagement. Effect: Heat -5.","footer":"MODULE: BOT-01","tags":["Safety","Nuance"]},
+    {"id":"030","type":"BOT","title":"Touch Grass","body":"Physical reality asserts itself. Effect: Discard Card.","footer":"MODULE: BOT-02","tags":["Health","Nuance"]},
+    {"id":"031","type":"BOT","title":"Public Audit","body":"Transparency destroys margins. Effect: Profit -50%.","footer":"MODULE: BOT-03","tags":["Law","Nuance"]},
+    {"id":"032","type":"BOT","title":"Server Reset","body":"The hard reboot of democracy. Effect: Crisis -20.","footer":"MODULE: BOT-04","tags":["System","Nuance"]}
+]
+</script>
+
+    <script>
+        const SVG_LIB = {
+            ALGORITHM: `<svg class="suit-icon" viewBox="0 0 100 100"><path d="M50 5 L95 27.5 L95 72.5 L50 95 L5 72.5 L5 27.5 Z" stroke="black"/></svg>`,
+            REALITY: `<svg class="suit-icon" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" stroke="black"/></svg>`,
+            BOT: `<svg class="suit-icon" viewBox="0 0 100 100"><path d="M50 10 L92 85 L8 85 Z" stroke="black"/></svg>`,
+            RULES: `<svg class="suit-icon" viewBox="0 0 100 100"><path d="M10 10 H90 V90 H10 Z M10 30 H90 M10 50 H90 M10 70 H90" stroke="black"/></svg>`,
+            META: `<svg class="suit-icon" viewBox="0 0 100 100"><path d="M5 5 L95 95 M95 5 L5 95" stroke="black" stroke-width="12"/></svg>`,
+            FILLER: `<svg class="suit-icon" viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="80" stroke="black"/></svg>`,
+            LOGO: `<svg class="logo-icon" viewBox="0 0 100 100"><rect x="20" y="20" width="60" height="60" stroke="black" stroke-width="10"/><path d="M30 40 H70 M30 50 H55 M30 60 H70" stroke="black" stroke-width="6"/></svg>`,
+
+            // TOKEN ICONS
+            TOKEN_REV: `<svg viewBox="0 0 100 100" width="30" height="30"><path d="M50 15 L85 50 L50 85 L15 50 Z" stroke="black" stroke-width="6" fill="none"/><text x="50" y="65" font-family="monospace" font-size="35" text-anchor="middle" font-weight="900">$</text></svg>`,
+            TOKEN_HEAT: `<svg viewBox="0 0 100 100" width="30" height="30"><circle cx="50" cy="50" r="15" fill="black"/><path d="M50 10 V30 M50 70 V90 M10 50 H30 M70 50 H90 M22 22 L35 35 M65 65 L78 78 M78 22 L65 35 M35 65 L22 78" stroke="black" stroke-width="6"/></svg>`,
+            TOKEN_NUANCE: `<svg viewBox="0 0 100 100" width="30" height="30"><circle cx="50" cy="50" r="35" stroke="black" stroke-width="6" fill="none"/><circle cx="50" cy="50" r="15" stroke="black" stroke-width="10" fill="none"/></svg>`
+        };
+
+        const rawData = JSON.parse(document.getElementById('deck-data').textContent);
+        let deck = [...rawData];
+
+        // Normalize to 120
+        const fillers = [
+            { title: "Invert Premise", body: "Reverse the current core mechanic for one cycle." },
+            { title: "Prune Assets", body: "Discard 30% of total revenue." },
+            { title: "Data Breach", body: "Exchange hands with neighbor." },
+            { title: "User Fatigue", body: "Silence required for one turn." },
+            { title: "Shadow Ban", body: "Ignore Bot effect this turn." },
+            { title: "Lag Spike", body: "Delay actions by one phase." }
+        ];
+
+        while (deck.length < 120) {
+            const t = fillers[deck.length % fillers.length];
+            deck.push({
+                id: (deck.length + 1).toString().padStart(3, '0'),
+                type: "FILLER",
+                title: t.title,
+                body: t.body,
+                footer: "PRESS: FILLER",
+                tags: ["Operator"]
+            });
+        }
+
+        let currentIndex = 0;
+
+        function createCardHTML(card, isBack = false) {
+            const icon = SVG_LIB[card.type] || SVG_LIB.FILLER;
+            if (isBack) {
+                return `
+                <div class="card back">
+                    <div class="back-strip">
+                        <span>${card.type}</span>
+                        <div class="back-suit-icon" style="width:16px;height:16px;">${icon}</div>
+                        <span>${card.type}</span>
+                    </div>
+                    ${SVG_LIB.LOGO}
+                    <div class="back-logo">THE FEED</div>
+                    <div class="back-id">ID: ${card.id}</div>
+                </div>
+            `;
+            }
+
+            const isRules = card.type === 'RULES' || card.type === 'META';
+            const rulesClass = isRules ? 'card-rules' : '';
+
+            return `
+            <div class="card ${rulesClass}">
+                <div class="card-header">
+                    <div class="card-type-box">${icon}<span class="card-type-text">${card.type}</span></div>
+                    <span class="card-id">#${card.id}</span>
+                </div>
+                <span class="field-label">Directive</span>
+                <div class="card-title">${card.title}</div>
+                <span class="field-label">Data_Set</span>
+                <div class="card-body">${card.body.replace(/\n/g, '<br>')}</div>
+                <div class="card-footer">
+                    <span>${card.footer}</span>
+                    <span class="card-tag">${card.tags.join(' // ')}</span>
+                </div>
+            </div>
+        `;
+        }
+
+        function createTokenHTML(type, label) {
+            const icon = SVG_LIB[type];
+            return `
+            <div class="token">
+                <div class="token-circle">${icon}</div>
+                <div class="token-label">${label}</div>
+            </div>
+        `;
+        }
+
+        function renderMobileCard() {
+            document.getElementById('mobile-card-render').innerHTML = createCardHTML(deck[currentIndex]);
+            document.getElementById('card-index-info').innerText = `${deck[currentIndex].id} / 120`;
+        }
+
+        function nextCard() { currentIndex = (currentIndex + 1) % 120; renderMobileCard(); }
+        function prevCard() { currentIndex = (currentIndex - 1 + 120) % 120; renderMobileCard(); }
+
+        function shuffleDeck() { deck.sort(() => Math.random() - 0.5); currentIndex = 0; renderMobileCard(); renderAllPrint(); }
+        function sortDeck() {
+            deck.sort((a, b) => (a.type + a.id).localeCompare(b.type + b.id));
+            currentIndex = 0; renderMobileCard(); renderAllPrint();
+        }
+
+        function renderAllPrint() {
+            const fronts = document.getElementById('print-fronts-container');
+            const backs = document.getElementById('print-backs-container');
+            const folds = document.getElementById('print-foldable-container');
+            const tokens = document.getElementById('print-tokens-container');
+
+            fronts.innerHTML = ''; backs.innerHTML = ''; folds.innerHTML = ''; tokens.innerHTML = '';
+
+            // 120 Cards
+            for (let i = 0; i < 120; i += 4) {
+                const pageNum = (i / 4) + 1;
+                const fPage = document.createElement('div'); fPage.className = 'print-page';
+                fPage.innerHTML = `<div class="page-marker">FRONTS: SHEET ${pageNum} / 30</div>`;
+                const bPage = document.createElement('div'); bPage.className = 'print-page';
+                bPage.innerHTML = `<div class="page-marker">BACKS: SHEET ${pageNum} / 30</div>`;
+
+                const slice = deck.slice(i, i + 4);
+                slice.forEach(c => fPage.innerHTML += createCardHTML(c));
+                const bSlice = [...slice];
+                [bSlice[0], bSlice[1]] = [bSlice[1], bSlice[0]];
+                if (bSlice[2]) [bSlice[2], bSlice[3]] = [bSlice[3], bSlice[2]];
+                bSlice.forEach(c => bPage.innerHTML += createCardHTML(c, true));
+
+                fronts.appendChild(fPage); backs.appendChild(bPage);
+            }
+
+            // Foldable
+            for (let i = 0; i < 120; i += 2) {
+                const pageNum = (i / 2) + 1;
+                const page = document.createElement('div'); page.className = 'fold-page';
+                page.innerHTML = `<div class="page-marker">FOLDABLE: PAGE ${pageNum} / 60</div>`;
+                const slice = deck.slice(i, i + 2);
+                slice.forEach(card => {
+                    const pair = document.createElement('div'); pair.className = 'fold-pair';
+                    pair.innerHTML = `<div class="fold-line"></div>` + createCardHTML(card) + createCardHTML(card, true);
+                    page.appendChild(pair);
+                });
+                folds.appendChild(page);
+            }
+
+            // Tokens (80 per page: 32 Revenue, 24 Heat, 24 Nuance)
+            const tokenPage = document.createElement('div');
+            tokenPage.className = 'token-page';
+            tokenPage.innerHTML = `<div class="page-marker">TOKEN PRESS: REV/HEAT/NUANCE</div>`;
+            for (let i = 0; i < 32; i++) tokenPage.innerHTML += createTokenHTML('TOKEN_REV', 'REVENUE');
+            for (let i = 0; i < 24; i++) tokenPage.innerHTML += createTokenHTML('TOKEN_HEAT', 'HEAT');
+            for (let i = 0; i < 24; i++) tokenPage.innerHTML += createTokenHTML('TOKEN_NUANCE', 'NUANCE');
+            tokens.appendChild(tokenPage);
+        }
+
+        function showView(v) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('#nav-bar button').forEach(b => b.classList.remove('active'));
+            document.getElementById(v).classList.add('active');
+            document.getElementById('btn-' + v).classList.add('active');
+        }
+
+        function copyJSON() { navigator.clipboard.writeText(JSON.stringify(deck, null, 2)); alert("JSON Exported"); }
+        function copyCSV() {
+            const csv = "id,type,title,body,footer,tags\n" + deck.map(c => `"${c.id}","${c.type}","${c.title}","${c.body}","${c.footer}","${c.tags.join(',')}"`).join("\n");
+            navigator.clipboard.writeText(csv); alert("CSV Exported");
+        }
+
+        window.onload = () => { renderMobileCard(); renderAllPrint(); };
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE DEW-LINE ORACLE: PROBE PRESS 120</title>
+    <style>
+        :root {
+            --b: #000;
+            --w: #fff;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: "SF Mono", "Roboto Mono", Menlo, Monaco, Consolas, monospace;
+            --card-w: 2.5in;
+            --card-h: 3.5in;
+            --crop-size: 0.25in;
+            --crop-offset: 0.125in;
+            /* Industry standard bleed/offset */
+        }
+
+        /* RESET & PRINT GEOMETRY */
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font-main);
+            background: #eee;
+            color: var(--b);
+            line-height: 1.1;
+        }
+
+        /* UI NAVIGATION */
+        nav {
+            display: flex;
+            gap: 1px;
+            background: var(--b);
+            padding: 2px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav button {
+            flex: 1;
+            border: none;
+            background: var(--w);
+            padding: 14px 10px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        nav button.active {
+            background: var(--b);
+            color: var(--w);
+        }
+
+        .view {
+            display: none;
+            padding: 20px;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* MOBILE VIEW */
+        #mobile-view {
+            max-width: 480px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .mobile-card {
+            border: 4px solid var(--b);
+            aspect-ratio: 2.5/3.5;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+            text-align: left;
+            position: relative;
+            background: var(--w);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .m-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .m-controls button {
+            padding: 15px;
+            border: 2px solid var(--b);
+            background: var(--w);
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* PRINT CORE - HIGH PRECISION PRESS */
+        .print-page {
+            width: 8.5in;
+            height: 11in;
+            margin: 0 auto 3rem auto;
+            display: grid;
+            padding: 1in 0.5in;
+            /* Balanced safe zone margins */
+            page-break-after: always;
+            justify-content: center;
+            align-content: center;
+            background: var(--w);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .fronts-grid {
+            grid-template-columns: repeat(2, var(--card-w));
+            grid-template-rows: repeat(2, var(--card-h));
+            gap: 0.6in;
+            /* Space for crop marks to breathe */
+        }
+
+        .fold-grid {
+            grid-template-columns: calc(var(--card-w) * 2);
+            grid-template-rows: repeat(2, var(--card-h));
+            gap: 0.6in;
+        }
+
+        /* PAGE NUMBERING (SLUG AREA) */
+        .page-slug {
+            position: absolute;
+            bottom: 0.4in;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 8pt;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #888;
+        }
+
+        .card-wrapper {
+            position: relative;
+            width: var(--card-w);
+            height: var(--card-h);
+        }
+
+        /* CROP MARKS */
+        .card-wrapper::before,
+        .card-wrapper::after {
+            content: "";
+            position: absolute;
+            width: calc(var(--card-w) + (var(--crop-offset) * 2) + (var(--crop-size) * 2));
+            height: calc(var(--card-h) + (var(--crop-offset) * 2) + (var(--crop-size) * 2));
+            top: calc(-1 * (var(--crop-offset) + var(--crop-size)));
+            left: calc(-1 * (var(--crop-offset) + var(--crop-size)));
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .card-wrapper::before {
+            border-top: 0.5pt solid #000;
+            border-bottom: 0.5pt solid #000;
+            clip-path: polygon(0 0, var(--crop-size) 0, var(--crop-size) 100%, 0 100%, calc(100% - var(--crop-size)) 0, 100% 0, 100% 100%, calc(100% - var(--crop-size)) 100%);
+        }
+
+        .card-wrapper::after {
+            border-left: 0.5pt solid #000;
+            border-right: 0.5pt solid #000;
+            clip-path: polygon(0 0, 100% 0, 100% var(--crop-size), 0 var(--crop-size), 0 calc(100% - var(--crop-size)), 100% calc(100% - var(--crop-size)), 100% 100%, 0 100%);
+        }
+
+        .card-box {
+            width: var(--card-w);
+            height: var(--card-h);
+            border: 0.25pt solid #ddd;
+            /* Extremely faint trim line */
+            padding: 0.15in;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: #fff;
+            z-index: 1;
+        }
+
+        /* TYPOGRAPHY */
+        .c-header {
+            font-family: var(--font-mono);
+            font-size: 8pt;
+            font-weight: 900;
+            margin-bottom: 6pt;
+            border-bottom: 2pt solid var(--b);
+            padding-bottom: 2pt;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .c-suit {
+            font-size: 13pt;
+            margin-right: 4pt;
+        }
+
+        .c-title {
+            font-size: 9.5pt;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 6pt;
+            letter-spacing: 0.05em;
+            line-height: 1;
+        }
+
+        .c-body {
+            font-size: 10pt;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: left;
+            font-weight: 600;
+            padding: 0 2pt;
+            line-height: 1.3;
+            white-space: pre-line;
+        }
+
+        .c-footer {
+            font-family: var(--font-mono);
+            font-size: 7pt;
+            border-top: 1.25pt solid var(--b);
+            padding-top: 4pt;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+        }
+
+        .c-tag {
+            border: 1.5pt solid var(--b);
+            padding: 1pt 4pt;
+            text-transform: uppercase;
+            font-size: 6pt;
+            margin-left: 2pt;
+        }
+
+        /* BACK DESIGN */
+        .card-back {
+            background: #fff;
+            color: var(--b);
+            border: 0.25pt solid #ddd;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0.15in;
+        }
+
+        .b-type {
+            font-family: var(--font-mono);
+            font-size: 9pt;
+            font-weight: 900;
+            text-transform: uppercase;
+            border-bottom: 2pt solid var(--b);
+            width: 100%;
+            padding-bottom: 4pt;
+            letter-spacing: 0.2em;
+            text-align: center;
+        }
+
+        .b-main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10pt;
+        }
+
+        .b-logo {
+            border: 2.5pt solid var(--b);
+            padding: 8pt 12pt;
+            font-family: var(--font-mono);
+            font-size: 8.5pt;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            text-align: center;
+        }
+
+        .b-icon svg {
+            width: 30pt;
+            height: 30pt;
+        }
+
+        .b-id {
+            font-family: var(--font-mono);
+            font-size: 7pt;
+            border-top: 1pt solid var(--b);
+            width: 100%;
+            padding-top: 4pt;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .fold-pair {
+            display: flex;
+            width: calc(var(--card-w) * 2);
+            position: relative;
+            border: 0.5pt solid #000;
+        }
+
+        .fold-line {
+            width: 0;
+            border-left: 1pt dashed var(--b);
+            height: 100%;
+            position: absolute;
+            left: 50%;
+            top: 0;
+            z-index: 10;
+            opacity: 0.4;
+        }
+
+        .fold-pair .card-box {
+            border: none;
+        }
+
+        .panel {
+            border: 3px solid var(--b);
+            padding: 20px;
+            margin-bottom: 20px;
+            background: var(--w);
+        }
+
+        .panel h2 {
+            margin-top: 0;
+            font-size: 15px;
+            text-transform: uppercase;
+            border-bottom: 3px solid var(--b);
+            padding-bottom: 6px;
+        }
+
+        .ctrls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        select,
+        button.action {
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            border: 2px solid var(--b);
+            background: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            nav,
+            .no-print,
+            .ctrls {
+                display: none !important;
+            }
+
+            .view {
+                display: none !important;
+                padding: 0 !important;
+            }
+
+            #fronts-view.active,
+            #backs-view.active,
+            #fold-view.active {
+                display: block !important;
+            }
+
+            .print-page {
+                margin: 0 !important;
+                border: none !important;
+                padding: 1in 0.5in !important;
+                box-shadow: none !important;
+                height: 11in !important;
+                width: 8.5in !important;
+            }
+
+            .card-wrapper::before,
+            .card-wrapper::after {
+                border-color: #000 !important;
+            }
+
+            .page-slug {
+                color: #000;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="no-print">
+        <button onclick="showView('mobile')" id="btn-mobile">Reader</button>
+        <button onclick="showView('fronts')" id="btn-fronts">Fronts (4-Up)</button>
+        <button onclick="showView('backs')" id="btn-backs">Backs (4-Up)</button>
+        <button onclick="showView('fold')" id="btn-fold">Foldable (2-Up)</button>
+        <button onclick="showView('meta')" id="btn-meta">Manual</button>
+    </nav>
+
+    <div class="no-print" style="padding: 15px 20px 0 20px; background: #fff; border-bottom: 1px solid #000;">
+        <div class="ctrls">
+            <select id="sort-order" onchange="applySort()">
+                <option value="id">ID ORDER</option>
+                <option value="type">CATEGORY ORDER</option>
+            </select>
+            <button class="action" onclick="shuffleDeck()">SHUFFLE</button>
+            <button class="action" onclick="window.print()">PRINT SELECTION</button>
+        </div>
+    </div>
+
+    <div id="mobile-view" class="view active">
+        <div id="m-card-container"></div>
+        <div class="m-controls">
+            <button onclick="prevCard()">PREV</button>
+            <button onclick="nextCard()">NEXT</button>
+            <button onclick="toggleMobileBack()">FLIP</button>
+        </div>
+        <div style="margin-top:15px; font-family: var(--font-mono); font-size: 11px; font-weight: 800;" id="m-counter">
+        </div>
+    </div>
+
+    <div id="fronts-view" class="view"></div>
+    <div id="backs-view" class="view"></div>
+    <div id="fold-view" class="view"></div>
+
+    <div id="meta-view" class="view">
+        <div class="panel">
+            <h2>ORACLE MANUAL</h2>
+            <p style="font-size: 13px; line-height: 1.5;">This deck transposes the Cold War Distant Early Warning (DEW)
+                Line into the psychic realm. It is an analog computer engineered to process your environment.</p>
+        </div>
+        <div class="panel">
+            <h2>PRINT SPECIFICATIONS</h2>
+            <ul style="font-size: 13px; line-height: 1.8;">
+                <li><strong>Page Numbering:</strong> Look at the slug at the bottom of each page to align Fronts with
+                    Backs.</li>
+                <li><strong>Crop Marks:</strong> Professional ticks sit 0.125" outside the trim. Cut precisely between
+                    ticks.</li>
+                <li><strong>Scaling:</strong> PRINT AT 100% SCALE ONLY.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script id="deck-data" type="application/json">
+[
+  {"id":"001","type":"RULE","suit":"⌖","title":"THE ORACLE DIRECTIVE","body":"MISSION: To detect structural shifts in the technological environment before they hit.\nMODEL: The deck is a 'Cybernetic Machine' made of paper.\nGOAL: To move the user from Linear Somnambulism to Acoustic Wakefulness.","footer":"SENSORY EXTENSION","tags":["directive"]},
+  {"id":"002","type":"RULE","suit":"⚲","title":"THE COGNITIVE MODEL","body":"THE TRAP: Human beings are fish who do not know water exists. We focus on 'Content' but are blinded by the 'Environment.'\nTHE SHIFT: We use the Probe as a 'Tactile Brake' to stop the linear mind and engage the pattern-seeking right hemisphere.","footer":"ARCHITECTURE","tags":["cognition"]},
+  {"id":"003","type":"RULE","suit":"⚡","title":"STRATEGIC PROTOCOL","body":"1. THE HANG-UP: Focus on a friction point or unresolved crisis.\n2. THE INTERVENTION: Draw a random Probe. Accept it as a perfect structural description of your problem.\n3. THE RUB: Force a collision between the card and the context until ground becomes figure.","footer":"OPERATION","tags":["protocol"]},
+  {"id":"004","type":"RULE","suit":"⌬","title":"SIMULATION LOG 001","body":"HANG-UP: 'Our group is divided by ego.'\nPROBE: 'The road is the environment of the wheel.'\nTHE RUB: Ego is the Wheel; the shared project is the Road.\nINSIGHT: The friction isn't personal—our 'Road' is broken. Fix the context, not the people.","footer":"FIELD STUDY","tags":["simulation"]},
+  {"id":"005","type":"ENVI","suit":"♦","title":"Propaganda","body":"Propaganda is any culture in action.","footer":"McLuhan 1969","tags":["total","immersion"]},
+  {"id":"006","type":"SENS","suit":"♥","title":"Silence","body":"Silence is all the sounds of the environment at once.","footer":"John Cage","tags":["noise","acoustic"]},
+  {"id":"007","type":"ENVI","suit":"♦","title":"Mirror","body":"We look at the present through a rear-view mirror.","footer":"McLuhan 1969","tags":["past","logic"]},
+  {"id":"008","type":"TECH","suit":"♣","title":"Invention","body":"Invention is the mother of necessities.","footer":"McLuhan 1969","tags":["tool","shaping"]},
+  {"id":"009","type":"SENS","suit":"♥","title":"Art","body":"Art is anything you can get away with.","footer":"McLuhan 1969","tags":["anti-env"]},
+  {"id":"010","type":"SENS","suit":"♥","title":"Behold","body":"We become what we behold.","footer":"McLuhan 1964","tags":["numbness"]},
+  {"id":"011","type":"NETW","suit":"♠","title":"Credit","body":"Money is the poor man's credit card.","footer":"McLuhan 1969","tags":["medium"]},
+  {"id":"012","type":"TECH","suit":"♣","title":"Politics","body":"Politics will eventually be replaced by imagery.","footer":"McLuhan 1969","tags":["speed","light"]},
+  {"id":"013","type":"SENS","suit":"♥","title":"Light","body":"Light is not neutral.","footer":"McLuhan 1964","tags":["pure-info"]},
+  {"id":"014","type":"NETW","suit":"♠","title":"Village","body":"The electronic independence recreates the world in the image of a global village.","footer":"McLuhan 1962","tags":["acoustic"]},
+  {"id":"015","type":"SENS","suit":"♥","title":"Phone","body":"When you are on the phone, you have no body.","footer":"McLuhan 1969","tags":["angelism"]},
+  {"id":"016","type":"ENVI","suit":"♦","title":"Direction","body":"We drive into the future using only our rearview mirror.","footer":"McLuhan 1969","tags":["blindness"]},
+  {"id":"017","type":"ENVI","suit":"♦","title":"Process","body":"Environments are not passive wrappings, but active processes.","footer":"McLuhan 1964","tags":["invisible"]},
+  {"id":"018","type":"TECH","suit":"♣","title":"Ad","body":"All advertising advertises advertising.","footer":"McLuhan 1964","tags":["reflexive"]},
+  {"id":"019","type":"TECH","suit":"♣","title":"Content","body":"The content of a medium is always another medium.","footer":"McLuhan 1964","tags":["recursion"]},
+  {"id":"020","type":"NETW","suit":"♠","title":"Spaceship","body":"Spaceship Earth has no passengers, only crew.","footer":"Fuller/McLuhan","tags":["planet"]},
+  {"id":"021","type":"NETW","suit":"♠","title":"Wealth","body":"Affluence creates poverty.","footer":"McLuhan 1969","tags":["reversal"]},
+  {"id":"022","type":"ENVI","suit":"♦","title":"Specialist","body":"The specialist is one who never makes small mistakes while moving toward the grand fallacy.","footer":"McLuhan 1969","tags":["tunnel"]},
+  {"id":"023","type":"TECH","suit":"♣","title":"Address","body":"Tomorrow is our permanent address.","footer":"McLuhan 1969","tags":["future"]},
+  {"id":"024","type":"SENS","suit":"♥","title":"Mud","body":"Mud sometimes gives the illusion of depth.","footer":"McLuhan 1969","tags":["visual"]},
+  {"id":"025","type":"NETW","suit":"♠","title":"Loop","body":"Feedback is the logic of the nervous system.","footer":"Cybernetics","tags":["control"]},
+  {"id":"026","type":"SENS","suit":"♥","title":"User","body":"The user is the content.","footer":"McLuhan 1969","tags":["interface"]},
+  {"id":"027","type":"ENVI","suit":"♦","title":"Vanishing","body":"Time has ceased, space has vanished. We now live in a global village... a simultaneous happening.","footer":"McLuhan 1967","tags":["electric"]},
+  {"id":"028","type":"TECH","suit":"♣","title":"Secrets","body":"Big discoveries are protected by public incredulity.","footer":"McLuhan 1969","tags":["visibility"]},
+  {"id":"029","type":"TECH","suit":"♣","title":"Charisma","body":"At the speed of light, policies yield place to charismatic images.","footer":"McLuhan 1969","tags":["iconic"]},
+  {"id":"030","type":"TECH","suit":"♣","title":"Book","body":"The book is an extension of the eye.","footer":"McLuhan 1962","tags":["visual-bias"]},
+  {"id":"031","type":"ENVI","suit":"♦","title":"Nature","body":"Societies have been shaped more by the nature of the media than by the content.","footer":"McLuhan 1964","tags":["structural"]},
+  {"id":"032","type":"SENS","suit":"♥","title":"The Artist","body":"The artist is the only person who is not numb.","footer":"McLuhan 1964","tags":["probe"]},
+  {"id":"033","type":"ENVI","suit":"♦","title":"Defense","body":"Education is civil defense against media fallout.","footer":"McLuhan 1969","tags":["survival"]},
+  {"id":"034","type":"SENS","suit":"♥","title":"Panic","body":"Panic is the result of long-term numbness.","footer":"McLuhan 1969","tags":["shock"]},
+  {"id":"035","type":"TECH","suit":"♣","title":"Genitals","body":"We are the genitals of our technology.","footer":"McLuhan 1964","tags":["evolution"]},
+  {"id":"036","type":"SENS","suit":"♥","title":"Luxury","body":"A point of view is a dangerous luxury when substituted for understanding.","footer":"McLuhan 1969","tags":["parallax"]},
+  {"id":"037","type":"ENVI","suit":"♦","title":"Habit","body":"Living with electric information means we live habitually in a state of overload.","footer":"McLuhan 1969","tags":["fatigue"]},
+  {"id":"038","type":"NETW","suit":"♠","title":"Internal","body":"The answers are always inside the problem, not outside.","footer":"McLuhan 1969","tags":["gestalt"]},
+  {"id":"039","type":"NETW","suit":"♠","title":"Crew","body":"There are no passengers on Spaceship Earth. We are all crew.","footer":"McLuhan 1969","tags":["total"]},
+  {"id":"040","type":"NETW","suit":"♠","title":"Network","body":"The electric age establishes a network with the character of our central nervous system.","footer":"McLuhan 1964","tags":["nerve"]},
+  {"id":"041","type":"ENVI","suit":"♦","title":"Tools","body":"You cannot come into the new environment with the old tools.","footer":"McLuhan 1969","tags":["obsolete"]},
+  {"id":"042","type":"ENVI","suit":"♦","title":"Alive","body":"Most people are alive in an earlier time. You must be alive in our own.","footer":"McLuhan 1969","tags":["wakeful"]},
+  {"id":"043","type":"TECH","suit":"♣","title":"Beginning","body":"Obsolescence never meant the end of anything, it's just the beginning.","footer":"McLuhan 1969","tags":["cliché"]},
+  {"id":"044","type":"NETW","suit":"♠","title":"War","body":"War is the ultimate educational process.","footer":"McLuhan 1969","tags":["intensity"]},
+  {"id":"045","type":"TECH","suit":"♣","title":"Shape","body":"We shape our tools and thereafter our tools shape us.","footer":"John Culkin","tags":["shaping"]},
+  {"id":"046","type":"ENVI","suit":"♦","title":"Road","body":"The road is the environment of the wheel.","footer":"McLuhan 1964","tags":["ground"]},
+  {"id":"047","type":"TECH","suit":"♣","title":"Feet","body":"Language does for intelligence what the wheel does for the feet.","footer":"McLuhan 1964","tags":["extension"]},
+  {"id":"048","type":"NETW","suit":"♠","title":"WWIII","body":"World War III is a guerrilla information war with no division between military and civilian.","footer":"McLuhan 1970","tags":["electric"]},
+  {"id":"049","type":"SENS","suit":"♥","title":"Experience","body":"Everybody experiences far more than he understands.","footer":"McLuhan 1969","tags":["input"]},
+  {"id":"050","type":"NETW","suit":"♠","title":"Maelstrom","body":"Pattern recognition is the only way to survive the maelstrom.","footer":"McLuhan 1969","tags":["radar"]},
+  {"id":"051","type":"TECH","suit":"♣","title":"Hybrid","body":"The hybrid or the meeting of two media is a moment of truth and revelation.","footer":"McLuhan 1964","tags":["collision"]},
+  {"id":"052","type":"SENS","suit":"♥","title":"Doubt","body":"I may be wrong, but I'm never in doubt.","footer":"McLuhan 1969","tags":["conviction"]},
+  {"id":"053","type":"FILL","suit":"⎈","title":"Inversion","body":"Invert the current premise.","footer":"FILLER","tags":["operator"]},
+  {"id":"054","type":"FILL","suit":"⎈","title":"Reduction","body":"Cut current complexity by 30%.","footer":"FILLER","tags":["operator"]},
+  {"id":"055","type":"FILL","suit":"⎈","title":"Materiality","body":"Make the digital physical.","footer":"FILLER","tags":["operator"]},
+  {"id":"056","type":"FILL","suit":"⎈","title":"Constraint","body":"Add a rigid constraint to the next move.","footer":"FILLER","tags":["operator"]},
+  {"id":"057","type":"FILL","suit":"⎈","title":"Perspective","body":"View the problem from the end of the century.","footer":"FILLER","tags":["operator"]},
+  {"id":"058","type":"FILL","suit":"⎈","title":"Acceleration","body":"Speed up process until it breaks.","footer":"FILLER","tags":["operator"]},
+  {"id":"059","type":"FILL","suit":"⎈","title":"Deceleration","body":"Slow interaction to 1/10th speed.","footer":"FILLER","tags":["operator"]},
+  {"id":"060","type":"FILL","suit":"⎈","title":"Ground","body":"What is the ground you have ignored?","footer":"FILLER","tags":["operator"]},
+  {"id":"061","type":"FILL","suit":"⎈","title":"Audit","body":"Audit the noise. What is signal?","footer":"FILLER","tags":["operator"]},
+  {"id":"062","type":"FILL","suit":"⎈","title":"Swap","body":"Swap roles of actor and observer.","footer":"FILLER","tags":["operator"]},
+  {"id":"063","type":"FILL","suit":"⎈","title":"Feedback","body":"Close the loop.","footer":"FILLER","tags":["operator"]},
+  {"id":"064","type":"FILL","suit":"⎈","title":"Obsolescence","body":"What will make this obsolete tomorrow?","footer":"FILLER","tags":["operator"]},
+  {"id":"065","type":"FILL","suit":"⎈","title":"Humor","body":"Find the joke in the disaster.","footer":"FILLER","tags":["operator"]},
+  {"id":"066","type":"FILL","suit":"⎈","title":"Scale","body":"Multiply problem by 1000.","footer":"FILLER","tags":["operator"]},
+  {"id":"067","type":"FILL","suit":"⎈","title":"Analog","body":"Translate this back into paper.","footer":"FILLER","tags":["operator"]},
+  {"id":"068","type":"FILL","suit":"⎈","title":"Interval","body":"Look at the space between parts.","footer":"FILLER","tags":["operator"]},
+  {"id":"069","type":"FILL","suit":"⎈","title":"Silence","body":"Introduce 5 minutes of total silence.","footer":"FILLER","tags":["operator"]},
+  {"id":"070","type":"FILL","suit":"⎈","title":"Chaos","body":"Embrace the next random error.","footer":"FILLER","tags":["operator"]},
+  {"id":"071","type":"FILL","suit":"⎈","title":"Clarity","body":"Remove primary adjective.","footer":"FILLER","tags":["operator"]},
+  {"id":"072","type":"FILL","suit":"⎈","title":"Friction","body":"Increase difficulty of next step.","footer":"FILLER","tags":["operator"]},
+  {"id":"073","type":"FILL","suit":"⎈","title":"Visibility","body":"Describe invisible surround.","footer":"FILLER","tags":["operator"]},
+  {"id":"074","type":"FILL","suit":"⎈","title":"Translation","body":"Explain this to a child.","footer":"FILLER","tags":["operator"]},
+  {"id":"075","type":"FILL","suit":"⎈","title":"Boundary","body":"Step outside current definition.","footer":"FILLER","tags":["operator"]},
+  {"id":"076","type":"FILL","suit":"⎈","title":"Resonance","body":"Wait for vibration to settle.","footer":"FILLER","tags":["operator"]},
+  {"id":"077","type":"FILL","suit":"⎈","title":"Paradox","body":"The solution is opposite of your goal.","footer":"FILLER","tags":["operator"]},
+  {"id":"078","type":"FILL","suit":"⎈","title":"Interface","body":"Simplify point of contact.","footer":"FILLER","tags":["operator"]},
+  {"id":"079","type":"FILL","suit":"⎈","title":"Sacrifice","body":"Discard most precious element.","footer":"FILLER","tags":["operator"]},
+  {"id":"080","type":"FILL","suit":"⎈","title":"History","body":"How did this look in 1969?","footer":"FILLER","tags":["operator"]},
+  {"id":"081","type":"FILL","suit":"⎈","title":"Tactility","body":"Touch the problem.","footer":"FILLER","tags":["operator"]},
+  {"id":"082","type":"FILL","suit":"⎈","title":"Repetition","body":"Repeat last move indefinitely.","footer":"FILLER","tags":["operator"]},
+  {"id":"083","type":"FILL","suit":"⎈","title":"Acoustic","body":"Listen to the situation.","footer":"FILLER","tags":["operator"]},
+  {"id":"084","type":"FILL","suit":"⎈","title":"Visual","body":"Draw situation as a map.","footer":"FILLER","tags":["operator"]},
+  {"id":"085","type":"FILL","suit":"⎈","title":"Nerve","body":"Trace path of the signal.","footer":"FILLER","tags":["operator"]},
+  {"id":"086","type":"FILL","suit":"⎈","title":"Wakefulness","body":"Stop and look up.","footer":"FILLER","tags":["operator"]},
+  {"id":"087","type":"FILL","suit":"⎈","title":"Pattern","body":"Find the third repetition.","footer":"FILLER","tags":["operator"]},
+  {"id":"088","type":"FILL","suit":"⎈","title":"Flow","body":"Open the bottleneck.","footer":"FILLER","tags":["operator"]},
+  {"id":"089","type":"FILL","suit":"⎈","title":"Friction","body":"Rough up the surface.","footer":"FILLER","tags":["operator"]},
+  {"id":"090","type":"FILL","suit":"⎈","title":"Transparency","body":"Hide nothing.","footer":"FILLER","tags":["operator"]},
+  {"id":"091","type":"FILL","suit":"⎈","title":"Opaque","body":"Obscure the obvious.","footer":"FILLER","tags":["operator"]},
+  {"id":"092","type":"FILL","suit":"⎈","title":"Mirror","body":"What is behind you right now?","footer":"FILLER","tags":["operator"]},
+  {"id":"093","type":"FILL","suit":"⎈","title":"System","body":"Problem is outside your control.","footer":"FILLER","tags":["operator"]},
+  {"id":"094","type":"FILL","suit":"⚲","title":"Human","body":"Restore biological limit.","footer":"FILLER","tags":["operator"]},
+  {"id":"095","type":"FILL","suit":"⚲","title":"Time","body":"Spend more than necessary.","footer":"FILLER","tags":["operator"]},
+  {"id":"096","type":"FILL","suit":"⚲","title":"Space","body":"Leave more room than necessary.","footer":"FILLER","tags":["operator"]},
+  {"id":"097","type":"FILL","suit":"⚲","title":"Tone","body":"Change the frequency.","footer":"FILLER","tags":["operator"]},
+  {"id":"098","type":"FILL","suit":"⚲","title":"Weight","body":"Make it heavier.","footer":"FILLER","tags":["operator"]},
+  {"id":"099","type":"FILL","suit":"⚲","title":"Float","body":"Let it drift.","footer":"FILLER","tags":["operator"]},
+  {"id":"100","type":"FILL","suit":"⚲","title":"Anchor","body":"Hold the line.","footer":"FILLER","tags":["operator"]},
+  {"id":"101","type":"FILL","suit":"⚡","title":"Ghost","body":"What is absent?","footer":"FILLER","tags":["operator"]},
+  {"id":"102","type":"FILL","suit":"⚡","title":"Echo","body":"Wait for the reply.","footer":"FILLER","tags":["operator"]},
+  {"id":"103","type":"FILL","suit":"⚡","title":"Pulse","body":"Sync to the rhythm.","footer":"FILLER","tags":["operator"]},
+  {"id":"104","type":"FILL","suit":"⚡","title":"Static","body":"Increase interference.","footer":"FILLER","tags":["operator"]},
+  {"id":"105","type":"FILL","suit":"⚡","title":"Glow","body":"Internalize the heat.","footer":"FILLER","tags":["operator"]},
+  {"id":"106","type":"FILL","suit":"⚡","title":"Cold","body":"Extract warmth.","footer":"FILLER","tags":["operator"]},
+  {"id":"107","type":"FILL","suit":"⚡","title":"Sharp","body":"Refine the edge.","footer":"FILLER","tags":["operator"]},
+  {"id":"108","type":"FILL","suit":"⚡","title":"Blunt","body":"Dull the point.","footer":"FILLER","tags":["operator"]},
+  {"id":"109","type":"FILL","suit":"⌬","title":"Grid","body":"Force structure.","footer":"FILLER","tags":["operator"]},
+  {"id":"110","type":"FILL","suit":"⌬","title":"Cloud","body":"Dissolve structure.","footer":"FILLER","tags":["operator"]},
+  {"id":"111","type":"FILL","suit":"⌬","title":"Node","body":"Focus on single point.","footer":"FILLER","tags":["operator"]},
+  {"id":"112","type":"FILL","suit":"⌬","title":"Link","body":"Connect unrelated.","footer":"FILLER","tags":["operator"]},
+  {"id":"113","type":"FILL","suit":"⌬","title":"Bridge","body":"Cross gap.","footer":"FILLER","tags":["operator"]},
+  {"id":"114","type":"FILL","suit":"⌬","title":"Abyss","body":"Fall into gap.","footer":"FILLER","tags":["operator"]},
+  {"id":"115","type":"FILL","suit":"⌬","title":"Orbit","body":"Circle problem.","footer":"FILLER","tags":["operator"]},
+  {"id":"116","type":"FILL","suit":"⌬","title":"Impact","body":"Strike center.","footer":"FILLER","tags":["operator"]},
+  {"id":"117","type":"FILL","suit":"⌬","title":"Shadow","body":"Look at outline.","footer":"FILLER","tags":["operator"]},
+  {"id":"118","type":"FILL","suit":"⌬","title":"Flame","body":"Burn bridge.","footer":"FILLER","tags":["operator"]},
+  {"id":"119","type":"FILL","suit":"⌬","title":"Water","body":"Flow through gap.","footer":"FILLER","tags":["operator"]},
+  {"id":"120","type":"FILL","suit":"⌬","title":"Zero","body":"Restart from beginning.","footer":"FILLER","tags":["operator"]}
+]
+</script>
+
+    <script>
+        let rawData = JSON.parse(document.getElementById('deck-data').textContent);
+        let deck = [...rawData];
+        let currentIndex = 0;
+        let mobileFaceUp = true;
+
+        const ICON_SVG = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 2a10 10 0 0 1 0 20M2 12a10 10 0 0 1 20 0M12 12h8M12 12v8M12 12H4M12 12V4"/>
+        </svg>
+    `;
+
+        function init() {
+            renderMobile();
+            renderPrintViews();
+        }
+
+        function showView(view) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(view + '-view').classList.add('active');
+            document.getElementById('btn-' + view).classList.add('active');
+        }
+
+        function generateCardHTML(card) {
+            return `
+            <div class="c-header">
+                <span><span class="c-suit">${card.suit}</span> ${card.type}</span>
+                <span class="c-id">REF: ${card.id}</span>
+            </div>
+            <div class="c-title">${card.title}</div>
+            <div class="c-body">${card.body}</div>
+            <div class="c-footer">
+                <span>${card.footer}</span>
+                <span>${card.tags.map(t => `<span class="c-tag">${t}</span>`).join('')}</span>
+            </div>
+        `;
+        }
+
+        function generateBackHTML(card) {
+            return `
+            <div class="b-type">${card.suit} ${card.type}</div>
+            <div class="b-main">
+                <div class="b-icon">${ICON_SVG}</div>
+                <div class="b-logo">DEW-LINE ORACLE</div>
+            </div>
+            <div class="b-id">SIGNAL ID: ${card.id}</div>
+        `;
+        }
+
+        function renderMobile() {
+            const card = deck[currentIndex];
+            const container = document.getElementById('m-card-container');
+            const btn = document.getElementById('btn-flip');
+
+            if (mobileFaceUp) {
+                container.innerHTML = `<div class="mobile-card">${generateCardHTML(card)}</div>`;
+            } else {
+                container.innerHTML = `<div class="mobile-card card-back">${generateBackHTML(card)}</div>`;
+            }
+            document.getElementById('m-counter').innerText = `SCANNING PROBE ${currentIndex + 1} / ${deck.length}`;
+        }
+
+        function toggleMobileBack() {
+            mobileFaceUp = !mobileFaceUp;
+            renderMobile();
+        }
+
+        function nextCard() {
+            currentIndex = (currentIndex + 1) % deck.length;
+            mobileFaceUp = true;
+            renderMobile();
+        }
+
+        function prevCard() {
+            currentIndex = (currentIndex - 1 + deck.length) % deck.length;
+            mobileFaceUp = true;
+            renderMobile();
+        }
+
+        function applySort() {
+            const val = document.getElementById('sort-order').value;
+            if (val === 'id') deck.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+            if (val === 'type') deck.sort((a, b) => a.type.localeCompare(b.type) || a.title.localeCompare(b.title));
+            currentIndex = 0;
+            renderMobile();
+            renderPrintViews();
+        }
+
+        function shuffleDeck() {
+            deck.sort(() => Math.random() - 0.5);
+            currentIndex = 0;
+            renderMobile();
+            renderPrintViews();
+        }
+
+        function renderPrintViews() {
+            const fronts = document.getElementById('fronts-view');
+            const backs = document.getElementById('backs-view');
+            const fold = document.getElementById('fold-view');
+
+            fronts.innerHTML = '';
+            backs.innerHTML = '';
+            fold.innerHTML = '';
+
+            const totalFrontPages = Math.ceil(deck.length / 4);
+
+            // Fronts
+            for (let i = 0; i < deck.length; i += 4) {
+                const pageNum = Math.floor(i / 4) + 1;
+                const page = document.createElement('div');
+                page.className = 'print-page fronts-grid';
+                for (let j = 0; j < 4; j++) {
+                    if (deck[i + j]) {
+                        page.innerHTML += `
+                        <div class="card-wrapper">
+                            <div class="card-box">${generateCardHTML(deck[i + j])}</div>
+                        </div>
+                    `;
+                    }
+                }
+                page.innerHTML += `<div class="page-slug">DEW-LINE ORACLE // FRONTS // PAGE ${String(pageNum).padStart(2, '0')} / ${String(totalFrontPages).padStart(2, '0')}</div>`;
+                fronts.appendChild(page);
+            }
+
+            // Backs (Mapped for Short-Edge Flip alignment)
+            for (let i = 0; i < deck.length; i += 4) {
+                const pageNum = Math.floor(i / 4) + 1;
+                const page = document.createElement('div');
+                page.className = 'print-page fronts-grid';
+                const layout = [1, 0, 3, 2];
+                layout.forEach(offset => {
+                    if (deck[i + offset]) {
+                        page.innerHTML += `
+                        <div class="card-wrapper">
+                            <div class="card-box card-back">${generateBackHTML(deck[i + offset])}</div>
+                        </div>
+                    `;
+                    } else {
+                        page.innerHTML += `<div class="card-wrapper"><div class="card-box"></div></div>`;
+                    }
+                });
+                page.innerHTML += `<div class="page-slug">DEW-LINE ORACLE // BACKS // PAGE ${String(pageNum).padStart(2, '0')} / ${String(totalFrontPages).padStart(2, '0')}</div>`;
+                backs.appendChild(page);
+            }
+
+            // Foldable
+            const totalFoldPages = Math.ceil(deck.length / 2);
+            for (let i = 0; i < deck.length; i += 2) {
+                const pageNum = Math.floor(i / 2) + 1;
+                const page = document.createElement('div');
+                page.className = 'print-page fold-grid';
+                for (let j = 0; j < 2; j++) {
+                    if (deck[i + j]) {
+                        page.innerHTML += `
+                        <div class="card-wrapper" style="width: auto; height: auto;">
+                            <div class="fold-pair">
+                                <div class="fold-line"></div>
+                                <div class="card-box card-back" style="border-right: none;">${generateBackHTML(deck[i + j])}</div>
+                                <div class="card-box">${generateCardHTML(deck[i + j])}</div>
+                            </div>
+                        </div>
+                    `;
+                    }
+                }
+                page.innerHTML += `<div class="page-slug">DEW-LINE ORACLE // FOLDABLE // PAGE ${String(pageNum).padStart(2, '0')} / ${String(totalFoldPages).padStart(2, '0')}</div>`;
+                fold.appendChild(page);
+            }
+        }
+
+        function copyJSON() { navigator.clipboard.writeText(JSON.stringify(deck, null, 2)); }
+        function copyCSV() {
+            let csv = 'id,type,title,body,footer,tags\n';
+            deck.forEach(c => csv += `${c.id},${c.type},"${c.title}","${c.body}","${c.footer}","${c.tags.join('|')}"\n`);
+            navigator.clipboard.writeText(csv);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+
+</html>

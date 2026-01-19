@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE ANTI-CRISIS PROTOCOL | Unified Metagame</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --border: #2a2a2a;
+            --text: #e8e8e8;
+            --dim: #888;
+            --crisis: #ff3e3e;
+            --vector: #00d4ff;
+            --extraction: #ffd700;
+            --performance: #ff00ff;
+            --oracle: #00ff88;
+            --heat: #ff4444;
+            --revenue: #4488ff;
+            --nuance: #44ff88;
+            --aura: #ffcc00;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, var(--bg) 70%);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 8vw, 5rem);
+            font-weight: 900;
+            letter-spacing: -3px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--crisis), var(--oracle));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--dim);
+            max-width: 600px;
+            font-style: italic;
+        }
+
+        .hero .tagline {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--dim);
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: var(--dim);
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--text);
+            border-color: var(--crisis);
+        }
+
+        /* Main */
+        main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        section {
+            margin-bottom: 4rem;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--crisis);
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 2rem 0 1rem 0;
+            color: var(--dim);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .lead {
+            font-size: 1.15rem;
+            color: var(--dim);
+            font-style: italic;
+        }
+
+        /* Suits Grid */
+        .suits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .suit-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .suit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .suit-card.crisis::before {
+            background: var(--crisis);
+        }
+
+        .suit-card.vector::before {
+            background: var(--vector);
+        }
+
+        .suit-card.extraction::before {
+            background: var(--extraction);
+        }
+
+        .suit-card.performance::before {
+            background: var(--performance);
+        }
+
+        .suit-card.oracle::before {
+            background: var(--oracle);
+        }
+
+        .suit-card .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .suit-card h4 {
+            font-size: 1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .suit-card p {
+            font-size: 0.85rem;
+            color: var(--dim);
+            margin: 0;
+        }
+
+        .suit-card .source {
+            font-size: 0.7rem;
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+            color: var(--dim);
+        }
+
+        /* Tokens */
+        .tokens-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+        }
+
+        .token {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .token .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .token.heat .dot {
+            background: var(--heat);
+        }
+
+        .token.revenue .dot {
+            background: var(--revenue);
+        }
+
+        .token.nuance .dot {
+            background: var(--nuance);
+        }
+
+        .token.aura .dot {
+            background: var(--aura);
+        }
+
+        /* Phase Loop */
+        .phase-loop {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .phase {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .phase:last-child {
+            border-bottom: none;
+        }
+
+        .phase-num {
+            width: 32px;
+            height: 32px;
+            background: var(--crisis);
+            color: #000;
+            font-weight: 900;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .phase-content h4 {
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .phase-content p {
+            font-size: 0.85rem;
+            color: var(--dim);
+            margin: 0;
+        }
+
+        /* Modes */
+        .modes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .mode-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .mode-card h4 {
+            font-size: 0.85rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .mode-card .trigger {
+            font-size: 0.75rem;
+            color: var(--dim);
+        }
+
+        /* Win Conditions */
+        .win-conditions {
+            display: grid;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .win-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .win-card .badge {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.7rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            background: var(--border);
+            color: var(--text);
+            height: fit-content;
+        }
+
+        .win-card.architect .badge {
+            background: var(--crisis);
+            color: #000;
+        }
+
+        .win-card.oracle .badge {
+            background: var(--oracle);
+            color: #000;
+        }
+
+        .win-card.defense .badge {
+            background: var(--vector);
+            color: #000;
+        }
+
+        .win-card.bot .badge {
+            background: var(--nuance);
+            color: #000;
+        }
+
+        .win-card h4 {
+            font-size: 0.9rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .win-card p {
+            font-size: 0.85rem;
+            color: var(--dim);
+            margin: 0;
+        }
+
+        /* Source Games */
+        .source-games {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .source-game {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+        }
+
+        .source-game h4 {
+            font-size: 0.9rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .source-game .mechanic {
+            font-size: 0.75rem;
+            color: var(--crisis);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .source-game p {
+            font-size: 0.8rem;
+            color: var(--dim);
+            margin: 0;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 1rem;
+            border-top: 1px solid var(--border);
+            color: var(--dim);
+            font-size: 0.8rem;
+        }
+
+        footer a {
+            color: var(--crisis);
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            .hero {
+                min-height: 50vh;
+                padding: 2rem 1rem;
+            }
+
+            .phase {
+                flex-direction: column;
+            }
+
+            .win-card {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="hero">
+        <h1>The Anti-Crisis Protocol</h1>
+        <p>"Four games walk into a crisis. Only one narrative walks out."</p>
+        <div class="tagline">A Unified Metagame</div>
+    </header>
+
+    <nav>
+        <a href="#suits">Suits</a>
+        <a href="#tokens">Tokens</a>
+        <a href="#loop">Game Loop</a>
+        <a href="#modes">Modes</a>
+        <a href="#victory">Victory</a>
+        <a href="#sources">Source Games</a>
+        <a href="cardbank.html" style="background: #457b9d; color: #fff; border-color: #457b9d;">▣ Cardbank</a>
+        <a href="index.html">← Index</a>
+    </nav>
+
+
+    <main>
+        <section id="core">
+            <h2>Core Concept</h2>
+            <p class="lead">All four games share a <strong>friction economy</strong>—they generate value from
+                discomfort. The metagame makes this friction visible and tradeable.</p>
+            <p>Each source game represents a <strong>MODE</strong> of crisis intervention:</p>
+            <div class="modes-grid">
+                <div class="mode-card">
+                    <h4>Meltdown Mode</h4>
+                    <div class="trigger">Generate friction, extract value</div>
+                </div>
+                <div class="mode-card">
+                    <h4>Oracle Mode</h4>
+                    <div class="trigger">Draw pattern, synthesize insight</div>
+                </div>
+                <div class="mode-card">
+                    <h4>Feed Mode</h4>
+                    <div class="trigger">Inject algorithm, harvest attention</div>
+                </div>
+                <div class="mode-card">
+                    <h4>Defense Mode</h4>
+                    <div class="trigger">Explain yourself in 10 seconds</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="suits">
+            <h2>The Five Universal Suits</h2>
+            <div class="suits-grid">
+                <div class="suit-card crisis">
+                    <div class="icon">⚡</div>
+                    <h4>Crisis</h4>
+                    <p>The inciting incident. Neutral seed with a base Heat value. Forces response.</p>
+                    <div class="source">From: SPARK, REALITY, SCENE</div>
+                </div>
+                <div class="suit-card vector">
+                    <div class="icon">◈</div>
+                    <h4>Vector</h4>
+                    <p>Amplification tools. Accelerants, algorithms, and behavioral framing.</p>
+                    <div class="source">From: ACCELERANT, ALGORITHM, PROBE</div>
+                </div>
+                <div class="suit-card extraction">
+                    <div class="icon">▣</div>
+                    <h4>Extraction</h4>
+                    <p>Monetization, grift, profit mechanisms. Convert friction to capital.</p>
+                    <div class="source">From: MONETIZATION, REVENUE</div>
+                </div>
+                <div class="suit-card performance">
+                    <div class="icon">⊗</div>
+                    <h4>Performance</h4>
+                    <p>Fluxus-style scores. Physical commands that break the polite fiction.</p>
+                    <div class="source">From: FLUXUS, FLUX</div>
+                </div>
+                <div class="suit-card oracle">
+                    <div class="icon">∿</div>
+                    <h4>Oracle</h4>
+                    <p>McLuhan probes, aphorisms, pattern interrupts. Nonsense becomes signal.</p>
+                    <div class="source">From: CORE, PROBE, EVIDENCE</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tokens">
+            <h2>Universal Tokens</h2>
+            <div class="tokens-row">
+                <div class="token heat"><span class="dot"></span> HEAT — Friction / Radicalization</div>
+                <div class="token revenue"><span class="dot"></span> REVENUE — Extracted Capital</div>
+                <div class="token nuance"><span class="dot"></span> NUANCE — Bot Intervention</div>
+                <div class="token aura"><span class="dot"></span> AURA — Social Credit</div>
+            </div>
+        </section>
+
+        <section id="loop">
+            <h2>The Anti-Crisis Loop</h2>
+            <div class="phase-loop">
+                <div class="phase">
+                    <div class="phase-num">1</div>
+                    <div class="phase-content">
+                        <h4>Crisis Injection</h4>
+                        <p>Draw 1 CRISIS card. Establish base Heat value on the Crisis Track.</p>
+                    </div>
+                </div>
+                <div class="phase">
+                    <div class="phase-num">2</div>
+                    <div class="phase-content">
+                        <h4>Vector Application</h4>
+                        <p>Attach a VECTOR card to amplify, deflect, or distort. Roll d6 for Virality.</p>
+                    </div>
+                </div>
+                <div class="phase">
+                    <div class="phase-num">3</div>
+                    <div class="phase-content">
+                        <h4>Oracle Consultation</h4>
+                        <p>Draw 1 ORACLE card. Force a pattern collision: "How does this probe describe the crisis?"</p>
+                    </div>
+                </div>
+                <div class="phase">
+                    <div class="phase-num">4</div>
+                    <div class="phase-content">
+                        <h4>Defense Window (10 sec)</h4>
+                        <p>Active player must EXPLAIN their intervention. Other players are the JURY. Timer starts
+                            immediately.</p>
+                    </div>
+                </div>
+                <div class="phase">
+                    <div class="phase-num">5</div>
+                    <div class="phase-content">
+                        <h4>Extraction / Judgment</h4>
+                        <p>Jury votes: ACQUIT (+Aura) or CONVICT (-Aura). Winner claims REVENUE or HEAT tokens.</p>
+                    </div>
+                </div>
+                <div class="phase">
+                    <div class="phase-num">6</div>
+                    <div class="phase-content">
+                        <h4>Bot Intervention</h4>
+                        <p>If Crisis Track > 50, Bot applies Nuance. If Nuance > Heat, game mode shifts.</p>
+                    </div>
+                </div>
+                <div class="phase">
+                    <div class="phase-num">7</div>
+                    <div class="phase-content">
+                        <h4>Scroll</h4>
+                        <p>All cards slide down one zone. Bottom card is deleted. New round begins.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="modes">
+            <h2>Mode Switching</h2>
+            <p>Players can force a mode switch based on their hand composition:</p>
+            <div class="modes-grid">
+                <div class="mode-card">
+                    <h4>3+ Crisis Cards</h4>
+                    <div class="trigger">→ Forces MELTDOWN mode (tribal alignment)</div>
+                </div>
+                <div class="mode-card">
+                    <h4>3+ Oracle Cards</h4>
+                    <div class="trigger">→ Forces ORACLE mode (pattern consultation)</div>
+                </div>
+                <div class="mode-card">
+                    <h4>3+ Vector Cards</h4>
+                    <div class="trigger">→ Forces FEED mode (injection/harvest)</div>
+                </div>
+                <div class="mode-card">
+                    <h4>Called to Stand</h4>
+                    <div class="trigger">→ Forces DEFENSE mode (10-sec timer)</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="victory">
+            <h2>Win Conditions</h2>
+            <div class="win-conditions">
+                <div class="win-card architect">
+                    <div class="badge">Architect</div>
+                    <div>
+                        <h4>Collapse Victory</h4>
+                        <p>Crisis Track reaches 100. Society collapses. Highest Revenue wins.</p>
+                    </div>
+                </div>
+                <div class="win-card oracle">
+                    <div class="badge">Oracle</div>
+                    <div>
+                        <h4>Pattern Singularity</h4>
+                        <p>Correctly predict the next Crisis using only Probe cards. Achieve enlightenment.</p>
+                    </div>
+                </div>
+                <div class="win-card defense">
+                    <div class="badge">Defense</div>
+                    <div>
+                        <h4>Teflon Status</h4>
+                        <p>Achieve 5 consecutive Acquittals. Nothing sticks. You are untouchable.</p>
+                    </div>
+                </div>
+                <div class="win-card bot">
+                    <div class="badge">Bot</div>
+                    <div>
+                        <h4>Society Heals</h4>
+                        <p>Nuance exceeds Heat on Crisis Track. All players lose. The machine wins.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sources">
+            <h2>Source Games</h2>
+            <p class="lead">The Anti-Crisis Protocol synthesizes mechanics from four distinct games:</p>
+            <div class="source-games">
+                <div class="source-game">
+                    <h4>Total Meltdown</h4>
+                    <div class="mechanic">Tribal Split (Scissor Statements)</div>
+                    <p>Forces binary alignment. Monetizes friction. Cynical accelerationism.</p>
+                </div>
+                <div class="source-game">
+                    <h4>DEW-Line</h4>
+                    <div class="mechanic">Random Oracle Collision</div>
+                    <p>Pattern recognition. Nonsense becomes signal when forced into context.</p>
+                </div>
+                <div class="source-game">
+                    <h4>The Feed</h4>
+                    <div class="mechanic">Bot Opposition (Anti-Crisis)</div>
+                    <p>You ARE the algorithm. Collapse is your win-state. Systemic critique.</p>
+                </div>
+                <div class="source-game">
+                    <h4>Explain Yourself</h4>
+                    <div class="mechanic">10-Second Timer</div>
+                    <p>Speed defense. Laughter = acquittal. Improvisational survival.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>THE ANTI-CRISIS PROTOCOL<br>A Unified Metagame from <a href="index.html">The Anti-Crisis Machine</a></p>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOTAL MELTDOWN: Press Artifact v2.9</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @page {
+            size: 8.5in 11in;
+            margin: 0;
+        }
+
+        :root {
+            --card-w: 2.5in;
+            --card-h: 3.5in;
+            --safe-margin: 0.15in;
+            --trim-color: #000;
+        }
+
+        body {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background: #fafafa;
+            color: #000;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Typography */
+        .t-header {
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.04em;
+            line-height: 0.9;
+            font-family: system-ui, sans-serif;
+        }
+
+        .t-body {
+            font-size: 8.8pt;
+            line-height: 1.25;
+        }
+
+        .t-micro {
+            font-size: 6.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: bold;
+        }
+
+        /* Card Geometry */
+        .card-box {
+            width: var(--card-w);
+            height: var(--card-h);
+            padding: var(--safe-margin);
+            box-sizing: border-box;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Print Layout (2-Up Fold) */
+        .fold-pair-wrapper {
+            position: relative;
+            padding: 0.2in;
+            /* Padding for crop marks */
+            margin-bottom: 0.4in;
+        }
+
+        .fold-pair {
+            display: flex;
+            width: calc(var(--card-w) * 2);
+            height: var(--card-h);
+            border: 0.5pt solid #eee;
+            /* Light trim line */
+            background: #fff;
+            position: relative;
+        }
+
+        /* Center Fold Line */
+        .fold-pair::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            border-left: 0.5pt dashed #999;
+            z-index: 5;
+        }
+
+        /* Crop Marks */
+        .crop-mark {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border: 0.5pt solid #000;
+            pointer-events: none;
+        }
+
+        .cm-tl {
+            top: 0;
+            left: 0;
+            border-right: 0;
+            border-bottom: 0;
+        }
+
+        .cm-tr {
+            top: 0;
+            right: 0;
+            border-left: 0;
+            border-bottom: 0;
+        }
+
+        .cm-bl {
+            bottom: 0;
+            left: 0;
+            border-right: 0;
+            border-top: 0;
+        }
+
+        .cm-br {
+            bottom: 0;
+            right: 0;
+            border-left: 0;
+            border-top: 0;
+        }
+
+        /* View Management */
+        #ui-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #fff;
+            border-bottom: 2px solid #000;
+        }
+
+        .view-pane {
+            display: none;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .view-pane.active {
+            display: block;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: #fff;
+            }
+
+            .view-pane {
+                display: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: none !important;
+            }
+
+            .view-pane.active {
+                display: block !important;
+            }
+
+            .print-page {
+                width: 8.5in;
+                height: 11in;
+                padding-top: 1in;
+                page-break-after: always;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                box-sizing: border-box;
+                overflow: hidden;
+            }
+
+            .page-label {
+                width: 5.4in;
+                font-size: 7pt;
+                text-transform: uppercase;
+                border-bottom: 1.5pt solid #000;
+                margin-bottom: 0.5in;
+                padding-bottom: 4px;
+                display: flex;
+                justify-content: space-between;
+                font-weight: 900;
+            }
+
+            .fold-pair {
+                border: 0.5pt solid #000;
+            }
+        }
+
+        .icon-svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: square;
+        }
+
+        .back-icon {
+            width: 70px;
+            height: 70px;
+            stroke-width: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="ui-topbar" class="no-print p-4 flex flex-wrap gap-4 items-center justify-between shadow-lg">
+        <div class="flex items-center gap-3">
+            <div class="bg-black text-white px-2 py-1 text-sm font-black">TM</div>
+            <div class="flex flex-col">
+                <span class="font-black text-xl tracking-tighter leading-none">TOTAL MELTDOWN</span>
+                <span class="text-[9px] uppercase font-bold text-gray-400 mt-1 tracking-widest">Artifact v2.9 // Stable
+                    Press</span>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-1">
+            <button onclick="setView('mobile')"
+                class="px-4 py-2 bg-black text-white text-[10px] font-bold uppercase tracking-widest">Viewer</button>
+            <button onclick="setView('rules')"
+                class="px-4 py-2 border-2 border-black text-[10px] font-bold uppercase tracking-widest">Protocol</button>
+            <button onclick="setView('print')"
+                class="px-4 py-2 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest shadow-lg">Print
+                Engine</button>
+            <button onclick="setView('util')"
+                class="px-4 py-2 border border-gray-300 text-[10px] uppercase tracking-widest">Data</button>
+        </div>
+    </div>
+
+    <!-- VIEWER -->
+    <div id="view-mobile" class="view-pane active no-print">
+        <div id="mobile-card-display"
+            class="bg-white border-[4px] border-black p-10 flex flex-col items-center mx-auto max-w-sm shadow-2xl relative">
+            <div class="w-full flex justify-between items-start mb-8">
+                <div id="m-type-label"
+                    class="bg-black text-white text-[10px] px-3 py-1 font-black tracking-widest uppercase">TYPE</div>
+                <div id="m-icon-box" class="text-black scale-150"></div>
+            </div>
+            <div id="m-title" class="t-header text-4xl mb-8 text-center">Card Title</div>
+            <div id="m-body" class="t-body text-base flex-grow text-center leading-relaxed">Card content.</div>
+            <div class="w-full mt-10 pt-6 border-t-[2pt] border-black flex justify-between items-center">
+                <div id="m-tags" class="t-micro">TAGS</div>
+                <div id="m-id" class="t-micro font-black text-xl tracking-tighter">#000</div>
+            </div>
+        </div>
+        <div class="flex justify-center items-center gap-10 mt-12">
+            <button onclick="prevCard()"
+                class="text-xs font-black bg-black text-white px-8 py-4 tracking-widest hover:bg-neutral-800">PREV</button>
+            <div class="text-xs font-black border-2 border-black px-6 py-2" id="m-counter">1 / 120</div>
+            <button onclick="nextCard()"
+                class="text-sm font-black bg-black text-white px-8 py-4 tracking-widest hover:bg-neutral-800">NEXT</button>
+        </div>
+    </div>
+
+    <!-- PRINT ENGINE -->
+    <div id="view-print" class="view-pane">
+        <div class="no-print bg-white p-6 mb-12 border-2 border-black flex justify-between items-center shadow-xl">
+            <div class="max-w-sm">
+                <h3 class="font-black text-xs uppercase tracking-tighter">Production Settings</h3>
+                <p class="text-[10px] text-gray-500 mt-1 font-bold italic">2-Up Centered Layout. Crop marks active.
+                    Grayscale optimized.</p>
+            </div>
+            <div class="flex gap-4">
+                <select id="print-filter" onchange="renderPrintPages()"
+                    class="text-[10px] p-2 border-2 border-black font-black uppercase tracking-widest">
+                    <option value="RULES">Protocol Manual</option>
+                    <option value="ALL">Full Deck (120 Cards)</option>
+                    <option value="SPARK">Suits: Sparks (001-010)</option>
+                    <option value="ACCELERANT">Suits: Accelerants (011-020)</option>
+                    <option value="MONETIZATION">Suits: Monetization (021-030)</option>
+                    <option value="FLUXUS">Suits: Fluxus (031-040)</option>
+                    <option value="FILLER">Suits: Operators (041-120)</option>
+                </select>
+                <button onclick="window.print()"
+                    class="bg-blue-600 text-white px-8 py-2 text-xs font-black uppercase shadow-lg hover:bg-blue-700">PRINT
+                    VIEW</button>
+            </div>
+        </div>
+        <div id="print-target"></div>
+    </div>
+
+    <!-- DATA/RULES -->
+    <div id="view-rules" class="view-pane no-print">
+        <div id="rules-content" class="bg-white p-12 border-4 border-black max-w-4xl mx-auto shadow-2xl"></div>
+    </div>
+    <div id="view-util" class="view-pane no-print"><button onclick="copyJSON()"
+            class="w-full p-8 bg-black text-white text-xs font-black tracking-widest">EXPORT_DECK_STABLE</button></div>
+
+    <script id="deck-data" type="application/json">
+[
+    {"id":"001","type":"SPARK","title":"The Trad-Wife IPO","body":"A 'Trad Wife' influencer is revealed as a CEO; her husband is her employee. Force immediate tribal alignment.","footer":"Status: INCENDIARY","tags":["GENDER","MARKET"]},
+    {"id":"002","type":"SPARK","title":"The Tankie's Dilemma","body":"An anti-imperialist streamer holds defense stock and denies genocide. Split the Left immediately.","footer":"Status: INCENDIARY","tags":["IDEOLOGY","CAPITAL"]},
+    {"id":"003","type":"SPARK","title":"EA Rugpull","body":"Tech billionaire embezzles pension funds to save 'future' trillions. Mathematical morality vs human ethics.","footer":"Status: INCENDIARY","tags":["TECH","ETHICS"]},
+    {"id":"004","type":"SPARK","title":"Doomer Merch Drop","body":"A celebrated nihilist launches a streetwear line made in sweatshops. Aestheticizing depression for clout.","footer":"Status: INCENDIARY","tags":["CONSUME","DOOM"]},
+    {"id":"005","type":"SPARK","title":"Diversity Algorithm","body":"AI patches for equity cause a safety-critical failure. Force choice between Safety and Equity.","footer":"Status: INCENDIARY","tags":["AI","SYSTEMIC"]},
+    {"id":"006","type":"SPARK","title":"Red Pill Divorce","body":"'Alpha' coach livestreaming tears as wife leaves him for a 'Beta'. Reality punctures the bubble.","footer":"Status: INCENDIARY","tags":["MANOSPHERE","FAIL"]},
+    {"id":"007","type":"SPARK","title":"Infinite Gender Reveal","body":"A reveal party with an empty box accidentally ignites a wildfire. Symbolic neutrality vs physical destruction.","footer":"Status: INCENDIARY","tags":["GENDER","ENVIRONMENT"]},
+    {"id":"008","type":"SPARK","title":"Green Jetsetters","body":"Climate org spends 80% of budget on private jets. Disconnect between rhetoric and behavior.","footer":"Status: INCENDIARY","tags":["ELITE","CLIMATE"]},
+    {"id":"009","type":"SPARK","title":"Just Asking Questions","body":"Podcaster hosts eugenicist for 'free speech', then sells supplements. The marketplace of ideas as a grift.","footer":"Status: INCENDIARY","tags":["MEDIA","GRIFT"]},
+    {"id":"010","type":"SPARK","title":"Medicare Socialist","body":"Elderly voters riot over 1% cuts while decrying student loan forgiveness. Generational resource war.","footer":"Status: INCENDIARY","tags":["AGE","POLICY"]},
+    {"id":"011","type":"ACCELERANT","title":"Sealion Swarm","body":"Force opponent to discard hand by demanding endless evidence for self-evident claims. Block until 3 sources provided.","footer":"Tool: BAD FAITH","tags":["HARASS","LOGIC"]},
+    {"id":"012","type":"ACCELERANT","title":"Gish Gallop Overload","body":"Play 5 weak arguments. Opponent loses round unless they refute all in 30 seconds.","footer":"Tool: BAD FAITH","tags":["BANDWIDTH","SPEED"]},
+    {"id":"013","type":"ACCELERANT","title":"Strawman Empath","body":"Cancel an attack by claiming it 'hurts the very people you're trying to help'. Tone policing.","footer":"Tool: BAD FAITH","tags":["EMOTION","SHIELD"]},
+    {"id":"014","type":"ACCELERANT","title":"Context Collapse","body":"Decontextualize a card played 3 turns ago. Re-interpret in worst faith. -5 Social Credit to target.","footer":"Tool: BAD FAITH","tags":["TIME","CANCEL"]},
+    {"id":"015","type":"ACCELERANT","title":"Motte & Bailey","body":"When successfully attacked, swap your radical position for a 'reasonable' one. Ignore all damage.","footer":"Tool: BAD FAITH","tags":["FALLACY","ESCAPE"]},
+    {"id":"016","type":"ACCELERANT","title":"Whataboutism","body":"Deflect any scandal by pointing to an unrelated crime of the opposing tribe. Damage reflected 100%.","footer":"Tool: BAD FAITH","tags":["DEFLECT","LOOP"]},
+    {"id":"017","type":"ACCELERANT","title":"Rage-Farm Harvest","body":"Play a Lie. Gain +2 Monetization for every opponent who contests it.","footer":"Tool: BAD FAITH","tags":["ANGRY","FUEL"]},
+    {"id":"018","type":"ACCELERANT","title":"The Wojak Mask","body":"Describe opponent as 'Soyjak'. Target is silenced until they prove they are not a 'Soyjak'.","footer":"Tool: BAD FAITH","tags":["MEME","DEHUMAN"]},
+    {"id":"019","type":"ACCELERANT","title":"Infinite Goalposts","body":"When a burden of proof is met, demand a higher standard. Cancel the opponent's success.","footer":"Tool: BAD FAITH","tags":["DENY","STALL"]},
+    {"id":"020","type":"ACCELERANT","title":"Tone Police Badge","body":"Negate any argument made with emotion or profanity. Privilege the comfortable.","footer":"Tool: BAD FAITH","tags":["STATUS","SILENCE"]},
+    {"id":"021","type":"MONETIZATION","title":"Male Vitality Stack","body":"Sell dubious pills to reclaim birthright. Gain tokens for every Red-Pilled player who feels insecure.","footer":"Product: GRIFT","tags":["BODY","ANXIETY"]},
+    {"id":"022","type":"MONETIZATION","title":"Resist Funko Pop","body":"Mass-produced kitsch of anti-capitalist icons. Gain tokens from Woke players.","footer":"Product: GRIFT","tags":["KITSCH","RAINBOW"]},
+    {"id":"023","type":"MONETIZATION","title":"Trad-Wife Course","body":"$299 Sourdough Training. Escape the Matrix using an iPhone. Extract wealth from Trad seekers.","footer":"Product: GRIFT","tags":["DIGITAL","TRAD"]},
+    {"id":"024","type":"MONETIZATION","title":"Doomer Prep Bucket","body":"Sell overpriced freeze-dried slop to those convinced society ends Tuesday. Gain tokens per Crisis.","footer":"Product: GRIFT","tags":["COLLAPSE","FEAR"]},
+    {"id":"025","type":"MONETIZATION","title":"Free Speech Paywall","body":"Charge $8/month for 'uncensored' content. Frame moderation as censorship to drive subs.","footer":"Product: GRIFT","tags":["ACCESS","GATE"]},
+    {"id":"026","type":"MONETIZATION","title":"Corporate HR Seminar","body":"DEI consulting with no structural change. Gain immunity from Cancellation for 3 turns.","footer":"Product: GRIFT","tags":["BUREAU","HR"]},
+    {"id":"027","type":"MONETIZATION","title":"Alpha Crypto Pump","body":"Transfer all wealth from 'Beta' players to the 'Alpha' player via exit liquidity.","footer":"Product: GRIFT","tags":["SCAM","FINANCE"]},
+    {"id":"028","type":"MONETIZATION","title":"Political Dip Bowl","body":"Force opponents to buy useless branded items to prove they aren't traitors.","footer":"Product: GRIFT","tags":["BRAND","LOYAL"]},
+    {"id":"029","type":"MONETIZATION","title":"Rage-Bait Ad-Buy","body":"Convert Anger tokens into Money tokens at a 1:10 ratio. Friction is profit.","footer":"Product: GRIFT","tags":["MEDIA","ADS"]},
+    {"id":"030","type":"MONETIZATION","title":"Anti-Woke Beer","body":"Rebrand generic lager as a 'Patriot' stance. Rally Red-Pilled players: +Strength, -Intelligence.","footer":"Product: GRIFT","tags":["PATRIOT","SIP"]},
+    {"id":"031","type":"FLUXUS","title":"The Pronoun Audit","body":"Point to neighbor. They must list every pronoun used in a bio. Silence for 10s if they stumble.","footer":"Score: AWKWARD","tags":["INTERROG","BIO"]},
+    {"id":"032","type":"FLUXUS","title":"Salary Transparency","body":"Open banking app. Place phone in center. First person to look away loses Social Credit.","footer":"Score: AWKWARD","tags":["MONEY","TABOO"]},
+    {"id":"033","type":"FLUXUS","title":"Who Did You Vote For?","body":"Stand and toast your candidate. Name one policy you hate about the neighbor's candidate.","footer":"Score: AWKWARD","tags":["POLITICS","DINNER"]},
+    {"id":"034","type":"FLUXUS","title":"History Excavation","body":"Neighbor searches your DM history for slurs or 'I hate'. Reads worst result aloud.","footer":"Score: AWKWARD","tags":["DM","DIGITAL"]},
+    {"id":"035","type":"FLUXUS","title":"Apology Video","body":"Record a 30s IG story apology using buzzwords: 'listening', 'growing', 'work'. Delete in 24h.","footer":"Score: AWKWARD","tags":["PERFORM","CONTRI"]},
+    {"id":"036","type":"FLUXUS","title":"Privilege Line-Up","body":"Physical privilege walk. Furthest back gets to slap the person furthest forward.","footer":"Score: AWKWARD","tags":["PHYSICAL","WALK"]},
+    {"id":"037","type":"FLUXUS","title":"Body Count Confess","body":"Estimate neighbor's partner count. Subject reveals true number. Drink if off by >3.","footer":"Score: AWKWARD","tags":["SEX","MORAL"]},
+    {"id":"038","type":"FLUXUS","title":"Uninvited Guest","body":"Text random number: 'I'm at the party. It’s awful. Can you pick me up?' Read reply.","footer":"Score: AWKWARD","tags":["SOCIAL","PRANK"]},
+    {"id":"039","type":"FLUXUS","title":"Is This Racist?","body":"Describe neighbor's outfit in an accent not your own. Group votes: Hate or Cringe?","footer":"Score: AWKWARD","tags":["ACCENT","TASTE"]},
+    {"id":"040","type":"FLUXUS","title":"Ok Boomer Silence","body":"Oldest player explains home ownership. Others maintain blank NPC expressions until they stop.","footer":"Score: AWKWARD","tags":["AGE","NPC"]}
+]
+</script>
+
+    <script>
+        const Icons = {
+            SPARK: `<svg class="icon-svg" viewBox="0 0 24 24"><path d="M13 2l-2 8h8L7 22l2-8H1l12-12z"/></svg>`,
+            ACCELERANT: `<svg class="icon-svg" viewBox="0 0 24 24"><path d="M7 2h10l1 2v18H6V4l1-2zm0 4h10M9 10h6v10H9zm1 2l4 6"/></svg>`,
+            MONETIZATION: `<svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18"/><circle cx="12" cy="12" r="3"/></svg>`,
+            FLUXUS: `<svg class="icon-svg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+            FILLER: `<svg class="icon-svg" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`
+        };
+
+        const MetaRules = [
+            { h: "The Schism Logic", p: "TOTAL MELTDOWN is a ludological simulation. You are not here to win arguments; you are here to monetize the friction and survive the collapse.", i: "FILLER" },
+            { h: "The Scissor-Extraction Loop", p: "1. ANTICIPATE: Draw a SPARK to force tribal alignment. 2. ENGAGE: Use tribal signaling to lock opponents into defensive positions. 3. EXTRACT: Deploy MONETIZATION while board friction is high. 4. EXHAUST: Use ACCELERANTS to deplete bandwidth.", i: "SPARK" },
+            { h: "Bandwidth Game Theory", p: "Information Debt is the primary currency. Force the opponent to spend more bandwidth refuting a lie than it took you to tell it. Second-order thinking is mandatory.", i: "ACCELERANT" },
+            { h: "Performative Sanction", p: "FLUXUS cards are mandatory social engineering. They break the 'polite fiction' of the room. Refusal leads to immediate Social Irrelevance (Elimination).", i: "FLUXUS" }
+        ];
+
+        let allCards = [];
+        let currentIndex = 0;
+
+        function setView(v) {
+            document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById('view-' + v).classList.add('active');
+            if (v === 'print') renderPrintPages();
+        }
+
+        function init() {
+            const raw = JSON.parse(document.getElementById('deck-data').textContent);
+            allCards = [...raw];
+            while (allCards.length < 120) {
+                allCards.push({
+                    id: (allCards.length + 1).toString().padStart(3, '0'),
+                    type: 'FILLER',
+                    title: 'SYSTEM OVERRIDE',
+                    body: 'Premise inversion. Swap roles with the person to your left. Reverse play direction.',
+                    footer: 'Status: OPERATOR',
+                    tags: ['SYS', 'GLTCH']
+                });
+            }
+
+            const rulesDiv = document.getElementById('rules-content');
+            rulesDiv.innerHTML = `<h1 class="t-header text-6xl mb-12 border-b-8 border-black pb-4">TOTAL MELTDOWN // THE PROTOCOL</h1>`;
+            const grid = document.createElement('div');
+            grid.className = "grid grid-cols-2 gap-12";
+            MetaRules.forEach(s => {
+                grid.innerHTML += `
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 border-b-2 border-black pb-2">
+                        <span class="bg-black text-white p-1">${Icons[s.i]}</span>
+                        <h2 class="t-header text-lg tracking-tight">${s.h}</h2>
+                    </div>
+                    <p class="text-xs leading-relaxed font-semibold">${s.p}</p>
+                </div>
+            `;
+            });
+            rulesDiv.appendChild(grid);
+            renderMobile();
+        }
+
+        function renderMobile() {
+            const c = allCards[currentIndex];
+            document.getElementById('m-type-label').innerText = c.type;
+            document.getElementById('m-icon-box').innerHTML = Icons[c.type];
+            document.getElementById('m-title').innerText = c.title;
+            document.getElementById('m-body').innerText = c.body;
+            document.getElementById('m-tags').innerText = c.tags.join(' • ');
+            document.getElementById('m-id').innerText = "#" + c.id;
+            document.getElementById('m-counter').innerText = `${currentIndex + 1} / 120`;
+        }
+
+        function nextCard() { currentIndex = (currentIndex + 1) % 120; renderMobile(); }
+        function prevCard() { currentIndex = (currentIndex - 1 + 120) % 120; renderMobile(); }
+
+        function renderPrintPages() {
+            const target = document.getElementById('print-target');
+            const filter = document.getElementById('print-filter').value;
+            target.innerHTML = '';
+
+            if (filter === 'RULES') {
+                const page = document.createElement('div');
+                page.className = 'print-page';
+                page.innerHTML = `<div class="page-label"><span>TOTAL MELTDOWN // SYSTEM MANUAL</span><span>V2.9_STABLE</span></div><div class="rules-print-sheet text-xs mt-4 w-full"></div>`;
+                target.appendChild(page);
+                page.querySelector('.rules-print-sheet').innerHTML = document.getElementById('rules-content').innerHTML;
+                return;
+            }
+
+            const cardsToPrint = filter === 'ALL' ? allCards : allCards.filter(c => c.type === filter);
+            for (let i = 0; i < cardsToPrint.length; i += 2) {
+                const page = document.createElement('div');
+                page.className = 'print-page';
+                page.innerHTML = `<div class="page-label"><span>${filter} // BLOCK_${Math.floor(i / 2) + 1}</span><span>SERIALS_${cardsToPrint[i].id}-${(cardsToPrint[i + 1] || cardsToPrint[i]).id}</span></div>`;
+                for (let j = 0; j < 2; j++) {
+                    const c = cardsToPrint[i + j];
+                    if (c) {
+                        const wrap = document.createElement('div');
+                        wrap.className = 'fold-pair-wrapper';
+                        wrap.innerHTML = `
+                        <div class="crop-mark cm-tl"></div><div class="crop-mark cm-tr"></div>
+                        <div class="crop-mark cm-bl"></div><div class="crop-mark cm-br"></div>
+                        <div class="fold-pair">
+                            <div class="card-box">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="t-micro border-b-2 border-black">${c.type}</span>
+                                    <span class="text-black">${Icons[c.type]}</span>
+                                </div>
+                                <div class="t-header text-xl leading-none my-4 tracking-tighter">${c.title}</div>
+                                <div class="t-body flex-grow font-semibold text-[9pt]">${c.body}</div>
+                                <div class="mt-4 pt-2 border-t border-black flex justify-between items-end">
+                                    <span class="t-micro">${c.tags.join(' ')}</span>
+                                    <span class="t-micro font-black text-xs">#${c.id}</span>
+                                </div>
+                            </div>
+                            <div class="card-box flex flex-col items-center justify-center text-center overflow-hidden">
+                                <div class="back-art-container">
+                                    <div class="scale-[3] mb-8 relative z-10 text-black">${Icons[c.type]}</div>
+                                    <div class="t-header text-[12px] tracking-[.4em] font-black mb-1 relative z-10">TOTAL MELTDOWN</div>
+                                    <div class="t-micro font-black border-4 border-black px-4 py-2 mt-4 relative z-10 bg-white">ID_${c.id}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                        page.appendChild(wrap);
+                    }
+                }
+                target.appendChild(page);
+            }
+        }
+
+        function copyJSON() { navigator.clipboard.writeText(JSON.stringify(allCards, null, 2)); alert("Data Synced."); }
+        window.onload = init;
+    </script>
+</body>
+
+</html>
