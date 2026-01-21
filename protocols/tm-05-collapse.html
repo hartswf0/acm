@@ -4,146 +4,418 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACM PROTOCOL 05: THE COLLAPSE</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800;900&display=swap"
-        rel="stylesheet">
+    <title>TOTAL MELTDOWN: Gamification of Collapse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Rubik+Glitch&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
         :root {
-            --bg: #f5f5f0;
-            --text: #000;
-            --accent: #ccff00;
-            --border: #000;
+            --neon-green: #39ff14;
+            --toxic-yellow: #ccff00;
+            --error-red: #ff003c;
+            --void-black: #050505;
+            --glitch-cyan: #00ffff;
+            --card-width: 2.5in;
+            --card-height: 3.5in;
         }
 
         body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            padding: 2rem;
-            max-width: 800px;
-            margin: 0 auto;
+            background-color: var(--void-black);
+            color: var(--neon-green);
+            font-family: 'Space Mono', monospace;
+            overflow-x: hidden;
         }
 
-        .mono {
-            font-family: 'JetBrains Mono', monospace;
+        /* Typography & Effects */
+        .font-glitch {
+            font-family: 'Rubik Glitch', system-ui;
         }
 
-        .card {
-            background: #fff;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
+        .font-mono {
+            font-family: 'Courier Prime', monospace;
         }
 
-        .header {
+        .glitch-text {
+            position: relative;
+            animation: glitch 2s infinite;
+        }
+
+        @keyframes glitch {
+            0% {
+                text-shadow: 2px 0 var(--error-red), -2px 0 var(--glitch-cyan);
+            }
+
+            25% {
+                text-shadow: -2px 0 var(--error-red), 2px 0 var(--glitch-cyan);
+            }
+
+            50% {
+                text-shadow: 2px 0 var(--void-black), -2px 0 var(--neon-green);
+            }
+
+            100% {
+                text-shadow: 2px 0 var(--error-red), -2px 0 var(--glitch-cyan);
+            }
+        }
+
+        /* Card Styles */
+        .card-frame {
+            background: #111;
+            border: 2px solid var(--neon-green);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 4px 4px 0px var(--neon-green);
+        }
+
+        .card-frame.spark {
+            border-color: var(--toxic-yellow);
+            box-shadow: 4px 4px 0px var(--toxic-yellow);
+            color: var(--toxic-yellow);
+        }
+
+        .card-frame.accelerant {
+            border-color: var(--error-red);
+            box-shadow: 4px 4px 0px var(--error-red);
+            color: var(--error-red);
+        }
+
+        .card-frame.money {
+            border-color: var(--glitch-cyan);
+            box-shadow: 4px 4px 0px var(--glitch-cyan);
+            color: var(--glitch-cyan);
+        }
+
+        .card-header {
+            background: currentColor;
+            color: #000;
+            padding: 0.25rem 0.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.75rem;
             display: flex;
             justify-content: space-between;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .family {
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -0.5px;
-        }
-
-        .id {
-            background: var(--accent);
-            padding: 0.2rem 0.6rem;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 0.8rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 0.5rem;
-            line-height: 1.1;
-            text-transform: uppercase;
-        }
-
-        .meta {
-            font-family: 'JetBrains Mono', monospace;
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
-        }
-
-        .brief {
-            font-size: 1.25rem;
-            line-height: 1.5;
-            margin-bottom: 2rem;
-            font-weight: 600;
-        }
-
-        .actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            background: #000;
-            color: #fff;
-            text-decoration: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            font-weight: 700;
-            display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
         }
 
-        .btn:hover {
-            background: #333;
+        .card-body {
+            padding: 0.75rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            color: #eee;
         }
 
-        .btn-outline {
-            background: transparent;
-            color: #000;
-            border: 2px solid #000;
+        .card-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            filter: drop-shadow(0 0 5px currentColor);
         }
 
-        .btn-outline:hover {
-            background: #f0f0f0;
+        .flavor-text {
+            font-size: 0.7rem;
+            font-style: italic;
+            opacity: 0.8;
+            margin-top: auto;
+            border-top: 1px dashed #444;
+            padding-top: 0.5rem;
         }
 
-        .back {
-            display: block;
-            margin-top: 2rem;
-            color: #666;
-            text-decoration: none;
-            font-size: 0.9rem;
+        /* Interactive Mode Styles */
+        .interactive-hand {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
         }
 
-        .back:hover {
-            text-decoration: underline;
-            color: #000;
+        @media (min-width: 768px) {
+            .interactive-hand {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Print Styles */
+        .print-grid {
+            display: none;
+        }
+
+        @media print {
+            @page {
+                margin: 0.5cm;
+                size: A4;
+            }
+
+            body {
+                background: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .no-print,
+            nav,
+            footer,
+            button {
+                display: none !important;
+            }
+
+            .print-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 2mm;
+                width: 100%;
+            }
+
+            .card-frame {
+                width: 100%;
+                height: var(--card-height);
+                page-break-inside: avoid;
+                break-inside: avoid;
+                box-shadow: none !important;
+                border-width: 2px !important;
+                margin-bottom: 2mm;
+                color: black !important;
+                /* Force black text for readability */
+            }
+
+            /* Adjust colors for print legibility but keep borders */
+            .card-frame.spark {
+                border-color: #000 !important;
+                background: #fff !important;
+            }
+
+            .card-frame.spark .card-header {
+                background: #FFD700 !important;
+                color: black !important;
+            }
+
+            .card-frame.accelerant {
+                border-color: #000 !important;
+                background: #fff !important;
+            }
+
+            .card-frame.accelerant .card-header {
+                background: #FF4500 !important;
+                color: white !important;
+            }
+
+            .card-frame.money {
+                border-color: #000 !important;
+                background: #fff !important;
+            }
+
+            .card-frame.money .card-header {
+                background: #00CED1 !important;
+                color: black !important;
+            }
+
+            .card-body {
+                color: black !important;
+            }
+
+            .card-icon {
+                filter: none !important;
+            }
         }
     </style>
 </head>
 
-<body>
-    <div class="card">
-        <div class="header">
-            <span class="family">Total Meltdown</span>
-            <span class="id mono">PROTOCOL 05</span>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navigation / Header -->
+    <nav class="p-4 border-b border-gray-800 bg-gray-900 sticky top-0 z-50 shadow-xl no-print">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <h1 class="text-3xl md:text-4xl font-glitch text-white tracking-widest uppercase">
+                TOTAL <span class="text-red-500">MELTDOWN</span>
+            </h1>
+            <div class="flex gap-2">
+                <button onclick="app.mode = 'play'; app.render();"
+                    class="px-4 py-2 bg-green-600 text-black font-bold uppercase hover:bg-green-500 transition border-2 border-green-400">
+                    Play
+                </button>
+                <button onclick="app.mode = 'gallery'; app.render();"
+                    class="px-4 py-2 bg-gray-700 text-white font-bold uppercase hover:bg-gray-600 transition border-2 border-gray-500">
+                    All Cards
+                </button>
+                <button onclick="window.print()"
+                    class="px-4 py-2 bg-yellow-500 text-black font-bold uppercase hover:bg-yellow-400 transition border-2 border-yellow-300 flex items-center gap-2">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Print Deck
+                </button>
+                <button onclick="document.getElementById('manifesto-modal').showModal()"
+                    class="px-4 py-2 bg-red-600 text-white font-bold uppercase hover:bg-red-500 transition border-2 border-red-400">
+                    ?
+                </button>
+            </div>
         </div>
-        <h1>The Collapse</h1>
-        <div class="meta">Core Game · 40 Cards</div>
-        <div class="brief">Play as platforms. Extract value from division. Forces tribal alignment. The simulator for
-            the end of open discourse.</div>
-        <div class="actions">
-            <a href="../tm-00.html" class="btn">▶ LAUNCH SIMULATION</a>
-            <a href="../print-production.html#game=meltdown" class="btn btn-outline">🖨️ PRINT KIT</a>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="app-root" class="flex-grow p-4 container mx-auto">
+        <!-- Content Injected via JS -->
+    </main>
+
+    <!-- Manifesto Modal -->
+    <dialog id="manifesto-modal"
+        class="bg-gray-900 border-2 border-red-500 p-6 max-w-2xl text-green-400 backdrop:bg-black/90">
+        <h2 class="text-2xl font-bold mb-4 text-red-500 uppercase border-b border-gray-700 pb-2">Manifesto: 1.0</h2>
+        <div class="space-y-4 font-mono text-sm max-h-[60vh] overflow-y-auto">
+            <p><strong>THE OBJECTIVE:</strong> The world isn't ending; it's pivoting to video. Your goal is not to solve
+                the crisis, but to optimize it.</p>
+            <p><strong>HOW TO PLAY:</strong></p>
+            <ol class="list-decimal pl-5 space-y-2">
+                <li><strong>Draw 3 Cards:</strong> One Spark (The Event), One Accelerant (The Tech), One Monetization
+                    (The Profit).</li>
+                <li><strong>Pitch the Apocalypse:</strong> You are the algorithm. Explain how these three cards combine
+                    to create the ultimate "Viral Super-Crisis."</li>
+                <li><strong>The "Naughty" Bonus:</strong> The most cynical player wins. If you aren't violating the
+                    Geneva Convention for clicks, you aren't trying hard enough.</li>
+            </ol>
+            <p class="text-xs text-gray-500 mt-4">v1.0 // TOTAL MELTDOWN // DESIGNED FOR THE COLLAPSE</p>
         </div>
-    </div>
-    <a href="../anti-crisis.html" class="back mono">← RETURN TO SYSTEM</a>
+        <form method="dialog" class="mt-6 flex justify-end">
+            <button class="px-6 py-2 bg-red-600 text-white font-bold uppercase hover:bg-red-500">Agree & Close</button>
+        </form>
+    </dialog>
+
+    <footer class="p-4 bg-black text-center text-gray-600 text-xs font-mono border-t border-gray-900 no-print">
+        <p>GENERATION ALPHA // DOOMSCROLL SIMULATOR // 2026</p>
+        <p>Ensure "Background Graphics" is ON when printing.</p>
+    </footer>
+
+    <script>
+        // --- DATA ASSETS ---
+        const cards = [
+            // PHASE 1: THE SPARK (1-10)
+            { id: 1, type: 'spark', title: 'Hippos Achieve Flight', icon: '🦛', text: 'Science confirms hippos are airborne for 15% of their stride. The sky is no longer safe.', flavor: 'Gravity is just a suggestion.' },
+            { id: 2, type: 'spark', title: 'Ayahuasca Quarterback', icon: '🏈', text: 'Aging sports star hallucinates a Super Bowl win in a dark retreat. Refuses to leave.', flavor: 'Legally distinct from reality.' },
+            { id: 3, type: 'spark', title: 'Village Bans Illness', icon: '🚫', text: 'Mayor decrees getting sick is illegal. Mortality rates drop to 0% (on paper).', flavor: 'Violators will be fined.' },
+            { id: 4, type: 'spark', title: 'Elon Buys the Moon', icon: '🌑', text: 'Just the "dark side" for a server farm. Tides are now a subscription service.', flavor: 'To the moon. Literally.' },
+            { id: 5, type: 'spark', title: 'Aggressive Vegan Zoo Break', icon: '🦁', text: 'Animals escaped. They aren\'t eating people, just judging them. Lions on a juice cleanse.', flavor: 'Moral superiority blockade.' },
+            { id: 6, type: 'spark', title: 'Gender Reveal: Capitalism', icon: '💸', text: 'New gender identity is "The Economy." Pronouns are Buy/Sell. Market crashes in confusion.', flavor: 'Calls on gender puts.' },
+            { id: 7, type: 'spark', title: 'The "Chill Guy" Presidency', icon: '🐶', text: 'A drawing of a dog in a sweater elected. Vetoes everything. Just vibing.', flavor: 'National debt triples, stress drops.' },
+            { id: 8, type: 'spark', title: 'Dubai Chocolate Riots', icon: '🍫', text: 'Pistachio cream ran out. Martial law in the candy aisle. Crumbs selling for $500.', flavor: 'Do it for the \'gram.' },
+            { id: 9, type: 'spark', title: 'NASA: "Space is Fake"', icon: '🪐', text: 'Budget cuts force admission: The sky is a dome. Flat-earthers demand back pay.', flavor: 'Intelligent Falling.' },
+            { id: 10, type: 'spark', title: 'Grandma Wakes Up', icon: '⚰️', text: 'She wasn\'t dead, just "quiet quitting" life. Wants a refund on the coffin.', flavor: 'The undead workforce.' },
+
+            // PHASE 2: ACCELERANT (11-20)
+            { id: 11, type: 'accelerant', title: 'Rage Bait Optimization', icon: '🤬', text: 'The algorithm noticed you hated this. Here is 400 more hours of it.', flavor: 'Blood pressure is our KPI.' },
+            { id: 12, type: 'accelerant', title: 'Shadowbanned Truth', icon: '👻', text: 'Fact-check hidden on page 45 of TOS. Disagreement is a terms violation.', flavor: 'Screaming into the void.' },
+            { id: 13, type: 'accelerant', title: 'Skibidi Brain Rot', icon: '🚽', text: 'News retold via singing toilets. Anyone over 25 enters catatonic confusion.', flavor: 'Semantic collapse.' },
+            { id: 14, type: 'accelerant', title: 'AI Sob Stories', icon: '🤖', text: 'ChatGPT wrote a thread about a traumatized puppy. It has 4M likes. Puppy has 6 legs.', flavor: 'Sympathy.exe loaded.' },
+            { id: 15, type: 'accelerant', title: '24-Hour Reaction Stream', icon: '😱', text: 'Streamer screams "WHAT IS THAT?!" for 6 hours. Screen is 90% emojis.', flavor: 'Volume stuck at max.' },
+            { id: 16, type: 'accelerant', title: 'Outrage Leaderboard', icon: '🏆', text: 'Rank the victims! Text "SAD" to vote. Top 3 traumas get a verified checkmark.', flavor: 'Competitive suffering.' },
+            { id: 17, type: 'accelerant', title: 'Sub-Based Free Speech', icon: '🔒', text: 'Scream for help only if you pay $8/mo. Poor people are muted by default.', flavor: 'Truth paywall.' },
+            { id: 18, type: 'accelerant', title: 'Deepfake "Proof"', icon: '🎥', text: 'Video of the President admitting it. Looks real if you squint and are drunk.', flavor: 'Reality is opt-in.' },
+            { id: 19, type: 'accelerant', title: 'Doomscroll Loop', icon: '📱', text: 'It is 3 AM. You hate this. You cannot stop swiping. The feed is eternal.', flavor: 'Thumbs cramping.' },
+            { id: 20, type: 'accelerant', title: '"Fanum Tax" Logistics', icon: '🍔', text: 'Streamer took a "20% bite" out of the supply chain. It\'s the law now.', flavor: 'Logistical theft.' },
+
+            // PHASE 3: MONETIZATION (21-30)
+            { id: 21, type: 'money', title: 'Mint Trauma NFT', icon: '💎', text: 'Own a blockchain receipt of this disaster. Comes with a sad monkey jpeg.', flavor: 'Floor price rising.' },
+            { id: 22, type: 'money', title: 'The "Deadbot" Upsell', icon: '💀', text: 'Upload victims to the cloud for $50k. Subscription required to keep them "alive".', flavor: 'SaaS (Souls as a Service).' },
+            { id: 23, type: 'money', title: 'OnlyFans "Sin Tax"', icon: '👠', text: 'Gov takes 50% of crisis earnings because it\'s "naughty." Morality is expensive.', flavor: 'Tax the thirst.' },
+            { id: 24, type: 'money', title: 'Heated Seat Sub', icon: '🔥', text: 'Want to be warm while the world ends? Extra $15/mo. Credit card only.', flavor: 'No refunds if car explodes.' },
+            { id: 25, type: 'money', title: 'Selling Farts in Jars', icon: '🫙', text: 'The crisis smells bad. Bottle it. Sell to simps. $500/unit.', flavor: 'Limited supply.' },
+            { id: 26, type: 'money', title: 'Disaster Merch Drop', icon: '👕', text: '"I Survived the [Insert Crisis]" Hoodies. Made in a sweatshop currently on fire.', flavor: 'Pre-order now.' },
+            { id: 27, type: 'money', title: 'GoFundMe for Villain', icon: '💰', text: 'The villain is "misunderstood." Raised $2M for legal defense. Buying a boat.', flavor: 'Sympathy for the devil.' },
+            { id: 28, type: 'money', title: 'Selling "Vibes" & "Air"', icon: '☁️', text: 'The product is nothing. It is the idea of a product. Sold out in seconds.', flavor: 'Capitalism completed.' },
+            { id: 29, type: 'money', title: 'Dynamic Surge Pricing', icon: '📈', text: 'Need water? Due to demand, water is 400x price. Thank the algorithm.', flavor: 'Supply and Demand.' },
+            { id: 30, type: 'money', title: 'Apology Video Ad Rev', icon: '📹', text: 'We are so sorry. (This 10-minute apology has 8 mid-roll ads).', flavor: 'Sigh. Link in bio.' }
+        ];
+
+        // --- APP LOGIC ---
+        const app = {
+            mode: 'play', // 'play' or 'gallery'
+            currentHand: [],
+
+            init() {
+                this.generateHand();
+                this.render();
+                lucide.createIcons();
+            },
+
+            generateHand() {
+                const sparks = cards.filter(c => c.type === 'spark');
+                const accelerants = cards.filter(c => c.type === 'accelerant');
+                const money = cards.filter(c => c.type === 'money');
+
+                this.currentHand = [
+                    sparks[Math.floor(Math.random() * sparks.length)],
+                    accelerants[Math.floor(Math.random() * accelerants.length)],
+                    money[Math.floor(Math.random() * money.length)]
+                ];
+            },
+
+            createCardHTML(card, isSmall = false) {
+                const typeLabel = card.type === 'money' ? 'Monetization' : card.type;
+                return `
+                    <div class="card-frame ${card.type} rounded-lg overflow-hidden h-full flex flex-col bg-gray-900">
+                        <div class="card-header">
+                            <span>${card.id.toString().padStart(2, '0')} // ${typeLabel}</span>
+                            <span>$${Math.floor(Math.random() * 999)}k</span>
+                        </div>
+                        <div class="card-body">
+                            <h3 class="text-lg font-bold leading-tight mb-2 uppercase font-glitch tracking-wider text-center border-b border-gray-700 pb-2">${card.title}</h3>
+                            <div class="card-icon">${card.icon}</div>
+                            <p class="text-sm font-mono leading-snug mb-4">${card.text}</p>
+                            <div class="flavor-text text-xs text-gray-400 mt-auto pt-2 border-t border-gray-800 italic">
+                                > SYSTEM_MSG: "${card.flavor}"
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            render() {
+                const root = document.getElementById('app-root');
+
+                if (this.mode === 'play') {
+                    // PLAY MODE RENDER
+                    root.innerHTML = `
+                        <div class="text-center mb-6 no-print">
+                            <button onclick="app.generateHand(); app.render();" class="w-full md:w-auto px-8 py-4 bg-red-600 text-white text-xl font-bold uppercase tracking-widest hover:bg-red-700 transition shadow-[4px_4px_0px_#fff] transform active:translate-x-1 active:translate-y-1">
+                                GENERATE CRISIS
+                            </button>
+                            <p class="mt-2 text-xs text-gray-500 font-mono">Tap to simulate new catastrophe</p>
+                        </div>
+
+                        <div class="interactive-hand mb-12">
+                            ${this.currentHand.map(card => this.createCardHTML(card)).join('')}
+                        </div>
+
+                        <div class="text-center p-6 border border-gray-800 bg-gray-900/50 rounded no-print">
+                            <h3 class="text-green-500 font-bold mb-2">YOUR OBJECTIVE:</h3>
+                            <p class="text-sm text-gray-300">Explain how the <strong>${this.currentHand[0].title}</strong> is made worse by <strong>${this.currentHand[1].title}</strong> to generate profit via <strong>${this.currentHand[2].title}</strong>.</p>
+                        </div>
+                    `;
+                } else {
+                    // GALLERY MODE RENDER
+                    root.innerHTML = `
+                        <div class="text-center mb-8 no-print">
+                            <h2 class="text-2xl font-bold text-white uppercase">Asset Database</h2>
+                            <p class="text-gray-500">All 30 Cards. Use Print button to print this view.</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 no-print">
+                            ${cards.map(card => this.createCardHTML(card)).join('')}
+                        </div>
+                        
+                        <!-- PRINT ONLY GRID -->
+                        <div class="print-grid">
+                            ${cards.map(card => this.createCardHTML(card)).join('')}
+                        </div>
+                    `;
+                }
+                lucide.createIcons();
+            }
+        };
+
+        // Initialize
+        app.init();
+    </script>
 </body>
 
 </html>

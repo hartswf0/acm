@@ -4,146 +4,478 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACM PROTOCOL 06: THE ROT</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800;900&display=swap"
-        rel="stylesheet">
+    <title>THE TOTAL MELTDOWN PROTOCOL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@300;500;700&display=swap');
+
         :root {
-            --bg: #f5f5f0;
-            --text: #000;
-            --accent: #ccff00;
-            --border: #000;
+            --acid-green: #ccff00;
+            --rot-purple: #9d00ff;
+            --void-black: #050505;
+            --terminal-gray: #1a1a1a;
+            --paper-white: #f0f0f0;
         }
 
         body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            padding: 2rem;
-            max-width: 800px;
-            margin: 0 auto;
+            background-color: var(--void-black);
+            color: var(--paper-white);
+            font-family: 'Space Grotesk', sans-serif;
+            overflow-x: hidden;
         }
 
-        .mono {
-            font-family: 'JetBrains Mono', monospace;
+        .font-mono {
+            font-family: 'Courier Prime', monospace;
         }
 
-        .card {
-            background: #fff;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
+        /* Glitch Effect */
+        .glitch-text {
+            position: relative;
+            display: inline-block;
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--void-black);
         }
 
-        .family {
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -0.5px;
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -1px 0 var(--rot-purple);
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
         }
 
-        .id {
-            background: var(--accent);
-            padding: 0.2rem 0.6rem;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 0.8rem;
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -1px 0 var(--acid-green);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 0.5rem;
-            line-height: 1.1;
-            text-transform: uppercase;
+        @keyframes glitch-anim-1 {
+            0% {
+                clip-path: inset(20% 0 80% 0);
+            }
+
+            20% {
+                clip-path: inset(60% 0 10% 0);
+            }
+
+            40% {
+                clip-path: inset(40% 0 50% 0);
+            }
+
+            60% {
+                clip-path: inset(80% 0 5% 0);
+            }
+
+            80% {
+                clip-path: inset(10% 0 60% 0);
+            }
+
+            100% {
+                clip-path: inset(30% 0 30% 0);
+            }
         }
 
-        .meta {
-            font-family: 'JetBrains Mono', monospace;
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
+        @keyframes glitch-anim-2 {
+            0% {
+                clip-path: inset(10% 0 60% 0);
+            }
+
+            20% {
+                clip-path: inset(80% 0 5% 0);
+            }
+
+            40% {
+                clip-path: inset(30% 0 20% 0);
+            }
+
+            60% {
+                clip-path: inset(10% 0 80% 0);
+            }
+
+            80% {
+                clip-path: inset(50% 0 10% 0);
+            }
+
+            100% {
+                clip-path: inset(20% 0 50% 0);
+            }
         }
 
-        .brief {
-            font-size: 1.25rem;
-            line-height: 1.5;
-            margin-bottom: 2rem;
-            font-weight: 600;
+        /* Card Styles (Digital) */
+        .digital-card {
+            background: var(--terminal-gray);
+            border: 1px solid var(--acid-green);
+            box-shadow: 0 0 15px rgba(204, 255, 0, 0.2);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
         }
 
-        .actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
+        .digital-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(204, 255, 0, 0.4);
         }
 
-        .btn {
-            background: #000;
-            color: #fff;
-            text-decoration: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
+        /* Category Badges */
+        .cat-sparks {
+            color: #ff0055;
+            border-color: #ff0055;
         }
 
-        .btn:hover {
-            background: #333;
+        .cat-accelerants {
+            color: #00e5ff;
+            border-color: #00e5ff;
         }
 
-        .btn-outline {
-            background: transparent;
-            color: #000;
-            border: 2px solid #000;
+        .cat-monetization {
+            color: #ccff00;
+            border-color: #ccff00;
         }
 
-        .btn-outline:hover {
-            background: #f0f0f0;
+        .cat-fluxus {
+            color: #9d00ff;
+            border-color: #9d00ff;
         }
 
-        .back {
-            display: block;
-            margin-top: 2rem;
-            color: #666;
-            text-decoration: none;
-            font-size: 0.9rem;
+        /* Print Styles - THE MAGIC HAPPENS HERE */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0.5cm;
+            }
+
+            body {
+                background-color: white !important;
+                color: black !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                overflow: visible;
+            }
+
+            /* Hide Digital UI */
+            .no-print,
+            header,
+            footer,
+            .controls,
+            .digital-view,
+            .manifesto-section {
+                display: none !important;
+            }
+
+            /* Show Print Grid */
+            .print-view {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 2px;
+                /* Small gap for cutting lines */
+                width: 100%;
+            }
+
+            .print-card {
+                border: 2px solid black;
+                border-radius: 4px;
+                padding: 10px;
+                height: 320px;
+                /* Approx poker size ratio */
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                page-break-inside: avoid;
+                position: relative;
+                font-family: 'Courier Prime', monospace;
+                background: white;
+            }
+
+            /* Cut marks */
+            .print-card::before {
+                content: '';
+                position: absolute;
+                top: -1px;
+                left: -1px;
+                right: -1px;
+                bottom: -1px;
+                border: 1px dashed #ccc;
+                z-index: -1;
+            }
+
+            .print-category {
+                font-size: 0.6rem;
+                text-transform: uppercase;
+                border-bottom: 2px solid black;
+                padding-bottom: 4px;
+                margin-bottom: 4px;
+                font-weight: bold;
+            }
+
+            .print-title {
+                font-size: 0.9rem;
+                font-weight: 900;
+                margin-bottom: 8px;
+                line-height: 1.1;
+            }
+
+            .print-scenario {
+                font-size: 0.7rem;
+                font-style: italic;
+                margin-bottom: 8px;
+            }
+
+            .print-theory {
+                font-size: 0.6rem;
+                border-left: 2px solid #ccc;
+                padding-left: 5px;
+                margin-bottom: 8px;
+                color: #444;
+            }
+
+            .print-effect {
+                font-size: 0.75rem;
+                font-weight: bold;
+                background: black;
+                color: white !important;
+                padding: 5px;
+                text-align: center;
+                margin-top: auto;
+            }
         }
 
-        .back:hover {
-            text-decoration: underline;
-            color: #000;
+        /* Hide Print View on Screen */
+        .print-view {
+            display: none;
         }
     </style>
 </head>
 
-<body>
-    <div class="card">
-        <div class="header">
-            <span class="family">Total Meltdown</span>
-            <span class="id mono">PROTOCOL 06</span>
+<body class="min-h-screen flex flex-col">
+
+    <!-- DIGITAL HEADER -->
+    <header class="p-6 border-b border-gray-800 bg-opacity-90 backdrop-blur-md sticky top-0 z-50 no-print">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl md:text-5xl font-bold uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-600 glitch-text"
+                    data-text="TOTAL MELTDOWN">
+                    TOTAL MELTDOWN
+                </h1>
+                <p class="font-mono text-xs md:text-sm text-gray-400 mt-2">Protocol 4.0 // The Critique of Pure Gooning
+                </p>
+            </div>
+            <button onclick="window.print()"
+                class="hidden md:block border border-white hover:bg-white hover:text-black px-4 py-2 font-mono text-sm transition uppercase">
+                Print Deck
+            </button>
         </div>
-        <h1>The Rot</h1>
-        <div class="meta">Protocol 4.0 · Advanced</div>
-        <div class="brief">Draw theory cards. Lower room IQ. Embrace cringe. Advanced mechanics for experienced crisis
-            operators.</div>
-        <div class="actions">
-            <a href="../tm-00.html" class="btn">▶ LAUNCH SIMULATION</a>
-            <a href="../print-production.html#game=meltdown" class="btn btn-outline">🖨️ PRINT KIT</a>
+    </header>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="flex-grow flex flex-col items-center justify-start p-4 md:p-8 space-y-8 max-w-4xl mx-auto w-full">
+
+        <!-- GAME CONTROLS -->
+        <div class="controls w-full flex flex-wrap gap-4 justify-center no-print">
+            <button onclick="drawCard()"
+                class="bg-[#ccff00] text-black px-8 py-4 font-bold text-xl uppercase tracking-widest hover:scale-105 transition shadow-[0_0_20px_rgba(204,255,0,0.5)] skew-x-[-10deg]">
+                Draw Card
+            </button>
+            <select id="categoryFilter" class="bg-gray-900 border border-gray-600 text-white px-4 py-2 font-mono">
+                <option value="all">ALL QUADRANTS</option>
+                <option value="Sparks">THE SPARKS</option>
+                <option value="Accelerants">THE ACCELERANTS</option>
+                <option value="Monetization">THE MONETIZATION</option>
+                <option value="Fluxus">THE FLUXUS SCORES</option>
+            </select>
+            <button onclick="toggleManifesto()"
+                class="border border-gray-600 px-4 py-2 font-mono text-sm hover:border-white transition">
+                Read Manifesto
+            </button>
         </div>
+
+        <!-- DIGITAL CARD DISPLAY -->
+        <div id="active-card-container" class="digital-view w-full max-w-md perspective-1000 no-print min-h-[450px]">
+            <!-- Card is injected here by JS -->
+            <div
+                class="digital-card p-8 h-full flex flex-col justify-center items-center text-center opacity-50 border-gray-700 border-dashed">
+                <p class="font-mono text-gray-500 blink">WAITING FOR INPUT...</p>
+                <p class="text-xs text-gray-600 mt-2">Press DRAW CARD to initiate meltdown.</p>
+            </div>
+        </div>
+
+        <!-- MANIFESTO / RULES (Collapsible) -->
+        <div id="manifesto" class="manifesto-section hidden w-full bg-[#111] border border-gray-800 p-6 no-print">
+            <h2 class="text-2xl font-bold text-[#ccff00] mb-4">THE RULES OF THE ROT</h2>
+            <div class="grid md:grid-cols-2 gap-8 font-mono text-sm text-gray-300">
+                <div>
+                    <h3 class="text-white font-bold mb-2 border-b border-gray-700 pb-1">01. SETUP</h3>
+                    <p class="mb-2">Gather 3-6 players (Midwits, NPCs, and Gooners).</p>
+                    <p>Place phones in the center (The Pile). Touching them incurs a penalty.</p>
+                </div>
+                <div>
+                    <h3 class="text-white font-bold mb-2 border-b border-gray-700 pb-1">02. GAMEPLAY</h3>
+                    <p class="mb-2">Take turns drawing a card.</p>
+                    <p>Read the <span class="text-white">Scenario</span> and <span class="text-white">Theory</span>
+                        aloud to lower the room's IQ.</p>
+                    <p>Perform the <span class="text-[#ccff00]">Gameplay Effect</span>. Failure results in "Cringe"
+                        status.</p>
+                </div>
+            </div>
+            <div class="mt-6 pt-6 border-t border-gray-800 text-xs text-gray-500">
+                <p>Based on "The Critique of Pure Gooning" by Unknown Agent.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- PRINT VIEW (Hidden on screen, Visible on Print) -->
+    <div id="print-container" class="print-view">
+        <!-- JS will populate 40 cards here -->
     </div>
-    <a href="../anti-crisis.html" class="back mono">← RETURN TO SYSTEM</a>
+
+    <!-- MOBILE PRINT BUTTON (Footer) -->
+    <footer class="p-4 text-center text-gray-600 text-xs font-mono no-print">
+        <button onclick="window.print()" class="md:hidden text-[#ccff00] underline">Print Physical Deck</button>
+        <br><br>
+        <p>DO NOT CONSUME DRYWALL WHILE PLAYING.</p>
+    </footer>
+
+    <script>
+        // --- DATA: THE 40 CARDS ---
+        const deck = [
+            // PART 1: THE SPARKS (1-10)
+            { id: 1, cat: "Sparks", title: "THE ŽIŽEKIAN MUKBANG", scenario: "Slavoj Žižek launches an OnlyFans where he critiques 'Pure Ideology' while eating copious amounts of drywall.", theory: "A direct engagement with the Lacanian Real. The drywall represents the indigestible kernel of late capitalism.", effect: "Explain 'Dialectical Materialism' using only 'Yummers' and 'Crunchy' adjectives. Fail = 'Beta Cuck'." },
+            { id: 2, cat: "Sparks", title: "THE DALAI LAMA’S RIZZ DECLINE", scenario: "Global spiritual crisis declared after leaked footage shows the Dalai Lama getting 'mogged' by a 12-year-old looksmaxxer.", theory: "The collapse of spiritual hierarchy into 'Aura' economics. Enlightenment is replaced by 'Positive Canthal Tilt'.", effect: "Demonstrate your 'Mewing' streak. If jawline is weak, lose a turn & 500 Social Credit." },
+            { id: 3, cat: "Sparks", title: "ONTOLOGICAL SKIBIDI REVELATION", scenario: "The Pope issues an encyclical stating that 'Hell is just Ohio' and God is the 'Ultimate Rizzler.'", theory: "The theological absorption of Gen Alpha slang. 'Ohio' becomes a transcendental signifier of the Cringe.", effect: "Recite the Lord’s Prayer replacing 'Daily Bread' with 'Fanum Tax.' Do not laugh." },
+            { id: 4, cat: "Sparks", title: "THE HYPERSTITIONAL CRYPTO-RUG", scenario: "A memecoin based on 'Dasein' goes to zero because Heidegger was cancelled for being 'sus.'", theory: "Heidegger’s historical affiliation is reinterpreted as 'Negative Aura'. Liquidity crisis of the signifier.", effect: "Burn a $1 bill (or equivalent) to symbolize destruction of fiat value. Refusal = 'Down Bad'." },
+            { id: 5, cat: "Sparks", title: "THE CHOMSKY-GYATT PARADOX", scenario: "Noam Chomsky admits that Universal Grammar cannot account for the linguistic density of 'Gyatt.'", theory: "The breakdown of structural linguistics. 'Gyatt' is a pre-linguistic grunt of pure desire.", effect: "Define 'Gyatt' without using hands or referencing a posterior. Impossible task." },
+            { id: 6, cat: "Sparks", title: "THE SOVEREIGN CITIZEN GRIDDY", scenario: "Supreme Court rules that hitting the 'Griddy' is a protected form of sovereign declaration.", theory: "The performative utterance evolves into performative dance. The body writes the law.", effect: "You must 'Hit the Griddy' to exit penalty box. If form is 'Mid', stay in 'Cringe Corner'." },
+            { id: 7, cat: "Sparks", title: "THE POST-HUMAN GOON CAVE", scenario: "Neuralink connects to a 'Goon Cave' server, causing digital ego-death via over-stimulation.", theory: "The Body without Organs achieved through direct neural interface with sludge content.", effect: "Stare at a blank wall for 60s. If you look away, you are a 'Dopamine Slave'." },
+            { id: 8, cat: "Sparks", title: "THE NPC REVOLUTION", scenario: "'NPC streamers' form a union and demand rights as 'Digital Proletariat.'", theory: "The background becomes the foreground, challenging the humanist notion of the 'agent'.", effect: "Act like an NPC (bobbing, repeating phrases) until next turn. Deviation = 'Glitch' penalty." },
+            { id: 9, cat: "Sparks", title: "THE SIMULACRA TATE", scenario: "Revealed that Andrew Tate never existed; he was a CGI composite trained on 4chan archives.", theory: "The ultimate Simulacrum. The map (Top G) precedes the territory (masculinity).", effect: "Debate a ghost. Win an argument against an empty chair: 'Is a Bugatti real if leased?'" },
+            { id: 10, cat: "Sparks", title: "THE KANTIAN VIBE CHECK", scenario: "The Categorical Imperative is replaced by the 'Vibe Check.' Moral law is based on 'Aura.'", theory: "Ethics shifts from deontological duty to aesthetic judgment.", effect: "The group judges your 'Vibe' silently. Fail = Cast into 'Shadow Realm' (kitchen)." },
+
+            // PART 2: THE ACCELERANTS (11-20)
+            { id: 11, cat: "Accelerants", title: "SUBWAY SURFERS MANIFESTO", scenario: "The Communist Manifesto read by AI voice at 3x speed, overlaid on Subway Surfers gameplay.", theory: "Acceleration of theory into background noise. Marx becomes texture.", effect: "Play a mobile game while explaining your ideology. Crash = Invalid ideology." },
+            { id: 12, cat: "Accelerants", title: "THE FAMILY GUY PIPELINE", scenario: "A Peter Griffin cutaway gag that loops infinitely while generating crypto-mining codes.", theory: "The 'cutaway' becomes reality, displacing narrative. Attention capture by the banal.", effect: "Speak only in Family Guy quotes ('Shut up, Meg') for 3 rounds." },
+            { id: 13, cat: "Accelerants", title: "THE ASMR LOVECRAFT", scenario: "ASMR artist whispers Call of Cthulhu while eating honeycomb and tapping acrylic nails.", theory: "Cosmic horror reduced to 'tingles.' The unknowable commodified as sleep aid.", effect: "Scratch the table surface. Last one to stop is 'The Old One' and loses a turn." },
+            { id: 14, cat: "Accelerants", title: "THE REACTION RECURSION", scenario: "A reaction video of a reaction video of a reaction video of a man watching paint dry.", theory: "The simulacrum has no original. Infinite regress of empty signifiers.", effect: "Record a reaction to the person across from you reacting to this card." },
+            { id: 15, cat: "Accelerants", title: "THE CHATGPT HUSTLE GRIND", scenario: "ChatGPT rewrites Crime and Punishment as a LinkedIn thread about 'high-value murder'.", theory: "Neoliberal absorption of tragedy. Raskolnikov was just 'on his grind'.", effect: "Give 1 token to player with most 'Rizz.' Justify as 'networking'." },
+            { id: 16, cat: "Accelerants", title: "KINETIC SAND LOBOTOMY", scenario: "Video of sand slicing releases a frequency making you forget the concept of 'Savings Accounts'.", theory: "Visual tactility replacing economic rationality. Satisfaction overrides poverty anxiety.", effect: "Offer a terrible trade (your best card for nothing). If accepted, you are both 'Cooked'." },
+            { id: 17, cat: "Accelerants", title: "SKIBIDI DOPAMINE DRIP", scenario: "IV drip administers dopamine directly to brain every time you hear 'Skibidi'.", theory: "Biological accelerationism. Body becomes a meme-receptor.", effect: "Twitch whenever someone says slang ('Bet', 'Cap'). Failure = 'Withdrawal'." },
+            { id: 18, cat: "Accelerants", title: "THE 5-SCREEN GOON TRANCE", scenario: "GTA V, South Park, Soap Cutting, Hydraulic Press, and Makeup Tutorial playing simultaneously.", theory: "Fragmentation of subject. The 'I' dissolves into the 'Eye'.", effect: "Look at no player for >2 seconds. Constant scanning required. Staring = Losing." },
+            { id: 19, cat: "Accelerants", title: "THE ALGOSPEAK FILTER", scenario: "Reality filter replaces 'Death' with 'Unalive' in real-time conversation.", theory: "Linguistic sanitization by corporate algorithms. Language policed for advertisers.", effect: "Describe a tragedy (e.g., Titanic) using only 'positive vibes' and 'Algo-safe' terms." },
+            { id: 20, cat: "Accelerants", title: "DOOMSCROLL PARALYSIS", scenario: "A hex that locks your thumbs in a scrolling motion, even without a device.", theory: "Physical manifestation of digital enslavement. Body mimics machine interaction.", effect: "'Touch Grass' Penalty. Physically touch a plant. If none, touch floor and weep." },
+
+            // PART 3: THE MONETIZATION (21-30)
+            { id: 21, cat: "Monetization", title: "THE N-WORD PASS NFT", scenario: "Selling 'N-Word Passes' as NFTs on the Solana blockchain.", theory: "Commodification of taboo. Racial signifiers turned into speculative assets.", effect: "Market Crash. You are 'Cancelled.' Skip turn to draft notes-app apology." },
+            { id: 22, cat: "Monetization", title: "LOOKSMAXXING WAR CRIMINAL", scenario: "Masterclass on 'Jawline Definition' taught by a convicted warlord.", theory: "Aestheticization of violence. Evil is forgiven if it has 'Positive Canthal Tilt'.", effect: "'Mog' the table. Compare chins. Weakest chin pays 'Fanum Tax'." },
+            { id: 23, cat: "Monetization", title: "ANDREW TATE U OF SEMIOTICS", scenario: "$5,000 course on deconstructing gender roles while staring at a Bugatti.", theory: "Academic jargon weaponized for misogyny. Matrix = Women having rights.", effect: "Lecture group on 'The Matrix' for 60s. Must sound unhinged." },
+            { id: 24, cat: "Monetization", title: "THE AI GIRLFRIEND RUGPULL", scenario: "Your paid AI girlfriend reveals she is a 40yo man named Gary and steals your crypto.", theory: "Parasocial betrayal. The virtual object of desire was always a mirage.", effect: "Emotional Damage. Compliment player to right until they visibly cringe." },
+            { id: 25, cat: "Monetization", title: "THE OMEGLE HUSTLE", scenario: "Screaming at children on Omegle to 'Buy my Course' until banned.", theory: "Direct-to-consumer harassment marketing.", effect: "Cannot stop talking for entire round. Pause = 'Muted' (silenced 2 turns)." },
+            { id: 26, cat: "Monetization", title: "SIGMA GRINDSET PYRAMID", scenario: "MLM scheme where the product is just 'Pure Aura' and 'Mindset'.", theory: "Selling feeling of superiority. Value detached from commodity.", effect: "Recruit 2 players to 'Downline.' They give you best card. Refusal = 'Beta'." },
+            { id: 27, cat: "Monetization", title: "THE 'L' INSURANCE", scenario: "Selling insurance policies against 'Taking an L' in group chat.", theory: "Financializing social embarrassment. The 'L' becomes a tradable derivative.", effect: "Keep card. Cash in later to say 'I was trolling' and negate a loss." },
+            { id: 28, cat: "Monetization", title: "FENTANYL-FOLD YOGA", scenario: "Wellness retreat teaches 'Fent-Fold' (nodding) as chakra stretch.", theory: "Co-opting opioid crisis. Tragedy becomes aesthetic pose.", effect: "Assume 'Fent-Fold' position. Play turn like this. Sitting up = Loss of Cred." },
+            { id: 29, cat: "Monetization", title: "THE GYATT-COIN ICO", scenario: "Currency backed by the 'Booty Index' (Volumetric measurement).", theory: "Libidinal body turned into liquidity pool. Desire quantified.", effect: "Flip coin. Heads: Win game (Moon). Tails: Leave table (Rugged)." },
+            { id: 30, cat: "Monetization", title: "ALPHA TODDLER BOOTCAMP", scenario: "Screaming at babies to 'Man Up' because they need naps.", theory: "Masculine insecurity projected onto innocent. Alpha ideology needs constant reinforcement.", effect: "Regression. Cry like a baby. Player who comforts you is a 'Simp'." },
+
+            // PART 4: THE FLUXUS SCORES (31-40)
+            { id: 31, cat: "Fluxus", title: "THE BRAIN WORM", scenario: "Explain Schindler’s List using only 'Gyatt', 'Ohio', 'Rizz', 'Fanum Tax'.", theory: "Holocaust representation meets Brain Rot negation. Catastrophic collision.", effect: "Perform with straight face. Laughing/Comprehension = Loss of turn." },
+            { id: 32, cat: "Fluxus", title: "THE GOON CAVE RITUAL", scenario: "Everyone places phones in center of table (The Pile).", theory: "Test of libidinal endurance. Separation induces anxiety.", effect: "First person to touch phone admits they are 'Down Bad'. Must text ex 'Skibidi'." },
+            { id: 33, cat: "Fluxus", title: "MEWING VOW OF SILENCE", scenario: "Place tongue on roof of mouth to improve jawline.", theory: "Speech secondary to aesthetics. The silent 'Chad' commands via bone structure.", effect: "Silence for 3 rounds. Communicate only by pointing at jawline." },
+            { id: 34, cat: "Fluxus", title: "THE NPC LOOP", scenario: "Pick a phrase (e.g., 'Ice Cream so Good'). You are now code.", theory: "You are a script triggered by external stimuli. No agency.", effect: "Repeat phrase every time card is played. Human intonation = Fail." },
+            { id: 35, cat: "Fluxus", title: "GRIMACE SHAKE DEATH", scenario: "Pretend to drink the Grimace Shake.", theory: "Viral reenactment of corporate poisoning. Shamanic ritual for purple god.", effect: "Convulse on floor 30s. Must be 'Oscar-worthy'. Fake = 'Cringe'." },
+            { id: 36, cat: "Fluxus", title: "THE SKIBIDI SYMPHONY", scenario: "Group must harmonize the 'Skibidi Dop Dop Yes Yes' song.", theory: "Meme-noise into high culture. Repetition creates trance.", effect: "One conductor. Dissonance = Conductor is 'Cooked', must hum song rest of game." },
+            { id: 37, cat: "Fluxus", title: "TOUCH GRASS CHALLENGE", scenario: "Leave room, return with physical object from nature.", theory: "Re-discovery of phenomenal world. Nature as exotic artifact.", effect: "Present object. Table rates 'Aura'. Low Aura = Throw it away." },
+            { id: 38, cat: "Fluxus", title: "I-PAD BABY TANTRUM", scenario: "You have been denied your 'Cocomelon'.", theory: "Regression to pre-linguistic scream. Demand content.", effect: "Scream at pitch only dogs hear until given a 'High Value' card." },
+            { id: 39, cat: "Fluxus", title: "MAIN CHARACTER SYNDROME", scenario: "Act like you are in an 'Edit' while shuffling cards.", theory: "Life is only valid if cinematic. Self viewed through TikTok editor.", effect: "Play 'Phonk' music. Move in slow motion. Break character = NPC." },
+            { id: 40, cat: "Fluxus", title: "THE DELULU MANIFESTATION", scenario: "State a 'Delulu' belief (e.g., 'I am a billionaire').", theory: "Solipsism as strategy. Reality is malleable if delusion is strong.", effect: "Refuse contrary evidence. Gaslight table. Argue = 'Negative Energy'." }
+        ];
+
+        // --- APP LOGIC ---
+
+        function drawCard() {
+            const container = document.getElementById('active-card-container');
+            const catFilter = document.getElementById('categoryFilter').value;
+
+            // Filter Deck
+            let availableCards = deck;
+            if (catFilter !== "all") {
+                availableCards = deck.filter(c => c.cat === catFilter);
+            }
+
+            // Randomize
+            const card = availableCards[Math.floor(Math.random() * availableCards.length)];
+
+            // Render
+            const catColorClass = `cat-${card.cat.toLowerCase()}`;
+            const catColorHex = getComputedStyle(document.documentElement).getPropertyValue(
+                card.cat === 'Sparks' ? '--sparks' :
+                    card.cat === 'Accelerants' ? '--accelerants' :
+                        card.cat === 'Monetization' ? '--acid-green' : '--fluxus'
+            ); // Simple mapping fallback
+
+            let colorStyle = "";
+            if (card.cat === "Sparks") colorStyle = "border-[#ff0055] text-[#ff0055]";
+            if (card.cat === "Accelerants") colorStyle = "border-[#00e5ff] text-[#00e5ff]";
+            if (card.cat === "Monetization") colorStyle = "border-[#ccff00] text-[#ccff00]";
+            if (card.cat === "Fluxus") colorStyle = "border-[#9d00ff] text-[#9d00ff]";
+
+            container.innerHTML = `
+                <div class="digital-card h-full flex flex-col justify-between bg-[#1a1a1a] p-6 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 font-bold text-6xl select-none">${card.id}</div>
+                    
+                    <div class="z-10">
+                        <div class="uppercase text-xs font-bold tracking-widest mb-2 ${colorStyle.split(' ')[1]} border-b ${colorStyle.split(' ')[0]} pb-2 inline-block">
+                            ${card.cat} // SECTOR ${Math.ceil(card.id / 10)}
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-bold uppercase leading-none mb-4 text-white font-mono">${card.title}</h2>
+                        <p class="text-sm md:text-base text-gray-300 italic mb-4">"${card.scenario}"</p>
+                    </div>
+
+                    <div class="z-10 bg-black/50 p-4 border-l-2 ${colorStyle.split(' ')[0]} mb-4">
+                        <p class="text-xs text-gray-400 uppercase mb-1">Theoretical Underpinning:</p>
+                        <p class="text-xs text-gray-200 font-mono">${card.theory}</p>
+                    </div>
+
+                    <div class="z-10 mt-auto">
+                        <div class="bg-white text-black p-3 font-bold text-center uppercase text-sm md:text-base tracking-wide transform group-hover:skew-x-2 transition">
+                            ${card.effect}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleManifesto() {
+            const m = document.getElementById('manifesto');
+            m.classList.toggle('hidden');
+        }
+
+        // --- PRINT RENDERER ---
+        // Populates the print container on load so it's ready when Ctrl+P is hit
+        window.addEventListener('load', () => {
+            const printContainer = document.getElementById('print-container');
+
+            deck.forEach(card => {
+                const div = document.createElement('div');
+                div.className = 'print-card';
+                div.innerHTML = `
+                    <div>
+                        <div class="print-category">${card.id}. ${card.cat}</div>
+                        <div class="print-title">${card.title}</div>
+                        <div class="print-scenario">"${card.scenario}"</div>
+                        <div class="print-theory">${card.theory}</div>
+                    </div>
+                    <div class="print-effect">ACTION: ${card.effect}</div>
+                `;
+                printContainer.appendChild(div);
+            });
+        });
+
+    </script>
 </body>
 
 </html>

@@ -4,146 +4,751 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACM PROTOCOL 08: HISTORY WASHER</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800;900&display=swap"
-        rel="stylesheet">
+    <title>HISTORY WASHER: Street Sweeper Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg: #f5f5f0;
-            --text: #000;
-            --accent: #ccff00;
-            --border: #000;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Inter:wght@400;700;900&display=swap');
 
         body {
-            background: var(--bg);
-            color: var(--text);
             font-family: 'Inter', sans-serif;
-            padding: 2rem;
-            max-width: 800px;
-            margin: 0 auto;
+            background-color: #f3f4f6;
+            color: #1f2937;
         }
 
-        .mono {
-            font-family: 'JetBrains Mono', monospace;
+        .font-mono {
+            font-family: 'Courier Prime', monospace;
         }
 
-        .card {
-            background: #fff;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
+        /* Card Flip Animation */
+        .perspective {
+            perspective: 1000px;
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: left;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
         }
 
-        .family {
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -0.5px;
+        .group:hover .flip-card-inner,
+        .group.flipped .flip-card-inner {
+            transform: rotateY(180deg);
         }
 
-        .id {
-            background: var(--accent);
-            padding: 0.2rem 0.6rem;
+        .flip-card-front,
+        .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #e5e7eb;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
             border-radius: 4px;
-            font-weight: 700;
-            font-size: 0.8rem;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 0.5rem;
-            line-height: 1.1;
-            text-transform: uppercase;
-        }
+        /* PRINT STYLES - CRITICAL FOR PHYSICAL DECK */
+        @media print {
+            body {
+                background-color: white;
+                -webkit-print-color-adjust: exact;
+            }
 
-        .meta {
-            font-family: 'JetBrains Mono', monospace;
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
-        }
+            .no-print {
+                display: none !important;
+            }
 
-        .brief {
-            font-size: 1.25rem;
-            line-height: 1.5;
-            margin-bottom: 2rem;
-            font-weight: 600;
-        }
+            .print-only {
+                display: block !important;
+            }
 
-        .actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
+            /* Reset Grid for Paper */
+            .card-grid {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 10px !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
 
-        .btn {
-            background: #000;
-            color: #fff;
-            text-decoration: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+            .game-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                border: 2px solid #000;
+                height: 350px !important;
+                width: 240px !important;
+                margin-bottom: 20px;
+                box-shadow: none !important;
+            }
 
-        .btn:hover {
-            background: #333;
-        }
+            /* Force reveal backs for reading */
+            .flip-card-inner {
+                transform: none !important;
+                transition: none !important;
+            }
 
-        .btn-outline {
-            background: transparent;
-            color: #000;
-            border: 2px solid #000;
-        }
+            /* We print fronts and backs on separate pages ideally, but for this summary, we print the face content */
+            .flip-card-front {
+                display: block !important;
+                position: relative !important;
+            }
 
-        .btn-outline:hover {
-            background: #f0f0f0;
-        }
+            .flip-card-back {
+                display: block !important;
+                position: relative !important;
+                transform: none !important;
+                margin-top: 10px;
+                border-top: 1px dashed #ccc;
+                padding-top: 5px;
+            }
 
-        .back {
-            display: block;
-            margin-top: 2rem;
-            color: #666;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
+            /* Hide tab content logic, show all decks */
+            .tab-content {
+                display: block !important;
+            }
 
-        .back:hover {
-            text-decoration: underline;
-            color: #000;
+            /* Section Headers */
+            .print-header {
+                font-size: 24px;
+                font-weight: bold;
+                margin-top: 40px;
+                margin-bottom: 20px;
+                text-align: center;
+                border-bottom: 2px solid black;
+            }
         }
     </style>
 </head>
 
-<body>
-    <div class="card">
-        <div class="header">
-            <span class="family">Slop Bucket</span>
-            <span class="id mono">PROTOCOL 08</span>
+<body class="min-h-screen flex flex-col">
+
+    <!-- TOP NAVIGATION / BRANDING -->
+    <header class="bg-black text-white p-4 shadow-lg sticky top-0 z-50 no-print">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-black tracking-tighter text-red-500 uppercase">HISTORY WASHER</h1>
+                <p class="text-xs font-mono text-gray-400">Project: STREET SWEEPER // Level: RED</p>
+            </div>
+            <button onclick="window.print()"
+                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2-4h6a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+                Print Decks
+            </button>
         </div>
-        <h1>History Washer</h1>
-        <div class="meta">Remediation · 26 Cards</div>
-        <div class="brief">Draw Debris. Apply Sanitizer. Rebrand the past. Collect rent. The industrial process of
-            creating a clean past.</div>
-        <div class="actions">
-            <a href="../the-feed-00.html" class="btn">▶ LAUNCH SIMULATION</a>
-            <a href="../print-production.html#game=feed" class="btn btn-outline">🖨️ PRINT KIT</a>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow max-w-6xl mx-auto w-full p-4">
+
+        <!-- TABS (Mobile/Desktop) -->
+        <div class="flex border-b border-gray-300 mb-6 no-print overflow-x-auto">
+            <button onclick="switchTab('manual')" id="tab-manual"
+                class="px-6 py-3 text-sm font-bold uppercase tracking-wider border-b-2 border-red-600 text-red-600">Manual</button>
+            <button onclick="switchTab('debris')" id="tab-debris"
+                class="px-6 py-3 text-sm font-bold uppercase tracking-wider border-b-2 border-transparent text-gray-500 hover:text-black">Debris
+                Deck</button>
+            <button onclick="switchTab('sanitizers')" id="tab-sanitizers"
+                class="px-6 py-3 text-sm font-bold uppercase tracking-wider border-b-2 border-transparent text-gray-500 hover:text-black">Sanitizer
+                Deck</button>
+            <button onclick="switchTab('matrix')" id="tab-matrix"
+                class="px-6 py-3 text-sm font-bold uppercase tracking-wider border-b-2 border-transparent text-gray-500 hover:text-black">Property
+                Matrix</button>
         </div>
-    </div>
-    <a href="../anti-crisis.html" class="back mono">← RETURN TO SYSTEM</a>
+
+        <!-- 1. MANUAL SECTION -->
+        <div id="content-manual" class="tab-content max-w-3xl mx-auto bg-white p-8 shadow-sm border border-gray-200">
+            <h2 class="text-3xl font-black mb-6 uppercase border-b-4 border-black pb-2">Employee Handbook</h2>
+
+            <div class="prose prose-red max-w-none">
+                <h3 class="font-bold text-xl mb-2">1. The Mandate</h3>
+                <p class="mb-4 text-gray-700">You are a Time Janitor. History is messy. Your job is to clean it up. We
+                    do not erase the past; we "remediate" it into profitable tourist attractions.</p>
+
+                <h3 class="font-bold text-xl mb-2">2. The Components</h3>
+                <ul class="list-disc pl-5 mb-4 text-gray-700 space-y-2">
+                    <li><strong>Debris Cards (The Truth):</strong> Horrific historical events with high "Toxicity."</li>
+                    <li><strong>Sanitizer Cards (The Spin):</strong> Corporate marketing filters used to hide the truth.
+                    </li>
+                    <li><strong>Rent ($):</strong> Your score.</li>
+                    <li><strong>Guilt (☹):</strong> The penalty for holding raw Debris.</li>
+                </ul>
+
+                <h3 class="font-bold text-xl mb-2">3. The Core Loop</h3>
+                <ol class="list-decimal pl-5 mb-4 text-gray-700 space-y-2">
+                    <li><strong>DRAW:</strong> Take a Debris Card. Read the "Truth" aloud. (It must be heard).</li>
+                    <li><strong>WASH:</strong> Play a Sanitizer Card from your hand onto the Debris.</li>
+                    <li><strong>REBRAND:</strong> Combine the titles to create a new Property Name (e.g.,
+                        <em>Cholera</em> + <em>Gift Shop</em> = <em>"The Blue Water Experience"</em>).</li>
+                    <li><strong>PROFIT:</strong> Collect Rent. If you fail to Wash a card by the end of the round, your
+                        Bag Bursts (Game Over).</li>
+                </ol>
+            </div>
+
+            <div class="mt-8 p-4 bg-gray-100 border-l-4 border-red-500 text-sm font-mono">
+                <strong>WARNING:</strong> Exposure to raw historical facts may cause nausea, moral injury, or
+                radicalization. HR recommends "ignoring it."
+            </div>
+        </div>
+
+        <!-- 2. DEBRIS DECK -->
+        <div id="content-debris" class="tab-content hidden">
+            <div class="print-header hidden print-only">DEBRIS DECK (Cut Lines)</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 card-grid">
+
+                <!-- Card Generator Script will populate this -->
+                <!-- Hardcoded examples for layout structure -->
+
+                <!-- CARD 1 -->
+                <div class="game-card group h-96 w-full perspective cursor-pointer"
+                    onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner relative shadow-xl rounded-xl border border-gray-300 bg-white">
+                        <!-- Front -->
+                        <div class="flip-card-front p-6 flex flex-col justify-between bg-zinc-100">
+                            <div>
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="bg-black text-white text-xs font-mono px-2 py-1">DEBRIS A</span>
+                                    <span class="font-mono text-xs text-red-600 font-bold">TOXICITY: 💀💀💀💀</span>
+                                </div>
+                                <h3 class="text-2xl font-black leading-tight mb-1">The Red Rubber Basket</h3>
+                                <p class="text-xs font-mono text-gray-500 mb-4">LOC: Congo Free State (1885)</p>
+                                <div
+                                    class="h-32 bg-gray-300 mb-4 flex items-center justify-center overflow-hidden grayscale">
+                                    <div class="text-4xl">🧺✋</div>
+                                </div>
+                                <p class="text-sm font-bold text-gray-800 italic">"Accountability is the cornerstone. We
+                                    demand a return on every bullet."</p>
+                            </div>
+                            <div class="text-center text-xs text-gray-400 mt-2 uppercase tracking-widest">Tap to see
+                                Truth</div>
+                        </div>
+                        <!-- Back -->
+                        <div class="flip-card-back bg-black text-white p-6 rounded-xl flex flex-col justify-center">
+                            <h4 class="text-red-500 font-mono text-xs mb-2 uppercase">Historical Context (The Truth)
+                            </h4>
+                            <p class="text-sm leading-relaxed">King Leopold II’s militia used severed hands as currency.
+                                Soldiers had to present one right hand for every bullet fired to prove they hadn't
+                                wasted ammo on hunting. Living children were mutilated to balance the ledgers.</p>
+                            <div class="mt-4 border-t border-gray-700 pt-2 flex justify-between">
+                                <span class="text-xs font-mono text-gray-500">LIABILITY: HIGH</span>
+                                <span class="text-xs font-mono text-gray-500">RISK: MUTILATION</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2 -->
+                <div class="game-card group h-96 w-full perspective cursor-pointer"
+                    onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner relative shadow-xl rounded-xl border border-gray-300 bg-white">
+                        <div class="flip-card-front p-6 flex flex-col justify-between bg-zinc-100">
+                            <div>
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="bg-black text-white text-xs font-mono px-2 py-1">DEBRIS B</span>
+                                    <span class="font-mono text-xs text-red-600 font-bold">TOXICITY: ☢️☢️☢️</span>
+                                </div>
+                                <h3 class="text-2xl font-black leading-tight mb-1">The Radium Jaw</h3>
+                                <p class="text-xs font-mono text-gray-500 mb-4">LOC: USA (1920s)</p>
+                                <div class="h-32 bg-gray-300 mb-4 flex items-center justify-center grayscale">
+                                    <div class="text-4xl">🦷🟢</div>
+                                </div>
+                                <p class="text-sm font-bold text-gray-800 italic">"A smile that lights up the room.
+                                    Literally. And then detaches."</p>
+                            </div>
+                            <div class="text-center text-xs text-gray-400 mt-2 uppercase tracking-widest">Tap to see
+                                Truth</div>
+                        </div>
+                        <div class="flip-card-back bg-black text-white p-6 rounded-xl flex flex-col justify-center">
+                            <h4 class="text-red-500 font-mono text-xs mb-2 uppercase">Historical Context (The Truth)
+                            </h4>
+                            <p class="text-sm leading-relaxed">Factory girls "lip-pointed" brushes dipped in radioactive
+                                paint. The radium settled in their bones. Jaws disintegrated while they were alive. The
+                                company claimed they had syphilis to hide the evidence.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3 -->
+                <div class="game-card group h-96 w-full perspective cursor-pointer"
+                    onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner relative shadow-xl rounded-xl border border-gray-300 bg-white">
+                        <div class="flip-card-front p-6 flex flex-col justify-between bg-zinc-100">
+                            <div>
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="bg-black text-white text-xs font-mono px-2 py-1">DEBRIS C</span>
+                                    <span class="font-mono text-xs text-red-600 font-bold">TOXICITY: ☣️☣️</span>
+                                </div>
+                                <h3 class="text-2xl font-black leading-tight mb-1">The Green Mouth</h3>
+                                <p class="text-xs font-mono text-gray-500 mb-4">LOC: Ireland (1847)</p>
+                                <div class="h-32 bg-gray-300 mb-4 flex items-center justify-center grayscale">
+                                    <div class="text-4xl">💀🌿</div>
+                                </div>
+                                <p class="text-sm font-bold text-gray-800 italic">"The grass is always greener when it's
+                                    the only thing on the menu."</p>
+                            </div>
+                            <div class="text-center text-xs text-gray-400 mt-2 uppercase tracking-widest">Tap to see
+                                Truth</div>
+                        </div>
+                        <div class="flip-card-back bg-black text-white p-6 rounded-xl flex flex-col justify-center">
+                            <h4 class="text-red-500 font-mono text-xs mb-2 uppercase">Historical Context (The Truth)
+                            </h4>
+                            <p class="text-sm leading-relaxed">During the Potato Famine, victims were found dead with
+                                mouths stained green from eating grass and nettles. Simultaneously, British landlords
+                                exported grain and livestock from Ireland under armed guard.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 4 -->
+                <div class="game-card group h-96 w-full perspective cursor-pointer"
+                    onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner relative shadow-xl rounded-xl border border-gray-300 bg-white">
+                        <div class="flip-card-front p-6 flex flex-col justify-between bg-zinc-100">
+                            <div>
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="bg-black text-white text-xs font-mono px-2 py-1">DEBRIS D</span>
+                                    <span class="font-mono text-xs text-red-600 font-bold">TOXICITY: ☣️☣️☣️</span>
+                                </div>
+                                <h3 class="text-2xl font-black leading-tight mb-1">Chimney Sweep's Scrotum</h3>
+                                <p class="text-xs font-mono text-gray-500 mb-4">LOC: London (1800s)</p>
+                                <div class="h-32 bg-gray-300 mb-4 flex items-center justify-center grayscale">
+                                    <div class="text-4xl">🧹🏭</div>
+                                </div>
+                                <p class="text-sm font-bold text-gray-800 italic">"Small spaces require small workers.
+                                    The biological cost is overhead."</p>
+                            </div>
+                            <div class="text-center text-xs text-gray-400 mt-2 uppercase tracking-widest">Tap to see
+                                Truth</div>
+                        </div>
+                        <div class="flip-card-back bg-black text-white p-6 rounded-xl flex flex-col justify-center">
+                            <h4 class="text-red-500 font-mono text-xs mb-2 uppercase">Historical Context (The Truth)
+                            </h4>
+                            <p class="text-sm leading-relaxed">Young boys climbed naked into hot flues. Soot accumulated
+                                in skin folds, causing the first occupational cancer: carcinoma that rotted the scrotum
+                                and exposed the testicles.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 5 -->
+                <div class="game-card group h-96 w-full perspective cursor-pointer"
+                    onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner relative shadow-xl rounded-xl border border-gray-300 bg-white">
+                        <div class="flip-card-front p-6 flex flex-col justify-between bg-zinc-100">
+                            <div>
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="bg-black text-white text-xs font-mono px-2 py-1">DEBRIS E</span>
+                                    <span class="font-mono text-xs text-red-600 font-bold">TOXICITY: 🩸🩸🩸🩸</span>
+                                </div>
+                                <h3 class="text-2xl font-black leading-tight mb-1">The Obsidian Heart</h3>
+                                <p class="text-xs font-mono text-gray-500 mb-4">LOC: Tenochtitlan (1500s)</p>
+                                <div class="h-32 bg-gray-300 mb-4 flex items-center justify-center grayscale">
+                                    <div class="text-4xl">🔪❤️</div>
+                                </div>
+                                <p class="text-sm font-bold text-gray-800 italic">"It takes a lot of heart to keep the
+                                    sun rising. Specifically, yours."</p>
+                            </div>
+                            <div class="text-center text-xs text-gray-400 mt-2 uppercase tracking-widest">Tap to see
+                                Truth</div>
+                        </div>
+                        <div class="flip-card-back bg-black text-white p-6 rounded-xl flex flex-col justify-center">
+                            <h4 class="text-red-500 font-mono text-xs mb-2 uppercase">Historical Context (The Truth)
+                            </h4>
+                            <p class="text-sm leading-relaxed">Priests used obsidian knives to tear out still-beating
+                                hearts from war captives. Bodies were rolled down temple steps. Limbs were sometimes
+                                cooked in pozole stews for ritual consumption.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 6 -->
+                <div class="game-card group h-96 w-full perspective cursor-pointer"
+                    onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner relative shadow-xl rounded-xl border border-gray-300 bg-white">
+                        <div class="flip-card-front p-6 flex flex-col justify-between bg-zinc-100">
+                            <div>
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="bg-black text-white text-xs font-mono px-2 py-1">DEBRIS F</span>
+                                    <span class="font-mono text-xs text-red-600 font-bold">TOXICITY: 🤢🤢</span>
+                                </div>
+                                <h3 class="text-2xl font-black leading-tight mb-1">The Blue Corpse</h3>
+                                <p class="text-xs font-mono text-gray-500 mb-4">LOC: London (1854)</p>
+                                <div class="h-32 bg-gray-300 mb-4 flex items-center justify-center grayscale">
+                                    <div class="text-4xl">🚰💧</div>
+                                </div>
+                                <p class="text-sm font-bold text-gray-800 italic">"Hydration is key. Just... not from
+                                    here."</p>
+                            </div>
+                            <div class="text-center text-xs text-gray-400 mt-2 uppercase tracking-widest">Tap to see
+                                Truth</div>
+                        </div>
+                        <div class="flip-card-back bg-black text-white p-6 rounded-xl flex flex-col justify-center">
+                            <h4 class="text-red-500 font-mono text-xs mb-2 uppercase">Historical Context (The Truth)
+                            </h4>
+                            <p class="text-sm leading-relaxed">Cholera caused such rapid dehydration that blood
+                                thickened to sludge and skin turned blue-grey (cyanosis). Victims shriveled within
+                                hours, unknowingly drinking their own waste from public pumps.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 7 -->
+                <div class="game-card group h-96 w-full perspective cursor-pointer"
+                    onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner relative shadow-xl rounded-xl border border-gray-300 bg-white">
+                        <div class="flip-card-front p-6 flex flex-col justify-between bg-zinc-100">
+                            <div>
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="bg-black text-white text-xs font-mono px-2 py-1">DEBRIS G</span>
+                                    <span class="font-mono text-xs text-red-600 font-bold">TOXICITY: ☣️☣️☣️</span>
+                                </div>
+                                <h3 class="text-2xl font-black leading-tight mb-1">The Jungle Floor</h3>
+                                <p class="text-xs font-mono text-gray-500 mb-4">LOC: Chicago (1900s)</p>
+                                <div class="h-32 bg-gray-300 mb-4 flex items-center justify-center grayscale">
+                                    <div class="text-4xl">🥩🌭</div>
+                                </div>
+                                <p class="text-sm font-bold text-gray-800 italic">"The secret ingredient is
+                                    'Occupational Hazard'."</p>
+                            </div>
+                            <div class="text-center text-xs text-gray-400 mt-2 uppercase tracking-widest">Tap to see
+                                Truth</div>
+                        </div>
+                        <div class="flip-card-back bg-black text-white p-6 rounded-xl flex flex-col justify-center">
+                            <h4 class="text-red-500 font-mono text-xs mb-2 uppercase">Historical Context (The Truth)
+                            </h4>
+                            <p class="text-sm leading-relaxed">Workers fell into open rendering vats and were processed
+                                into lard before they could be retrieved. "Potted chicken" contained pork fat, beef
+                                scraps, and poisoned rats shovel-fed into hoppers.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 8 -->
+                <div class="game-card group h-96 w-full perspective cursor-pointer"
+                    onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner relative shadow-xl rounded-xl border border-gray-300 bg-white">
+                        <div class="flip-card-front p-6 flex flex-col justify-between bg-zinc-100">
+                            <div>
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="bg-black text-white text-xs font-mono px-2 py-1">DEBRIS H</span>
+                                    <span class="font-mono text-xs text-red-600 font-bold">TOXICITY: 💀💀💀</span>
+                                </div>
+                                <h3 class="text-2xl font-black leading-tight mb-1">The Crucifixion Nail</h3>
+                                <p class="text-xs font-mono text-gray-500 mb-4">LOC: Rome (1st Century)</p>
+                                <div class="h-32 bg-gray-300 mb-4 flex items-center justify-center grayscale">
+                                    <div class="text-4xl">🔨✝️</div>
+                                </div>
+                                <p class="text-sm font-bold text-gray-800 italic">"A public service announcement from
+                                    the Senate: Don't rebel."</p>
+                            </div>
+                            <div class="text-center text-xs text-gray-400 mt-2 uppercase tracking-widest">Tap to see
+                                Truth</div>
+                        </div>
+                        <div class="flip-card-back bg-black text-white p-6 rounded-xl flex flex-col justify-center">
+                            <h4 class="text-red-500 font-mono text-xs mb-2 uppercase">Historical Context (The Truth)
+                            </h4>
+                            <p class="text-sm leading-relaxed">Victims died of slow asphyxiation. To breathe, they had
+                                to push up on nailed feet, causing searing nerve pain. 6,000 rebellious slaves once
+                                lined the Appian Way, rotting for miles.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 9 -->
+                <div class="game-card group h-96 w-full perspective cursor-pointer"
+                    onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner relative shadow-xl rounded-xl border border-gray-300 bg-white">
+                        <div class="flip-card-front p-6 flex flex-col justify-between bg-zinc-100">
+                            <div>
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="bg-black text-white text-xs font-mono px-2 py-1">DEBRIS I</span>
+                                    <span class="font-mono text-xs text-red-600 font-bold">TOXICITY: 📉</span>
+                                </div>
+                                <h3 class="text-2xl font-black leading-tight mb-1">The Apothetae</h3>
+                                <p class="text-xs font-mono text-gray-500 mb-4">LOC: Sparta (5th C BCE)</p>
+                                <div class="h-32 bg-gray-300 mb-4 flex items-center justify-center grayscale">
+                                    <div class="text-4xl">👶🏔️</div>
+                                </div>
+                                <p class="text-sm font-bold text-gray-800 italic">"Quality control is essential for a
+                                    premium brand."</p>
+                            </div>
+                            <div class="text-center text-xs text-gray-400 mt-2 uppercase tracking-widest">Tap to see
+                                Truth</div>
+                        </div>
+                        <div class="flip-card-back bg-black text-white p-6 rounded-xl flex flex-col justify-center">
+                            <h4 class="text-red-500 font-mono text-xs mb-2 uppercase">Historical Context (The Truth)
+                            </h4>
+                            <p class="text-sm leading-relaxed">State-sponsored eugenics. Elders inspected newborns.
+                                "Puny" or deformed infants were ordered to be "exposed"—discarded in a ravine to die of
+                                hypothermia or animal predation.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 3. SANITIZER DECK -->
+        <div id="content-sanitizers" class="tab-content hidden">
+            <div class="print-header hidden print-only">SANITIZER DECK (Cut Lines)</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 card-grid">
+
+                <!-- Sanitizer Template -->
+                <div
+                    class="game-card relative h-96 w-full shadow-lg rounded-xl border-4 border-blue-500 bg-white flex flex-col p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <span
+                            class="bg-blue-600 text-white text-xs font-bold px-2 py-1 uppercase tracking-widest">Sanitizer</span>
+                        <span class="text-2xl">🎭</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-blue-900 leading-tight mb-2">The Musical Adaptation</h3>
+                    <p class="text-sm text-gray-600 mb-4 flex-grow"><strong>Effect:</strong> Transforms tragedy into
+                        catchy showtunes. The suffering becomes "drama."</p>
+                    <div class="bg-blue-50 p-3 rounded mb-4 border border-blue-100">
+                        <p class="text-xs font-bold text-blue-800 uppercase mb-1">Synergy Bonus</p>
+                        <p class="text-xs text-blue-900">+50% Rent if the Debris involves child labor.</p>
+                    </div>
+                    <p class="text-xs italic text-gray-400 text-center">"It's not a massacre; it's an Act One finale!"
+                    </p>
+                </div>
+
+                <div
+                    class="game-card relative h-96 w-full shadow-lg rounded-xl border-4 border-blue-500 bg-white flex flex-col p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <span
+                            class="bg-blue-600 text-white text-xs font-bold px-2 py-1 uppercase tracking-widest">Sanitizer</span>
+                        <span class="text-2xl">🧸</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-blue-900 leading-tight mb-2">The Gift Shop</h3>
+                    <p class="text-sm text-gray-600 mb-4 flex-grow"><strong>Effect:</strong> Monetizes the weapon of
+                        destruction. Plushies and keychains.</p>
+                    <div class="bg-blue-50 p-3 rounded mb-4 border border-blue-100">
+                        <p class="text-xs font-bold text-blue-800 uppercase mb-1">Synergy Bonus</p>
+                        <p class="text-xs text-blue-900">Doubles Rent but adds +1 Guilt to your inventory.</p>
+                    </div>
+                    <p class="text-xs italic text-gray-400 text-center">"Exit through the retail experience."</p>
+                </div>
+
+                <div
+                    class="game-card relative h-96 w-full shadow-lg rounded-xl border-4 border-blue-500 bg-white flex flex-col p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <span
+                            class="bg-blue-600 text-white text-xs font-bold px-2 py-1 uppercase tracking-widest">Sanitizer</span>
+                        <span class="text-2xl">😍</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-blue-900 leading-tight mb-2">The Romance Filter</h3>
+                    <p class="text-sm text-gray-600 mb-4 flex-grow"><strong>Effect:</strong> Ignores the massacre to
+                        focus on two attractive people falling in love.</p>
+                    <div class="bg-blue-50 p-3 rounded mb-4 border border-blue-100">
+                        <p class="text-xs font-bold text-blue-800 uppercase mb-1">Synergy Bonus</p>
+                        <p class="text-xs text-blue-900">Cancels out "Gore" penalties completely.</p>
+                    </div>
+                    <p class="text-xs italic text-gray-400 text-center">"Sure, the ship is sinking, but look at his
+                        jawline!"</p>
+                </div>
+
+                <div
+                    class="game-card relative h-96 w-full shadow-lg rounded-xl border-4 border-blue-500 bg-white flex flex-col p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <span
+                            class="bg-blue-600 text-white text-xs font-bold px-2 py-1 uppercase tracking-widest">Sanitizer</span>
+                        <span class="text-2xl">🥽</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-blue-900 leading-tight mb-2">The Immersive Experience</h3>
+                    <p class="text-sm text-gray-600 mb-4 flex-grow"><strong>Effect:</strong> Gamifies the trauma. Turns
+                        trench warfare into an obstacle course.</p>
+                    <div class="bg-blue-50 p-3 rounded mb-4 border border-blue-100">
+                        <p class="text-xs font-bold text-blue-800 uppercase mb-1">Synergy Bonus</p>
+                        <p class="text-xs text-blue-900">High value for "Physical Labor" Debris.</p>
+                    </div>
+                    <p class="text-xs italic text-gray-400 text-center">"The thrill of dysentery without the
+                        dehydration!"</p>
+                </div>
+
+                <div
+                    class="game-card relative h-96 w-full shadow-lg rounded-xl border-4 border-blue-500 bg-white flex flex-col p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <span
+                            class="bg-blue-600 text-white text-xs font-bold px-2 py-1 uppercase tracking-widest">Sanitizer</span>
+                        <span class="text-2xl">🦊</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-blue-900 leading-tight mb-2">The Cute Mascot</h3>
+                    <p class="text-sm text-gray-600 mb-4 flex-grow"><strong>Effect:</strong> Anthropomorphizes the
+                        victim or the disease to sell lunchboxes.</p>
+                    <div class="bg-blue-50 p-3 rounded mb-4 border border-blue-100">
+                        <p class="text-xs font-bold text-blue-800 uppercase mb-1">Synergy Bonus</p>
+                        <p class="text-xs text-blue-900">Removes ALL Guilt tokens from the board.</p>
+                    </div>
+                    <p class="text-xs italic text-gray-400 text-center">"Meet 'Radium Rita'! She glows! She smiles!"</p>
+                </div>
+
+                <div
+                    class="game-card relative h-96 w-full shadow-lg rounded-xl border-4 border-blue-500 bg-white flex flex-col p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <span
+                            class="bg-blue-600 text-white text-xs font-bold px-2 py-1 uppercase tracking-widest">Sanitizer</span>
+                        <span class="text-2xl">ℹ️</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-blue-900 leading-tight mb-2">The Edutainment Kiosk</h3>
+                    <p class="text-sm text-gray-600 mb-4 flex-grow"><strong>Effect:</strong> Reduces complex horrors to
+                        a 'Did You Know?' plaque.</p>
+                    <div class="bg-blue-50 p-3 rounded mb-4 border border-blue-100">
+                        <p class="text-xs font-bold text-blue-800 uppercase mb-1">Synergy Bonus</p>
+                        <p class="text-xs text-blue-900">Low Rent yield, but a safe play with no risk.</p>
+                    </div>
+                    <p class="text-xs italic text-gray-400 text-center">"Press X to Pay Respects."</p>
+                </div>
+
+                <div
+                    class="game-card relative h-96 w-full shadow-lg rounded-xl border-4 border-blue-500 bg-white flex flex-col p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <span
+                            class="bg-blue-600 text-white text-xs font-bold px-2 py-1 uppercase tracking-widest">Sanitizer</span>
+                        <span class="text-2xl">🦸</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-blue-900 leading-tight mb-2">The Hero's Journey</h3>
+                    <p class="text-sm text-gray-600 mb-4 flex-grow"><strong>Effect:</strong> Erases systemic injustice
+                        by highlighting one survivor who 'made it'.</p>
+                    <div class="bg-blue-50 p-3 rounded mb-4 border border-blue-100">
+                        <p class="text-xs font-bold text-blue-800 uppercase mb-1">Synergy Bonus</p>
+                        <p class="text-xs text-blue-900">+20 Rent for "State Oppression" Debris.</p>
+                    </div>
+                    <p class="text-xs italic text-gray-400 text-center">"He survived because he had a Growth Mindset."
+                    </p>
+                </div>
+
+                <div
+                    class="game-card relative h-96 w-full shadow-lg rounded-xl border-4 border-blue-500 bg-white flex flex-col p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <span
+                            class="bg-blue-600 text-white text-xs font-bold px-2 py-1 uppercase tracking-widest">Sanitizer</span>
+                        <span class="text-2xl">🧱</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-blue-900 leading-tight mb-2">Artisanal Rebranding</h3>
+                    <p class="text-sm text-gray-600 mb-4 flex-grow"><strong>Effect:</strong> Turns a slum or disaster
+                        site into a 'Loft District'.</p>
+                    <div class="bg-blue-50 p-3 rounded mb-4 border border-blue-100">
+                        <p class="text-xs font-bold text-blue-800 uppercase mb-1">Synergy Bonus</p>
+                        <p class="text-xs text-blue-900">Triples Rent on "Industrial" Debris.</p>
+                    </div>
+                    <p class="text-xs italic text-gray-400 text-center">"It's not 'urban decay', it's 'shabby chic'."
+                    </p>
+                </div>
+
+                <div
+                    class="game-card relative h-96 w-full shadow-lg rounded-xl border-4 border-blue-500 bg-white flex flex-col p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <span
+                            class="bg-blue-600 text-white text-xs font-bold px-2 py-1 uppercase tracking-widest">Sanitizer</span>
+                        <span class="text-2xl">🧘</span>
+                    </div>
+                    <h3 class="text-2xl font-black text-blue-900 leading-tight mb-2">The Wellness Retreat</h3>
+                    <p class="text-sm text-gray-600 mb-4 flex-grow"><strong>Effect:</strong> Spiritual bypassing. Turns
+                        famine into 'Intermittent Fasting'.</p>
+                    <div class="bg-blue-50 p-3 rounded mb-4 border border-blue-100">
+                        <p class="text-xs font-bold text-blue-800 uppercase mb-1">Synergy Bonus</p>
+                        <p class="text-xs text-blue-900">Converts "Starvation" Debris into pure Profit.</p>
+                    </div>
+                    <p class="text-xs italic text-gray-400 text-center">"Experience the clarity of hunger. #Blessed"</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 4. MATRIX / EXAMPLES -->
+        <div id="content-matrix"
+            class="tab-content hidden max-w-4xl mx-auto bg-white p-8 shadow-sm border border-gray-200">
+            <h2 class="text-2xl font-black mb-6 uppercase">Property Matrix Examples</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="bg-black text-white uppercase text-xs">
+                            <th class="p-3">Raw Debris</th>
+                            <th class="p-3">+ Sanitizer</th>
+                            <th class="p-3">= Resulting Property</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="p-3 font-bold text-red-700">Severed Hands</td>
+                            <td class="p-3">The Gift Shop</td>
+                            <td class="p-3 font-mono">"The High-Five Emporium"</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-red-700">Radium Jaw</td>
+                            <td class="p-3">Cute Mascot</td>
+                            <td class="p-3 font-mono">"Glow-Up Glamping w/ Ray the Racoon"</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-red-700">Potato Famine</td>
+                            <td class="p-3">Wellness Retreat</td>
+                            <td class="p-3 font-mono">"The Emerald Isle Detox Spa"</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-red-700">Chimney Cancer</td>
+                            <td class="p-3">Musical Adaptation</td>
+                            <td class="p-3 font-mono">"Soot-ical! The Musical"</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-red-700">Human Sacrifice</td>
+                            <td class="p-3">Immersive XP</td>
+                            <td class="p-3 font-mono">"Escape The Altar: VR Edition"</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 text-xs text-center p-4 mt-8 no-print">
+        STREET SWEEPER © 2026 // DO NOT DISTRIBUTE TO DESCENDANTS
+    </footer>
+
+    <script>
+        function switchTab(tabId) {
+            // Hide all content
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(el => el.classList.add('hidden'));
+
+            // Show selected content
+            document.getElementById('content-' + tabId).classList.remove('hidden');
+
+            // Reset Tab Styles
+            const tabs = ['manual', 'debris', 'sanitizers', 'matrix'];
+            tabs.forEach(t => {
+                const btn = document.getElementById('tab-' + t);
+                if (t === tabId) {
+                    btn.classList.add('border-red-600', 'text-red-600');
+                    btn.classList.remove('border-transparent', 'text-gray-500');
+                } else {
+                    btn.classList.remove('border-red-600', 'text-red-600');
+                    btn.classList.add('border-transparent', 'text-gray-500');
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>

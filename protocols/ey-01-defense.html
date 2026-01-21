@@ -4,145 +4,432 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACM PROTOCOL 01: THE DEFENSE</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800;900&display=swap"
-        rel="stylesheet">
+    <title>EXPLAIN YOURSELF - Party Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg: #f5f5f0;
-            --text: #000;
-            --accent: #ccff00;
-            --border: #000;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Oswald:wght@700&display=swap');
 
         body {
-            background: var(--bg);
-            color: var(--text);
             font-family: 'Inter', sans-serif;
-            padding: 2rem;
-            max-width: 800px;
-            margin: 0 auto;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .mono {
-            font-family: 'JetBrains Mono', monospace;
+        .card-font {
+            font-family: 'Oswald', sans-serif;
         }
 
-        .card {
-            background: #fff;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .print-page {
+                page-break-after: always;
+                width: 11in;
+                height: 8.5in;
+                padding: 0.5in;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(2, 1fr);
+                gap: 0.25in;
+            }
         }
 
-        .header {
+        .poker-card {
+            width: 2.5in;
+            height: 3.5in;
+            border-radius: 0.125in;
+            position: relative;
+            overflow: hidden;
             display: flex;
-            justify-content: space-between;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
+            flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
 
-        .family {
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -0.5px;
-        }
-
-        .id {
-            background: var(--accent);
-            padding: 0.2rem 0.6rem;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 0.8rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 0.5rem;
-            line-height: 1.1;
-            text-transform: uppercase;
-        }
-
-        .meta {
-            font-family: 'JetBrains Mono', monospace;
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
-        }
-
-        .brief {
-            font-size: 1.25rem;
-            line-height: 1.5;
-            margin-bottom: 2rem;
-            font-weight: 600;
-        }
-
-        .actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            background: #000;
-            color: #fff;
-            text-decoration: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn:hover {
-            background: #333;
-        }
-
-        .btn-outline {
-            background: transparent;
+        .evidence-card {
+            background: #ffffff;
             color: #000;
             border: 2px solid #000;
         }
 
-        .btn-outline:hover {
-            background: #f0f0f0;
+        .scene-card {
+            background: #1a1a1a;
+            color: #fff;
+            border: 2px solid #fff;
         }
 
-        .back {
-            display: block;
-            margin-top: 2rem;
-            color: #666;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .back:hover {
-            text-decoration: underline;
+        .protocol-card {
+            background: #fbbf24;
             color: #000;
+            border: 2px solid #000;
+        }
+
+        .swipe-enter {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        .swipe-enter-active {
+            transform: translateX(0);
+            opacity: 1;
+            transition: all 0.3s ease-out;
+        }
+
+        .cut-line {
+            position: absolute;
+            border: 1px dashed #ccc;
         }
     </style>
 </head>
 
-<body>
-    <div class="card">
-        <div class="header">
-            <span class="family">Explain Yourself</span>
-            <span class="id mono">PROTOCOL 01</span>
+<body class="bg-zinc-100 text-zinc-900 min-h-screen overflow-x-hidden">
+
+    <div id="app">
+        <!-- START SCREEN -->
+        <div v-if="view === 'start'" class="max-w-md mx-auto min-h-screen p-6 flex flex-col justify-center text-center">
+            <h1 class="text-6xl font-black mb-2 tracking-tighter italic">EXPLAIN YOURSELF</h1>
+            <p class="text-zinc-500 font-bold uppercase tracking-widest text-sm mb-8">The Game of Kinetic Defense</p>
+
+            <div class="space-y-4">
+                <button @click="startMobileGame"
+                    class="w-full bg-black text-white py-6 rounded-2xl font-black text-xl shadow-xl hover:scale-105 transition-transform active:scale-95">
+                    PLAY ON PHONE
+                </button>
+                <button @click="view = 'print'"
+                    class="w-full bg-white border-4 border-black text-black py-4 rounded-2xl font-black text-lg shadow-lg hover:bg-zinc-50 transition-colors">
+                    PRINT DECK
+                </button>
+            </div>
+
+            <div class="mt-12 text-left bg-white p-6 rounded-3xl border-2 border-zinc-200">
+                <h3 class="font-black text-lg mb-2">HOW TO PLAY</h3>
+                <p class="text-sm text-zinc-600 mb-4">You've been caught with 2 objects in a compromising location. You
+                    have 10 seconds to launch a defense before the Jury finds you guilty.</p>
+                <ul class="text-xs space-y-2 font-medium text-zinc-500 uppercase">
+                    <li>1. Reveal 2 Evidence & 1 Scene</li>
+                    <li>2. Start 10s Timer</li>
+                    <li>3. Explain the "Innocent" Truth</li>
+                    <li>4. Jury Votes: Innocent or Pervert</li>
+                </ul>
+            </div>
         </div>
-        <h1>The Defense</h1>
-        <div class="meta">Core Game · 50 Cards</div>
-        <div class="brief">2 objects. 1 location. 10 seconds. Jury votes. You look guilty. Prove otherwise.</div>
-        <div class="actions">
-            <a href="../explain-yourself.html" class="btn">▶ LAUNCH SIMULATION</a>
-            <a href="../print-production.html#game=explain" class="btn btn-outline">🖨️ PRINT KIT</a>
+
+        <!-- MOBILE GAME VIEW -->
+        <div v-if="view === 'game'" class="min-h-screen flex flex-col bg-zinc-900 text-white">
+            <!-- Header -->
+            <div
+                class="p-4 flex justify-between items-center border-b border-zinc-800 bg-black/50 backdrop-blur-md sticky top-0 z-50">
+                <button @click="view = 'start'" class="text-zinc-400 font-bold text-sm">BACK</button>
+                <div class="flex flex-col items-center">
+                    <span class="text-[10px] font-black tracking-widest text-zinc-500">SCORE</span>
+                    <span class="text-xl font-black tabular-nums">{{ score }}</span>
+                </div>
+                <button @click="resetGame" class="text-zinc-400 font-bold text-sm">RESET</button>
+            </div>
+
+            <!-- Timer Bar -->
+            <div class="h-2 bg-zinc-800 w-full overflow-hidden">
+                <div class="h-full bg-red-500 transition-all duration-100 ease-linear"
+                    :style="{ width: timerWidth + '%' }"></div>
+            </div>
+
+            <!-- Cards Container -->
+            <div class="flex-1 flex flex-col items-center justify-center p-4 gap-4 overflow-y-auto pb-32">
+
+                <!-- Scene Card (Sticky top of play area) -->
+                <div v-if="currentScene" class="poker-card scene-card scale-90 mb-2 shrink-0">
+                    <div class="p-4 flex flex-col h-full">
+                        <div class="text-[10px] font-bold tracking-widest opacity-60">SCENE</div>
+                        <div class="card-font text-2xl leading-none mt-1 mb-3">{{ currentScene.title }}</div>
+                        <div class="flex-1 text-[11px] leading-tight opacity-90">
+                            <div v-for="line in currentScene.body" :key="line" class="mb-1 italic">• {{ line }}</div>
+                        </div>
+                        <div
+                            class="text-[9px] font-bold uppercase tracking-tighter mt-auto border-t border-white/20 pt-2">
+                            {{ currentScene.footer }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 w-full justify-center">
+                    <!-- Evidence Card 1 -->
+                    <div v-if="currentEvidence[0]" class="poker-card evidence-card scale-[0.85] origin-right">
+                        <div class="p-4 flex flex-col h-full">
+                            <div class="text-[10px] font-bold tracking-widest opacity-40">EVIDENCE A</div>
+                            <div class="card-font text-2xl leading-none mt-1 mb-3">{{ currentEvidence[0].title }}</div>
+                            <div class="flex-1 text-[11px] leading-tight">
+                                <div v-for="line in currentEvidence[0].body" :key="line" class="mb-1">• {{ line }}</div>
+                            </div>
+                            <div
+                                class="text-[9px] font-bold uppercase tracking-tighter mt-auto border-t border-black/10 pt-2">
+                                {{ currentEvidence[0].footer }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Evidence Card 2 -->
+                    <div v-if="currentEvidence[1]" class="poker-card evidence-card scale-[0.85] origin-left">
+                        <div class="p-4 flex flex-col h-full">
+                            <div class="text-[10px] font-bold tracking-widest opacity-40">EVIDENCE B</div>
+                            <div class="card-font text-2xl leading-none mt-1 mb-3">{{ currentEvidence[1].title }}</div>
+                            <div class="flex-1 text-[11px] leading-tight">
+                                <div v-for="line in currentEvidence[1].body" :key="line" class="mb-1">• {{ line }}</div>
+                            </div>
+                            <div
+                                class="text-[9px] font-bold uppercase tracking-tighter mt-auto border-t border-black/10 pt-2">
+                                {{ currentEvidence[1].footer }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="p-6 bg-black border-t border-zinc-800 space-y-4">
+                <div v-if="!timerActive && !showVote" class="flex gap-2">
+                    <button @click="drawCards"
+                        class="flex-1 bg-white text-black py-5 rounded-2xl font-black text-lg shadow-xl shadow-white/5">
+                        DRAW CARDS
+                    </button>
+                    <button v-if="currentScene" @click="startTimer"
+                        class="bg-red-600 text-white px-8 py-5 rounded-2xl font-black text-lg">
+                        GO!
+                    </button>
+                </div>
+
+                <div v-if="timerActive" class="text-center py-4">
+                    <div class="text-6xl font-black italic animate-pulse">{{ timeLeft }}s</div>
+                    <div class="text-xs font-bold text-zinc-500 uppercase tracking-widest mt-2">EXPLAIN YOURSELF!</div>
+                </div>
+
+                <div v-if="showVote" class="flex gap-4 animate-bounce-in">
+                    <button @click="handleVerdict(false)"
+                        class="flex-1 bg-zinc-800 text-red-500 py-6 rounded-2xl font-black border-2 border-red-500/20">
+                        GUILTY
+                    </button>
+                    <button @click="handleVerdict(true)"
+                        class="flex-1 bg-green-600 text-white py-6 rounded-2xl font-black shadow-lg shadow-green-900/40">
+                        INNOCENT
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRINT VIEW -->
+        <div v-if="view === 'print'" class="p-8 no-print min-h-screen bg-zinc-200">
+            <div class="max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-2xl border border-zinc-300">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-black italic">PRINT CENTER</h2>
+                        <p class="text-zinc-500 font-bold uppercase tracking-widest text-xs">Standard Poker Size (2.5" x
+                            3.5")</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button @click="view = 'start'"
+                            class="bg-zinc-100 px-4 py-2 rounded-xl font-bold">CANCEL</button>
+                        <button @click="window.print()"
+                            class="bg-black text-white px-6 py-2 rounded-xl font-black">PRINT NOW</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+                        <div class="text-[10px] font-black text-zinc-400">EVIDENCE</div>
+                        <div class="text-2xl font-black">{{ gameData.decks.evidence_cards.length }}</div>
+                    </div>
+                    <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+                        <div class="text-[10px] font-black text-zinc-400">SCENES</div>
+                        <div class="text-2xl font-black">{{ gameData.decks.scene_cards.length }}</div>
+                    </div>
+                    <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+                        <div class="text-[10px] font-black text-zinc-400">PROTOCOLS</div>
+                        <div class="text-2xl font-black">{{ gameData.decks.protocol_cards.length }}</div>
+                    </div>
+                    <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+                        <div class="text-[10px] font-black text-zinc-400">LAYOUT</div>
+                        <div class="text-2xl font-black">2x2</div>
+                    </div>
+                </div>
+
+                <p class="bg-amber-50 text-amber-700 p-4 rounded-xl text-sm font-medium border border-amber-100">
+                    <strong>Pro Tip:</strong> Set your printer to <strong>Landscape</strong> orientation and
+                    <strong>Scale to 100%</strong>. Use heavy cardstock (200gsm+) for the best feel.
+                </p>
+            </div>
+        </div>
+
+        <!-- HIDDEN PRINT PAGES (Browser render only) -->
+        <div v-if="view === 'print'" class="print-only">
+            <div v-for="(page, pIdx) in printPages" :key="pIdx" class="print-page">
+                <div v-for="card in page" :key="card.id" class="poker-card m-auto" :class="card.type + '-card'">
+                    <div class="p-6 flex flex-col h-full relative">
+                        <div class="text-[10px] font-bold tracking-widest uppercase opacity-60">{{ card.type }} - {{
+                            card.id }}</div>
+                        <div class="card-font text-[28px] leading-none mt-2 mb-4 uppercase">{{ card.title }}</div>
+
+                        <div class="flex-1 text-[13px] leading-tight space-y-2">
+                            <div v-for="line in card.body" :key="line" class="flex gap-2">
+                                <span class="opacity-40">•</span>
+                                <span>{{ line }}</span>
+                            </div>
+                        </div>
+
+                        <div v-if="card.type === 'evidence'" class="mt-4 pt-4 border-t border-black/10">
+                            <div class="text-[9px] font-black text-zinc-400 mb-1">INNOCENT DEFENSES:</div>
+                            <div class="text-[10px] leading-none opacity-80">{{ card.innocent_vectors.join(', ') }}
+                            </div>
+                        </div>
+
+                        <div class="text-[11px] font-black uppercase tracking-widest mt-auto border-t pt-3"
+                            :class="card.type === 'scene' ? 'border-white/20' : 'border-black/20'">
+                            {{ card.footer }}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <a href="../anti-crisis.html" class="back mono">← RETURN TO SYSTEM</a>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                const view = ref('start');
+                const score = ref(0);
+                const timerActive = ref(false);
+                const timeLeft = ref(10);
+                const timerWidth = ref(100);
+                const showVote = ref(false);
+
+                const currentScene = ref(null);
+                const currentEvidence = ref([]);
+
+                // Game Data from the provided JSON
+                const gameData = {
+                    decks: {
+                        protocol_cards: [
+                            { id: "SYS-001", type: "protocol", title: "SETUP & TURN", body: ["Separate Evidence & Scene decks.", "Pick a Suspect.", "Suspect draws 2 Evidence cards.", "Flip 1 Scene card.", "10 Seconds to Explain."], footer: "Go fast. Panic is your enemy." },
+                            { id: "SYS-002", type: "protocol", title: "THE JURY", body: ["You are the public.", "You are judgmental.", "Judge on: Speed, Plausibility, Entertainment."], footer: "If they stutter, they are guilty." },
+                            { id: "SYS-003", type: "protocol", title: "THE DEFENSE", body: ["'I'm fixing something.'", "'It's a prop for a play.'", "'Medical emergency.'", "'Abstract art.'"], footer: "Confidence > Logic." }
+                        ],
+                        evidence_cards: [
+                            { id: "EVD-001", type: "evidence", title: "DUCT TAPE", body: ["50-yard roll", "Silver, heavy duty", "Sticky residue"], footer: "Fixes everything. Or silences everyone.", innocent_vectors: ["Plumbing", "Car fix"] },
+                            { id: "EVD-002", type: "evidence", title: "CUCUMBER", body: ["12-inch English", "Wrapped in plastic", "Firm"], footer: "Just a salad ingredient. Right?", innocent_vectors: ["Salad", "Beauty treatment"] },
+                            { id: "EVD-003", type: "evidence", title: "SKI MASK", body: ["Black wool", "Three holes", "Itchy"], footer: "For 'skiing'. In July.", innocent_vectors: ["Cold weather", "Costume"] },
+                            { id: "EVD-004", type: "evidence", title: "JAR OF MAYO", body: ["Family size", "Full fat", "Slightly warm"], footer: "That specific sound.", innocent_vectors: ["Catering", "Hair mask"] },
+                            { id: "EVD-005", type: "evidence", title: "SHOVEL", body: ["Spade tip", "Wooden handle", "Dirt on blade"], footer: "Digging or filling?", innocent_vectors: ["Gardening", "Snow"] },
+                            { id: "EVD-006", type: "evidence", title: "HANDCUFFS", body: ["Real steel", "No key visible", "Rattling"], footer: "Click. Click.", innocent_vectors: ["Magic practice", "Costume"] },
+                            { id: "EVD-007", type: "evidence", title: "VASELINE", body: ["Petroleum jelly", "Greasy tub", "Half empty"], footer: "Slippery slope.", innocent_vectors: ["Lips", "Squeaky hinge"] },
+                            { id: "EVD-010", type: "evidence", title: "EGGPLANT", body: ["Purple", "Curved", "Glossy"], footer: "The emoji made real.", innocent_vectors: ["Chef", "Art model"] },
+                            { id: "EVD-012", type: "evidence", title: "BLEACH", body: ["Industrial", "Sharp smell", "Warning"], footer: "DNA remover.", innocent_vectors: ["Laundry", "Tie-dye"] },
+                            { id: "EVD-020", type: "evidence", title: "WHIPPED CREAM", body: ["Aerosol can", "Extra creamy", "Cold"], footer: "Dessert is served.", innocent_vectors: ["Baking", "Coffee"] },
+                            { id: "EVD-031", type: "evidence", title: "CROWBAR", body: ["Red steel", "Hooked end", "Scratched"], footer: "Leverage.", innocent_vectors: ["Demo", "Opening crates"] },
+                            { id: "EVD-045", type: "evidence", title: "DOG COLLAR", body: ["Spiked leather", "Heavy buckle", "Name tag"], footer: "Who's a good boy?", innocent_vectors: ["Dog owner", "Punk fashion"] },
+                            { id: "EVD-056", type: "evidence", title: "SYRINGE", body: ["Needle", "Plunger", "Empty"], footer: "Just a little prick.", innocent_vectors: ["Diabetic cat", "B12 shot"] },
+                            { id: "EVD-061", type: "evidence", title: "BALL GAG", body: ["Red rubber", "Leather strap", "Buckle"], footer: "Mmph mmph.", innocent_vectors: ["Lost bet", "Modern art"] },
+                            { id: "EVD-075", type: "evidence", title: "TRASH BAGS", body: ["Heavy duty", "Box of 20", "Drawstring"], footer: "Take it out.", innocent_vectors: ["Spring cleaning", "Donations"] },
+                            { id: "EVD-087", type: "evidence", title: "BASEBALL BAT", body: ["Wooden", "Louisville", "Tape grip"], footer: "Home run.", innocent_vectors: ["Softball league", "Collector"] },
+                            { id: "EVD-091", type: "evidence", title: "LIVE GOAT", body: ["Bleating", "Horns", "Eating trash"], footer: "The G.O.A.T.", innocent_vectors: ["Yoga", "Lawn mowing"] }
+                            // ... adding more from data as placeholders or iterating full list if logic needed
+                        ],
+                        scene_cards: [
+                            { id: "SCN-001", type: "scene", title: "AIRPORT SECURITY", body: ["Agents staring", "Long line", "Plastic bins"], footer: "Shoes off.", prompt_seed: "Don't say bomb." },
+                            { id: "SCN-002", type: "scene", title: "SCHOOL PARKING LOT", body: ["3:00 PM Pickup", "Parents watching", "Crossing guard"], footer: "Stranger danger.", prompt_seed: "You don't have a kid here." },
+                            { id: "SCN-003", type: "scene", title: "CONFESSIONAL", body: ["Dark screen", "Priest listening", "Whispering"], footer: "Forgive me father.", prompt_seed: "This is awkward." },
+                            { id: "SCN-009", type: "scene", title: "PUBLIC BATHROOM", body: ["Gap in door", "Tile floor", "Echo"], footer: "Occupied.", prompt_seed: "Spare a square?" },
+                            { id: "SCN-015", type: "scene", title: "GYM LOCKER ROOM", body: ["Steam", "Naked old guys", "Benches"], footer: "Towel snap.", prompt_seed: "Eyes up here." },
+                            { id: "SCN-037", type: "scene", title: "DAUGHTER'S BEDROOM", body: ["Posters", "Messy", "Door closed"], footer: "Keep out.", prompt_seed: "Knock first!" }
+                        ]
+                    }
+                };
+
+                const startMobileGame = () => {
+                    view.value = 'game';
+                    drawCards();
+                };
+
+                const drawCards = () => {
+                    showVote.value = false;
+                    timerWidth.value = 100;
+                    timeLeft.value = 10;
+
+                    const evd = [...gameData.decks.evidence_cards];
+                    const scn = [...gameData.decks.scene_cards];
+
+                    currentScene.value = scn[Math.floor(Math.random() * scn.length)];
+
+                    // Draw 2 unique evidence
+                    let e1 = evd[Math.floor(Math.random() * evd.length)];
+                    let e2 = evd[Math.floor(Math.random() * evd.length)];
+                    while (e1.id === e2.id) {
+                        e2 = evd[Math.floor(Math.random() * evd.length)];
+                    }
+                    currentEvidence.value = [e1, e2];
+                };
+
+                const startTimer = () => {
+                    if (timerActive.value) return;
+                    timerActive.value = true;
+                    timerWidth.value = 100;
+                    timeLeft.value = 10;
+
+                    const interval = setInterval(() => {
+                        timeLeft.value -= 0.1;
+                        timerWidth.value = (timeLeft.value / 10) * 100;
+
+                        if (timeLeft.value <= 0) {
+                            clearInterval(interval);
+                            timerActive.value = false;
+                            timeLeft.value = 0;
+                            showVote.value = true;
+                        }
+                    }, 100);
+                };
+
+                const handleVerdict = (innocent) => {
+                    if (innocent) score.value++;
+                    showVote.value = false;
+                    drawCards();
+                };
+
+                const resetGame = () => {
+                    score.value = 0;
+                    drawCards();
+                };
+
+                // Print Page Logic
+                const printPages = computed(() => {
+                    const allCards = [
+                        ...gameData.decks.protocol_cards,
+                        ...gameData.decks.scene_cards,
+                        ...gameData.decks.evidence_cards
+                    ];
+
+                    const pages = [];
+                    for (let i = 0; i < allCards.length; i += 4) {
+                        pages.push(allCards.slice(i, i + 4));
+                    }
+                    return pages;
+                });
+
+                return {
+                    view, score, gameData, currentScene, currentEvidence,
+                    timerActive, timeLeft, timerWidth, showVote,
+                    startMobileGame, drawCards, startTimer, handleVerdict,
+                    resetGame, printPages
+                };
+            }
+        }).mount('#app');
+    </script>
+
 </body>
 
 </html>

@@ -3,147 +3,700 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACM PROTOCOL 02: SPEED TRIAL</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800;900&display=swap"
-        rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CIRCUMSTANTIAL: The Party Game</title>
     <style>
+        /* --- RESET & VARIABLES --- */
         :root {
-            --bg: #f5f5f0;
-            --text: #000;
-            --accent: #ccff00;
-            --border: #000;
+            --bg: #121212;
+            --card-bg: #f5f5f0;
+            --text: #1a1a1a;
+            --accent: #d32f2f;
+            /* Alert Red */
+            --accent-dim: #9a0007;
+            --safe: #388e3c;
+            --font-head: 'Impact', 'Arial Black', sans-serif;
+            --font-body: 'Courier New', Courier, monospace;
+            --card-w: 2.5in;
+            --card-h: 3.5in;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
+            margin: 0;
+            padding: 0;
             background: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            padding: 2rem;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .card {
-            background: #fff;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
-        }
-
-        .header {
+            color: #eee;
+            font-family: var(--font-body);
+            overflow: hidden;
+            height: 100vh;
             display: flex;
-            justify-content: space-between;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
+            flex-direction: column;
         }
 
-        .family {
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -0.5px;
+        /* --- CUSTOM SCROLLBAR --- */
+        ::-webkit-scrollbar {
+            width: 10px;
         }
 
-        .id {
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-left: 1px solid #333;
+        }
+
+        ::-webkit-scrollbar-thumb {
             background: var(--accent);
-            padding: 0.2rem 0.6rem;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 0.8rem;
+            border-radius: 5px;
+            border: 2px solid #1a1a1a;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 0.5rem;
-            line-height: 1.1;
-            text-transform: uppercase;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff5252;
         }
 
-        .meta {
-            font-family: 'JetBrains Mono', monospace;
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
-        }
-
-        .brief {
-            font-size: 1.25rem;
-            line-height: 1.5;
-            margin-bottom: 2rem;
-            font-weight: 600;
-        }
-
-        .actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
+        /* --- UTILS --- */
+        .hidden {
+            display: none !important;
         }
 
         .btn {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 12px 15px;
+            font-family: var(--font-head);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 4px;
+            touch-action: manipulation;
+            font-size: 1rem;
+        }
+
+        .btn:active {
+            background: #555;
+            transform: translateY(1px);
+        }
+
+        .btn-red {
+            background: var(--accent);
+            border-color: var(--accent-dim);
+        }
+
+        .btn-green {
+            background: var(--safe);
+            border-color: #2e7d32;
+        }
+
+        /* --- APP LAYOUT --- */
+        #app {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        header {
+            padding: 10px 15px;
+            background: #000;
+            border-bottom: 2px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: var(--font-head);
+            font-size: 1.5rem;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+
+        .menu-btn {
+            font-size: 1.2rem;
+            background: none;
+            border: none;
+            color: #fff;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        /* --- VIEWS --- */
+        .view {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 15px;
+            display: none;
+            flex-direction: column;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .view.active {
+            display: flex;
+        }
+
+        /* --- GAME VIEW (SNAP SCROLLING) --- */
+        #game-view {
+            padding-bottom: 160px;
+            /* High clearance for fixed controls */
+            scroll-snap-type: y mandatory;
+        }
+
+        .hand-view {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .card {
+            scroll-snap-align: center;
+            position: relative;
+            width: 100%;
+            max-width: 360px;
+            min-height: 440px;
+            background: var(--card-bg);
+            color: var(--text);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 5px solid #000;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        /* CARD INTERNAL DESIGN */
+        .card-header {
             background: #000;
             color: #fff;
-            text-decoration: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            font-weight: 700;
-            display: inline-flex;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.5rem;
+            border-bottom: 3px solid var(--accent);
         }
 
-        .btn:hover {
-            background: #333;
+        .card-id {
+            font-family: var(--font-body);
+            font-size: 0.8rem;
+            font-weight: bold;
         }
 
-        .btn-outline {
-            background: transparent;
-            color: #000;
-            border: 2px solid #000;
-        }
-
-        .btn-outline:hover {
-            background: #f0f0f0;
-        }
-
-        .back {
-            display: block;
-            margin-top: 2rem;
-            color: #666;
-            text-decoration: none;
+        .card-type {
+            font-family: var(--font-head);
             font-size: 0.9rem;
+            text-transform: uppercase;
+            color: var(--accent);
+            letter-spacing: 1px;
         }
 
-        .back:hover {
-            text-decoration: underline;
-            color: #000;
+        .card-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-family: var(--font-head);
+            font-size: 2rem;
+            line-height: 1.1;
+            margin: 0 0 12px 0;
+            text-transform: uppercase;
+            border-bottom: 2px solid #000;
+            padding-bottom: 8px;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            background: #e0e0e0;
+            color: #333;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 800;
+            border: 1px solid #bbb;
+        }
+
+        .card-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .card-list li {
+            margin-bottom: 6px;
+            padding-left: 15px;
+            position: relative;
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .card-list li::before {
+            content: "»";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: 900;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-top: 15px;
+            margin-bottom: 6px;
+            color: #444;
+            border-bottom: 1px solid #ccc;
+            display: block;
+            width: 100%;
+            letter-spacing: 0.5px;
+        }
+
+        .card-footer {
+            background: #e8e8e8;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.8rem;
+            font-style: italic;
+            border-top: 2px solid #ddd;
+            color: #222;
+            font-weight: bold;
+        }
+
+        /* TYPE COLORS */
+        .type-scene .card-type {
+            color: #2196f3;
+        }
+
+        .type-scene .card-header {
+            border-bottom-color: #2196f3;
+        }
+
+        .type-protocol .card-type {
+            color: #666;
+        }
+
+        .type-protocol .card-header {
+            border-bottom-color: #444;
+        }
+
+        /* --- FIXED CONTROLS --- */
+        #controls {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 600px;
+            padding: 15px;
+            background: linear-gradient(to top, #000 80%, transparent);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 200;
+        }
+
+        #timer-btn {
+            background: #000;
+            color: var(--accent);
+            font-family: var(--font-head);
+            font-size: 2rem;
+            text-align: center;
+            padding: 18px;
+            border: 3px solid var(--accent);
+            border-radius: 12px;
+            cursor: pointer;
+            user-select: none;
+            width: 100%;
+            box-shadow: 0 0 20px rgba(211, 47, 47, 0.3);
+            transition: all 0.2s;
+        }
+
+        #timer-btn.running {
+            color: #fff;
+            background: var(--accent);
+            border-color: #fff;
+            transform: scale(0.98);
+        }
+
+        #timer-btn.finished {
+            background: #b71c1c;
+            color: #fff;
+            border-color: #ffcdd2;
+            animation: none;
+        }
+
+        .control-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* --- MODALS --- */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            font-family: var(--font-head);
+            color: var(--accent);
+            border-bottom: 2px solid #333;
+            padding-bottom: 12px;
+            font-size: 2rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 2.5rem;
+            color: #fff;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* --- PRINT --- */
+        @media print {
+            body {
+                background: #fff;
+                display: block;
+                height: auto;
+            }
+
+            #app {
+                display: none;
+            }
+
+            #print-container {
+                display: block !important;
+            }
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .shake {
+            animation: shake 0.3s infinite;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translate(2px, 2px);
+            }
+
+            25% {
+                transform: translate(-2px, -2px);
+            }
+
+            50% {
+                transform: translate(2px, -2px);
+            }
+
+            75% {
+                transform: translate(-2px, 2px);
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="card">
-        <div class="header">
-            <span class="family">Explain Yourself</span>
-            <span class="id mono">PROTOCOL 02</span>
+
+    <div id="app">
+        <header>
+            <h1>CIRCUMSTANTIAL</h1>
+            <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        </header>
+
+        <div id="menu-modal" class="modal hidden">
+            <button class="modal-close" onclick="toggleMenu()">×</button>
+            <h2>DOSSIER</h2>
+            <button class="btn btn-red" onclick="showView('game-view'); toggleMenu()">Resume Defense</button>
+            <div style="height: 15px"></div>
+            <button class="btn" onclick="showView('rules-view'); toggleMenu()">Rules & Tactics</button>
+            <div style="height: 10px"></div>
+            <button class="btn" onclick="showView('score-view'); toggleMenu()">Jury Scoreboard</button>
+            <div style="height: 10px"></div>
+            <button class="btn" onclick="showView('examples-view'); toggleMenu()">Precedents (Examples)</button>
+            <div style="height: 10px"></div>
+            <button class="btn btn-green" onclick="renderPrintView()">Print Physical Deck</button>
+            <p style="color:#444; font-size: 0.8rem; margin-top: auto; text-align: center; letter-spacing: 2px;">SECURE
+                CONNECTION | V1.2.0</p>
         </div>
-        <h1>Speed Trial</h1>
-        <div class="meta">Variants · Hard Mode</div>
-        <div class="brief">7 second timer. Filibuster mode. Legal precedents. The court is in session and patience is
-            zero.</div>
-        <div class="actions">
-            <a href="../explain-yourself.html?mode=hard" class="btn">▶ LAUNCH SIMULATION (HARD)</a>
-            <a href="../print-production.html#game=explain" class="btn btn-outline">🖨️ PRINT KIT</a>
+
+        <!-- GAME VIEW -->
+        <div id="game-view" class="view active">
+            <div class="hand-view" id="hand-container">
+                <div class="card"
+                    style="justify-content:center; align-items:center; text-align:center; min-height:400px;">
+                    <div style="padding:30px;">
+                        <h2 style="font-family:var(--font-head); font-size:2.5rem; margin-bottom:10px;">STANDBY</h2>
+                        <p style="font-weight:bold; color:#666;">Awaiting new round...</p>
+                        <div style="margin-top:20px; color:var(--accent); font-size:0.8rem;">Tap DRAW ROUND below to
+                            begin interrogation.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="controls">
+                <button id="timer-btn" onclick="toggleTimer()">START PLEA (10s)</button>
+                <div class="control-row">
+                    <button class="btn btn-green" onclick="drawRound()">DRAW ROUND</button>
+                    <button class="btn" onclick="resetTimer()">RESET TIMER</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RULES VIEW -->
+        <div id="rules-view" class="view">
+            <h2>RULES OF ENGAGEMENT</h2>
+            <div style="line-height:1.6; color:#bbb;">
+                <p><strong>THE CRIME:</strong> You have been caught in a SCENE with two pieces of EVIDENCE. To the
+                    casual observer, you are guilty of something heinous.</p>
+                <p><strong>THE DEFENSE:</strong> You have 10 seconds to spin a tale of pure innocence. You must explain
+                    both items and the location.</p>
+                <p><strong>THE JURY:</strong> After the timer stops, the Jury votes. If the majority believes your lie
+                    (or is entertained by it), you walk free (+1 point). Otherwise, you are guilty.</p>
+            </div>
+            <h3>VARIANTS</h3>
+            <div style="display:grid; gap:10px;">
+                <div style="background:#222; padding:15px; border-left:4px solid var(--accent);"><strong>SPEED
+                        TRIAL:</strong> Timer is 7s. No stuttering allowed.</div>
+                <div style="background:#222; padding:15px; border-left:4px solid var(--accent);">
+                    <strong>FILIBUSTER:</strong> You must speak until the timer hits 0.</div>
+            </div>
+        </div>
+
+        <!-- SCORE VIEW -->
+        <div id="score-view" class="view">
+            <h2>JURY LOG</h2>
+            <div id="score-list"></div>
+            <button class="btn btn-green" onclick="addPlayer()" style="margin-top:20px;">+ Recruit
+                Juror/Suspect</button>
+        </div>
+
+        <!-- EXAMPLES VIEW -->
+        <div id="examples-view" class="view">
+            <h2>LEGAL PRECEDENTS</h2>
+            <div id="examples-list"></div>
         </div>
     </div>
-    <a href="../anti-crisis.html" class="back mono">← RETURN TO SYSTEM</a>
+
+    <div id="print-container"></div>
+
+    <script>
+        /* --- DATABASE --- */
+        const PROTOCOL = [
+            { id: 'SYS-001', title: 'THE GOLDEN RULE', body: ['Silence is guilt.', 'Hesitation is guilt.', 'Sweating is definitely guilt.'], footer: 'Trust no one.' },
+            { id: 'SYS-002', title: 'JURY INSTRUCTIONS', body: ['Logic is secondary to confidence.', 'If they make you laugh, let them go.', 'Crude humor is encouraged.'], footer: 'The Law is flexible.' }
+        ];
+
+        let evId = 0;
+        const mkEv = (t, innocent, risk, seed, comedy) => ({
+            id: `EVD-${String(++evId).padStart(3, '0')}`,
+            type: 'evidence', title: t, tags: ['OBJECT'],
+            innocent_vectors: innocent, risk_vectors: risk,
+            prompt_seed: seed, comedy_angle: comedy, body: [], footer: comedy
+        });
+
+        let scId = 0;
+        const mkSc = (t, corrupt, press, seed) => ({
+            id: `SCN-${String(++scId).padStart(3, '0')}`,
+            type: 'scene', title: t, tags: ['LOCATION'],
+            corruptors: corrupt, pressure_profile: press,
+            prompt_seed: seed, body: [], footer: seed
+        });
+
+        const EVIDENCE = [
+            mkEv('Duct Tape', ['Fixing a pipe', 'Art project'], ['Binding hands', 'Muffling screams'], 'It fixes everything!', 'The handyman special.'),
+            mkEv('Large Zucchini', ['Homegrown prize', 'Cooking stew'], ['Suggestive shape', 'Blunt weapon'], 'It won a ribbon!', 'Organic hazard.'),
+            mkEv('Ski Mask', ['Cold wind', 'Identity theft (joke)'], ['Bank robbery', 'Stalking'], 'My face gets chilly!', 'Winter essential.'),
+            mkEv('Handcuffs', ['Magic act', 'Lost key', 'Collector'], ['Unlawful restraint', 'Kinky stuff'], 'I am an escapologist!', 'Click-clack.'),
+            mkEv('Chloroform Rag', ['Stain removal', 'Antique cleaning'], ['Knockout', 'Kidnapping'], 'Smells like... lavender?', 'Deep sleep.'),
+            mkEv('Meat Cleaver', ['Gourmet chef', 'Coconut work'], ['Slasher film', 'Aggressive vibes'], 'I am making a salad!', 'Chop chop.'),
+            mkEv('Briefcase of Cash', ['Lottery win', 'Car sale'], ['Bribe', 'Laundered loot'], 'I hate banks.', 'Liquid assets.'),
+            mkEv('Rubber Gloves', ['Dishes', 'Hair dye'], ['No fingerprints', 'Medical exam'], 'Hygiene is a virtue.', 'Snap.'),
+            mkEv('Binoculars', ['Birding', 'Stargazing'], ['Peeping tom', 'Staking out'], 'I love the Lesser Warbler.', 'Watchful eye.'),
+            mkEv('Shovel', ['Gardening', 'Pet burial'], ['Grave digging', 'Body disposal'], 'Just planting petunias.', 'Groundbreaking.'),
+            mkEv('Broken Doll', ['Fixing it', 'Art piece'], ['Voodoo', 'Creepy ritual'], 'She needs a doctor!', 'Toy story.'),
+            mkEv('Laxatives', ['Medical need', 'Detox'], ['Sabotage', 'Prank gone wrong'], 'Regularity is key.', 'Movement.'),
+            mkEv('Goat Mask', ['Mascot', 'Theater prop'], ['Cult activity', 'Satanic panic'], 'Go Team Goats!', 'Baaa-d news.'),
+            mkEv('Jerry Can (Empty)', ['Ran out of gas', 'Storage'], ['Arson prep', 'Fume huffing'], 'My car died!', 'Fueling up.'),
+            mkEv('Taxidermy Squirrel', ['Heirloom', 'Odd gift'], ['Fake pet', 'Weird fetish'], 'His name is Nutty.', 'Stiff competition.'),
+            mkEv('Pregnancy Test', ['Anxiety', 'Prank'], ['Blackmail', 'Trap'], 'It is negative!', 'Life comes at you fast.'),
+            mkEv('Toaster (Unplugged)', ['Moving', 'Repairing'], ['Bath murder', 'Arson'], 'Who wants a bagel?', 'Pop up.'),
+            mkEv('Wig (Neon Pink)', ['Costume', 'Drag night'], ['Disguise', 'Identity theft'], 'I am feeling festive!', 'Hair today.'),
+            mkEv('Megaphone', ['Coaching', 'Safety drill'], ['Public nuisance', 'Riot leading'], 'CAN YOU HEAR ME?', 'Loudmouth.'),
+            mkEv('Trench Coat', ['Rainy day', 'Noir film'], ['Flasher', 'Concealed weapons'], 'It is waterproof!', 'Shadowy.'),
+            mkEv('Live Lobster', ['Dinner guest', 'Pet'], ['Weaponized claws', 'Chaos agent'], 'He is my best friend.', 'Pinchy.'),
+            mkEv('Circular Saw', ['Carpentry', 'Renovation'], ['Body disposal', 'Torture'], 'Cutting some shelves.', 'Edge of reason.'),
+            mkEv('Ball Gag', ['Dog toy', 'Prank gift'], ['Kidnap', 'Kinky business'], 'He likes to chew!', 'Muffled response.'),
+            mkEv('Bleach', ['Laundry', 'Cleaning'], ['DNA destruction', 'Poison'], 'Spotless mind.', 'Whiter than white.'),
+            mkEv('Cactus (Potted)', ['Gift', 'Botany'], ['Torture item', 'Weapon'], 'Succulent love.', 'Prickly situation.'),
+            mkEv('Clown Nose', ['Cheering kids', 'Acting'], ['Killer clown', 'Insanity'], 'Honk honk!', 'Bozo.'),
+            mkEv('Traffic Cone', ['Safety', 'Parking spot'], ['Drunk antic', 'Theft'], 'Caution ahead!', 'Orange you glad?'),
+            mkEv('Briefcase (Locked)', ['Documents', 'Laptop'], ['Nuclear codes', 'Ransom'], 'Strictly business.', 'Top secret.'),
+            mkEv('Banana', ['Potassium', 'Snack'], ['Slippery trap', 'Suggestive'], 'Good for cramps!', 'Scale.'),
+            mkEv('Eggplant', ['Cooking', 'Garden'], ['Emoji code', 'Suggestive'], 'Purple power.', 'Aubergine.')
+        ];
+
+        const SCENES = [
+            mkSc('Elementary School (Midnight)', ['Trespassing', 'Lost item'], ['Predator', 'Vandal'], 'I lost my keys in the sandbox!'),
+            mkSc('TSA Checkpoint', ['Searching', 'Delay'], ['Smuggling', 'Threat'], 'That is not mine!'),
+            mkSc('Public Restroom Stall', ['Privacy', 'Hygiene'], ['Drug deal', 'Hiding'], 'Occupied!'),
+            mkSc('Police Stop', ['Speeding', 'Routine'], ['Fugitive', 'Contraband'], 'Is there a problem, officer?'),
+            mkSc('Grandma’s Living Room', ['Visit', 'Tea'], ['Theft', 'Disrespect'], 'She loves surprises.'),
+            mkSc('Funeral Home', ['Mourning', 'Respect'], ['Looting', 'Necrophilia'], 'He would have laughed.'),
+            mkSc('Church Confessional', ['Sin', 'Penance'], ['Blasphemy', 'Threat'], 'Forgive me, father.'),
+            mkSc('Emergency Room', ['Injury', 'Waiting'], ['Drug seeking', 'Fake pain'], 'It is a real emergency!'),
+            mkSc('Wedding Altar', ['Love', 'Vows'], ['Objection', 'Ex-lover'], 'I have something to say!'),
+            mkSc('Inside a Vent', ['Spying', 'Shortcut'], ['Die Hard fantasy', 'Stalker'], 'Come out to the coast...'),
+            mkSc('Nudist Beach', ['Tanning', 'Swimming'], ['Peeping', 'Photography'], 'I forgot my towel.'),
+            mkSc('Bank Vault', ['Banking', 'Safety'], ['Heist', 'Unauthorized'], 'Just checking my box.')
+        ];
+
+        let DECK = [];
+        let players = [];
+        let timerInt = null;
+        let timerVal = 10;
+
+        function init() {
+            DECK = [...PROTOCOL.map(c => ({ ...c, type: 'protocol', tags: ['RULES'] })), ...EVIDENCE, ...SCENES];
+            DECK.forEach(c => {
+                if (c.type === 'evidence') c.body = [`INNOCENT: ${c.innocent_vectors.join(', ')}`, `RISK: ${c.risk_vectors.join(', ')}`, `SAY: "${c.prompt_seed}"`];
+                if (c.type === 'scene') c.body = [`CONTEXT: ${c.corruptors.join(', ')}`, `PRESSURE: ${c.pressure_profile.join(', ')}`, `VIBE: "${c.prompt_seed}"`];
+            });
+
+            const exList = document.getElementById('examples-list');
+            const combos = [
+                { e1: 'Duct Tape', e2: 'Shovel', s: 'School', d: '"I am a volunteer groundskeeper fixing the slide and burying a time capsule!"' },
+                { e1: 'Lube', e2: 'Lobster', s: 'TSA', d: '"I am a professional aquarium cleaner and he gets dry skin during flights!"' }
+            ];
+            combos.forEach(c => {
+                const div = document.createElement('div');
+                div.style = "background:#222; padding:15px; margin-bottom:10px; border-radius:5px;";
+                div.innerHTML = `<strong>${c.e1} + ${c.e2} @ ${c.s}</strong><br><em style="color:#888">${c.d}</em>`;
+                exList.appendChild(div);
+            });
+
+            addPlayer('Player 1');
+            addPlayer('Player 2');
+        }
+
+        function toggleMenu() { document.getElementById('menu-modal').classList.toggle('hidden'); }
+        function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+        function drawRound() {
+            const evs = EVIDENCE.sort(() => 0.5 - Math.random()).slice(0, 2);
+            const scn = SCENES.sort(() => 0.5 - Math.random()).slice(0, 1);
+            renderHand([...scn, ...evs]);
+            resetTimer();
+            document.getElementById('game-view').scrollTop = 0;
+        }
+
+        function renderHand(cards) {
+            const container = document.getElementById('hand-container');
+            container.innerHTML = '';
+            cards.forEach(c => {
+                const div = document.createElement('div');
+                div.className = `card type-${c.type}`;
+                div.innerHTML = `
+            <div class="card-header"><span class="card-id">${c.id}</span><span class="card-type">${c.type}</span></div>
+            <div class="card-body">
+                <h2 class="card-title">${c.title}</h2>
+                <div class="card-tags">${c.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+                ${renderBody(c)}
+            </div>
+            <div class="card-footer">${c.footer}</div>
+        `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderBody(c) {
+            if (c.type === 'evidence') return `<span class="section-label">Safe Angles</span><ul class="card-list">${c.innocent_vectors.map(v => `<li>${v}</li>`).join('')}</ul><span class="section-label" style="color:var(--accent)">The Risk</span><ul class="card-list">${c.risk_vectors.map(v => `<li>${v}</li>`).join('')}</ul>`;
+            if (c.type === 'scene') return `<span class="section-label">Atmosphere</span><ul class="card-list">${c.corruptors.map(v => `<li>${v}</li>`).join('')}</ul><span class="section-label" style="color:#2196f3">Stakes</span><ul class="card-list">${c.pressure_profile.map(v => `<li>${v}</li>`).join('')}</ul>`;
+            return '';
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('timer-btn');
+            if (timerInt) { clearInterval(timerInt); timerInt = null; btn.innerText = "RESUME"; btn.classList.remove('running', 'shake'); }
+            else {
+                if (timerVal <= 0) { resetTimer(); return; }
+                btn.classList.add('running');
+                timerInt = setInterval(() => {
+                    timerVal--;
+                    btn.innerText = timerVal;
+                    if (timerVal <= 3) btn.classList.add('shake');
+                    if (timerVal <= 0) { clearInterval(timerInt); timerInt = null; btn.innerText = "GUILTY!"; btn.classList.remove('running', 'shake'); btn.classList.add('finished'); }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInt); timerInt = null; timerVal = 10;
+            const btn = document.getElementById('timer-btn');
+            btn.innerText = "START PLEA (10s)";
+            btn.classList.remove('running', 'shake', 'finished');
+        }
+
+        function addPlayer(name) { players.push({ name: name || `Suspect ${players.length + 1}`, score: 0 }); renderScores(); }
+        function renderScores() {
+            const list = document.getElementById('score-list');
+            list.innerHTML = players.map((p, i) => `<div style="display:flex; justify-content:space-between; background:#222; padding:15px; border-radius:8px; margin-bottom:10px; align-items:center;"><span>${p.name}</span><div style="display:flex; gap:10px; align-items:center;"><button class="btn btn-red" onclick="modScore(${i},-1)">-</button><b style="font-size:1.5rem; width:30px; text-align:center;">${p.score}</b><button class="btn btn-green" onclick="modScore(${i},1)">+</button></div></div>`).join('');
+        }
+        function modScore(i, v) { players[i].score += v; renderScores(); }
+
+        function renderPrintView() { alert("Ready to print. Layout: Landscape, No Margins."); window.print(); }
+
+        init();
+    </script>
 </body>
 
 </html>

@@ -4,146 +4,447 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACM PROTOCOL 07: TRASH FIRE</title>
+    <title>TRASH FIRE: The Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Rubik+Glitch&family=Bebas+Neue&display=swap"
         rel="stylesheet">
     <style>
         :root {
-            --bg: #f5f5f0;
-            --text: #000;
-            --accent: #ccff00;
-            --border: #000;
+            --neon-pink: #ff00ff;
+            --neon-green: #00ff41;
+            --trash-black: #0a0a0a;
+            --paper-white: #f0f0f0;
         }
 
         body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            padding: 2rem;
-            max-width: 800px;
-            margin: 0 auto;
+            background-color: var(--trash-black);
+            color: var(--paper-white);
+            font-family: 'Courier Prime', monospace;
+            overflow-x: hidden;
         }
 
-        .mono {
-            font-family: 'JetBrains Mono', monospace;
+        .font-glitch {
+            font-family: 'Rubik Glitch', cursive;
         }
 
+        .font-header {
+            font-family: 'Bebas Neue', sans-serif;
+        }
+
+        /* Card Styles */
         .card {
-            background: #fff;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
+            aspect-ratio: 2.5/3.5;
+            transition: transform 0.2s;
+            position: relative;
+            overflow: hidden;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23222222' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
+        .card-sicko {
+            border: 4px solid var(--neon-pink);
+            background-color: #1a051a;
         }
 
-        .family {
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -0.5px;
+        .card-filth {
+            border: 4px solid var(--neon-green);
+            background-color: #051a05;
         }
 
-        .id {
-            background: var(--accent);
-            padding: 0.2rem 0.6rem;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 0.8rem;
+        .sicko-text {
+            color: var(--neon-pink);
         }
 
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 0.5rem;
-            line-height: 1.1;
-            text-transform: uppercase;
+        .filth-text {
+            color: var(--neon-green);
         }
 
-        .meta {
-            font-family: 'JetBrains Mono', monospace;
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
+        /* Glitch Animation */
+        @keyframes glitch-anim {
+            0% {
+                transform: translate(0);
+            }
+
+            20% {
+                transform: translate(-2px, 2px);
+            }
+
+            40% {
+                transform: translate(-2px, -2px);
+            }
+
+            60% {
+                transform: translate(2px, 2px);
+            }
+
+            80% {
+                transform: translate(2px, -2px);
+            }
+
+            100% {
+                transform: translate(0);
+            }
         }
 
-        .brief {
-            font-size: 1.25rem;
-            line-height: 1.5;
-            margin-bottom: 2rem;
-            font-weight: 600;
+        .glitch-hover:active {
+            animation: glitch-anim 0.2s infinite;
         }
 
-        .actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
+        /* Print Styles */
+        @media print {
+            body {
+                background-color: white !important;
+                color: black !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .print-only {
+                display: grid !important;
+            }
+
+            .card {
+                border-width: 2px !important;
+                page-break-inside: avoid;
+                background-color: white !important;
+                background-image: none !important;
+                color: black !important;
+                box-shadow: none !important;
+                break-inside: avoid;
+            }
+
+            .card-sicko {
+                border-color: black !important;
+                border-style: solid;
+            }
+
+            .card-filth {
+                border-color: black !important;
+                border-style: dashed;
+            }
+
+            .sicko-text {
+                color: black !important;
+                font-weight: bold;
+                text-decoration: underline;
+            }
+
+            .filth-text {
+                color: black !important;
+                font-weight: bold;
+                font-style: italic;
+            }
+
+            .print-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                width: 100%;
+            }
+
+            @page {
+                margin: 0.5cm;
+            }
         }
 
-        .btn {
-            background: #000;
-            color: #fff;
-            text-decoration: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
+        .print-only {
+            display: none;
         }
 
-        .btn:hover {
-            background: #333;
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: #000;
-            border: 2px solid #000;
-        }
-
-        .btn-outline:hover {
-            background: #f0f0f0;
-        }
-
-        .back {
-            display: block;
-            margin-top: 2rem;
-            color: #666;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .back:hover {
-            text-decoration: underline;
-            color: #000;
+        /* Modal */
+        .modal-open {
+            overflow: hidden;
         }
     </style>
 </head>
 
-<body>
-    <div class="card">
-        <div class="header">
-            <span class="family">Slop Bucket</span>
-            <span class="id mono">PROTOCOL 07</span>
+<body class="min-h-screen flex flex-col">
+
+    <!-- HEADER -->
+    <header class="p-4 border-b border-gray-800 bg-black sticky top-0 z-50 no-print">
+        <div class="flex justify-between items-center max-w-4xl mx-auto">
+            <h1 class="text-3xl font-glitch text-white tracking-widest leading-none">
+                TRASH<span class="text-[var(--neon-pink)]">FIRE</span>
+            </h1>
+            <button onclick="toggleManifesto()"
+                class="text-xs uppercase border border-white px-3 py-1 hover:bg-white hover:text-black transition">
+                Manifesto
+            </button>
         </div>
-        <h1>Trash Fire</h1>
-        <div class="meta">Narrative Slop · 37 Cards</div>
-        <div class="brief">Draw SICKO + FILTH. 60s pitch. Virality over quality. The manifesto of uninhibited narrative
-            slop.</div>
-        <div class="actions">
-            <a href="../the-feed-00.html" class="btn">▶ LAUNCH SIMULATION</a>
-            <a href="../print-production.html#game=feed" class="btn btn-outline">🖨️ PRINT KIT</a>
+    </header>
+
+    <!-- GAME AREA (Mobile First) -->
+    <main class="flex-grow flex flex-col items-center justify-center p-4 gap-6 no-print w-full max-w-4xl mx-auto">
+
+        <div class="text-center space-y-2 mb-4">
+            <p class="text-gray-400 text-sm">THE MANIFESTO OF UNINHIBITED NARRATIVE SLOP</p>
+            <div class="text-xs bg-gray-900 inline-block px-2 py-1 rounded text-gray-500">SESSION TIME: 04:00 AM</div>
+        </div>
+
+        <!-- The Slot Machine -->
+        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <!-- SICKO CARD SLOT -->
+            <div id="sicko-slot"
+                class="card card-sicko rounded-xl p-6 flex flex-col justify-between shadow-[0_0_20px_rgba(255,0,255,0.3)] min-h-[400px]">
+                <div class="flex justify-between items-start">
+                    <span class="text-xs font-bold bg-[var(--neon-pink)] text-black px-2 py-0.5">SICKO</span>
+                    <span class="text-xs text-[var(--neon-pink)] opacity-70">PHYSIOLOGY</span>
+                </div>
+                <div class="flex-grow flex flex-col justify-center py-4">
+                    <h2 id="sicko-title" class="text-2xl font-header sicko-text mb-4 leading-tight">THE CONFEDERATE
+                        RETRIEVER</h2>
+                    <p id="sicko-desc" class="text-lg leading-snug">A Racist Golden Retriever who is actually a
+                        reincarnated Confederate General.</p>
+                </div>
+                <div class="border-t border-[var(--neon-pink)] pt-2 mt-2">
+                    <p class="text-[10px] uppercase tracking-widest opacity-60">Narrative Function</p>
+                    <p id="sicko-func" class="text-xs italic text-gray-300">Forces cast to interpret barks as hate
+                        speech.</p>
+                </div>
+            </div>
+
+            <!-- FILTH CARD SLOT -->
+            <div id="filth-slot"
+                class="card card-filth rounded-xl p-6 flex flex-col justify-between shadow-[0_0_20px_rgba(0,255,65,0.3)] min-h-[400px]">
+                <div class="flex justify-between items-start">
+                    <span class="text-xs font-bold bg-[var(--neon-green)] text-black px-2 py-0.5">FILTH</span>
+                    <span class="text-xs text-[var(--neon-green)] opacity-70">ACTION</span>
+                </div>
+                <div class="flex-grow flex flex-col justify-center py-4">
+                    <h2 id="filth-title" class="text-2xl font-header filth-text mb-4 leading-tight">THE FUNERAL DROP
+                    </h2>
+                    <p id="filth-desc" class="text-lg leading-snug">...seduces the priest during a funeral via AirDrop.
+                    </p>
+                </div>
+                <div class="border-t border-[var(--neon-green)] pt-2 mt-2">
+                    <p class="text-[10px] uppercase tracking-widest opacity-60">Propp Function</p>
+                    <p id="filth-func" class="text-xs italic text-gray-300">Trickery: Deceiving the victim via
+                        technology.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Controls -->
+        <button onclick="generateSlop()"
+            class="glitch-hover w-full md:w-auto bg-white text-black font-header text-3xl py-4 px-12 rounded shadow-[4px_4px_0px_var(--neon-pink)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all border-2 border-transparent hover:border-[var(--neon-pink)]">
+            GENERATE SLOP
+        </button>
+
+        <p class="text-center text-xs text-gray-500 max-w-sm">
+            INSTRUCTIONS: Combine the cards. Pitch the scene. Disregard logic. The most unhinged narrative wins.
+        </p>
+
+        <div class="mt-8 border-t border-gray-800 w-full pt-4 text-center">
+            <button onclick="window.print()" class="text-sm text-gray-400 hover:text-white underline decoration-dotted">
+                🖨️ PRINT FULL DECK (PAPER MODE)
+            </button>
+        </div>
+    </main>
+
+    <!-- MANIFESTO MODAL -->
+    <div id="manifesto-modal" class="fixed inset-0 bg-black/95 z-[100] hidden overflow-y-auto no-print">
+        <div class="max-w-2xl mx-auto p-8 min-h-screen">
+            <div class="flex justify-between items-center mb-8 sticky top-0 bg-black/95 py-4 border-b border-gray-700">
+                <h2 class="text-2xl font-glitch text-[var(--neon-pink)]">THE MANIFESTO</h2>
+                <button onclick="toggleManifesto()" class="text-2xl text-white">&times;</button>
+            </div>
+
+            <div class="prose prose-invert prose-sm font-mono text-gray-300">
+                <h3 class="text-white uppercase font-bold">1. Executive Summary: The 4 AM Paradigm Shift</h3>
+                <p>The contemporary narrative landscape is in a state of terminal entropy. We are no longer crafting
+                    "stories"; we are manufacturing "content." This engine is designed to generate "Narrative
+                    Slop"—plotlines devoid of moral compass yet possessed of addictive watchability.</p>
+
+                <h3 class="text-white uppercase font-bold mt-6">2. The Game Logic</h3>
+                <p>The game operates on the "4 AM Writer's Room" heuristic. Logic, continuity, and decency are
+                    incinerated. </p>
+                <ul class="list-disc pl-4 space-y-2">
+                    <li><strong class="text-[var(--neon-pink)]">PILE 1: THE SICKOS.</strong> Based on the corruption of
+                        Lajos Egri’s dramatic theory. Physiology becomes monstrosity. Sociology becomes toxic
+                        performance.</li>
+                    <li><strong class="text-[var(--neon-green)]">PILE 2: THE FILTH.</strong> Based on the perversion of
+                        Vladimir Propp’s narratology. The Hero’s Journey is replaced by the Gutter Slide.</li>
+                </ul>
+
+                <h3 class="text-white uppercase font-bold mt-6">How To Play</h3>
+                <ol class="list-decimal pl-4 space-y-2">
+                    <li>Draw one <strong>SICKO</strong> and one <strong>FILTH</strong>.</li>
+                    <li>You have 60 seconds to pitch the scene.</li>
+                    <li>The goal is not "Quality." The goal is "Virality."</li>
+                    <li>Example: <em>"A Vegan Vampire sets the wedding venue on fire for a gender reveal."</em></li>
+                </ol>
+
+                <div class="mt-12 text-center">
+                    <button onclick="toggleManifesto()"
+                        class="border border-white px-6 py-2 hover:bg-white hover:text-black">ACKNOWLEDGE &
+                        CLOSE</button>
+                </div>
+            </div>
         </div>
     </div>
-    <a href="../anti-crisis.html" class="back mono">← RETURN TO SYSTEM</a>
+
+    <!-- PRINT LAYOUT (Visible only when printing) -->
+    <div class="print-only p-4">
+        <div class="text-center mb-4 border-b-2 border-black pb-2">
+            <h1 class="font-glitch text-4xl">TRASH FIRE DECK</h1>
+            <p class="font-mono text-sm">Cut along lines. Combine 1 Sicko + 1 Filth. Destroy Art.</p>
+        </div>
+
+        <div class="print-grid" id="print-deck-container">
+            <!-- Cards injected via JS -->
+        </div>
+    </div>
+
+    <script>
+        // DATA SETS
+        const sickos = [
+            { id: 1, title: "THE CONFEDERATE RETRIEVER", desc: "A Racist Golden Retriever who is actually a reincarnated Confederate General.", func: "Gaslights cast to interpret barks as hate speech." },
+            { id: 2, title: "THE GOD COMPLEX GYNO", desc: "A Gynaecologist with a God Complex and shaky hands.", func: "Promses health but delivers lawsuits." },
+            { id: 3, title: "THE TRENCH COAT WIFE", desc: "A 'Trad-Wife' Influencer who is secretly 3 raccoons in a trench coat.", func: "The 'Unrecognized Arrival'. Passes until the coat slips." },
+            { id: 4, title: "THE SPIN CYCLE STEPMOM", desc: "A Step-Mom who is 'stuck' in the washing machine (again).", func: "A literal obstacle. The plot must move around her." },
+            { id: 5, title: "THE BETA-ALPHA PODCASTER", desc: "An Alpha Male Podcaster who is afraid of women with high credit scores.", func: "The villain who defeats himself through insecurity." },
+            { id: 6, title: "THE FLAT-EARTH ASTRONAUT", desc: "A Flat-Earther Astronaut who refuses to look out the window.", func: "Refusal of the Call. Denies objective reality." },
+            { id: 7, title: "THE HEMATOPHOBE RIPPER", desc: "A 'Hemophobic' Serial Killer who faints at the sight of blood.", func: "Kills must be elaborate and bloodless Rube Goldberg machines." },
+            { id: 8, title: "THE O-NEGATIVE VEGAN", desc: "A Vegan Vampire who only drinks coconut water but tells everyone it's O-Negative.", func: "Postures as a threat but is just annoying at dinner." },
+            { id: 9, title: "THE CROSSFIT MESSIAH", desc: "A Crossfit Jesus who turns water into protein shakes.", func: "Provides the hero with 'Pre-Workout' (Cult Membership)." },
+            { id: 10, title: "THE METHOD TREE", desc: "A Method Actor playing a tree who has taken root in the living room.", func: "A silent Greek Chorus who judges with branch language." },
+            { id: 11, title: "THE SOURDOUGH SUFFRAGETTE", desc: "A Sentient Sourdough Starter that demands voting rights.", func: "The 'Thing in the Fridge' that gains political dominance." },
+            { id: 12, title: "THE KLINGON BEAUTY QUEEN", desc: "A Beauty Queen with 'Foreign Accent Syndrome' who speaks exclusively in Klingon.", func: "Communication Ban. No one understands her threats." },
+            { id: 13, title: "THE INDEX CARD HOARDER", desc: "A Hoarder who collects other people's secrets (literally, on index cards).", func: "The Dispatcher. Releases one card to start a quest." },
+            { id: 14, title: "THE VAPE-PEN VICTORIAN", desc: "A Time-Traveling Victorian Child who is addicted to vape pens.", func: "Fish out of Water who adapts to the worst modern vices." },
+            { id: 15, title: "THE ALIEN HAND SURGEON", desc: "A Surgeon with 'Alien Hand Syndrome' that keeps trying to strangle the patient.", func: "The Hero fights the Villain during the life-saving operation." },
+            { id: 16, title: "THE NFT SOUL", desc: "A Crypto-Bro who sold his soul as an NFT.", func: "Must obey the whims of the market (the other players)." },
+            { id: 17, title: "THE CAKE MOTHER", desc: "A Mom-Fluencer whose children are actually hyper-realistic cakes.", func: "Tragedy occurs when someone hugs the child and dents the fondant." },
+            { id: 18, title: "THE PIGEON TRUTHER", desc: "A Conspiracy Theorist who believes birds are government drones and is dating a pigeon.", func: "The Romance Arc. Violation of the interdiction." },
+            { id: 19, title: "THE MARITIME CAT", desc: "A 'Sovereign Citizen' Cat that refuses to use the litter box because of 'Maritime Law'.", func: "Refuses to yield to the Hero's rules (The Social Contract)." },
+            { id: 20, title: "THE SIMP-CELL", desc: "A Reddit Mod who runs a 'Simp' army but is allergic to wifi.", func: "The Wizard in the Tower who can only be reached by ethernet." }
+        ];
+
+        const filth = [
+            { id: 1, title: "THE FUNERAL DROP", desc: "...seduces the priest during a funeral via AirDrop.", func: "Trickery: Technology intruding on the sacred." },
+            { id: 2, title: "THE BURRITO BABY", desc: "...fakes a pregnancy using a stolen burrito.", func: "Unfounded Claims: The evidence is perishable food." },
+            { id: 3, title: "THE TAX-FRAUD OF", desc: "...starts an OnlyFans but it's just videos of them committing tax fraud.", func: "Transfiguration: Confession disguised as content." },
+            { id: 4, title: "THE THERAPEUTIC BLACKMAIL", desc: "...blackmails their therapist into dating them.", func: "Testing: The healer becomes the hostage." },
+            { id: 5, title: "THE UNBOXING CRIME", desc: "...accidentally livestreams a crime while doing an unboxing video.", func: "Exposure: Incidental to consumerism." },
+            { id: 6, title: "THE SIREN RIDE", desc: "...steals a police car to get to a booty call.", func: "Spatial Transference: Lust overrides grand theft auto." },
+            { id: 7, title: "THE GATOR DATE", desc: "...wrestles an alligator to impress a date.", func: "Struggle: Creating danger solely to resolve it." },
+            { id: 8, title: "THE APPENDIX DECOR", desc: "...sells their own appendix on Etsy as 'vintage decor'.", func: "Lack: Self-cannibalization for the gig economy." },
+            { id: 9, title: "THE TILT-A-WHIRL AFFAIR", desc: "...marries a carnival ride and cheats on it with the Tilt-A-Whirl.", func: "Wedding: Objectum Sexuality infidelity." },
+            { id: 10, title: "THE SYNTHOL POP", desc: "...injects cooking oil into their biceps to look swole.", func: "Transfiguration: False Heroism leading to necrosis." },
+            { id: 11, title: "THE TICKET EATER", desc: "...eats a winning lottery ticket to prevent their spouse from getting half.", func: "Liquidation: Spite destroys the boon." },
+            { id: 12, title: "THE MUSTACHE FUNERAL", desc: "...fakes their own death but attends the funeral in a disguise that is just a mustache.", func: "Unrecognized Arrival: Relies on Clark Kent logic." },
+            { id: 13, title: "THE PARANORMAL KAREN", desc: "...calls the police on a ghost for trespassing.", func: "Counteraction: Bureaucracy applied to the metaphysical." },
+            { id: 14, title: "THE BABY WEAPON", desc: "...uses a baby as a weapon in a bar fight.", func: "Magical Agent: Innocence turned into violence." },
+            { id: 15, title: "THE EXPOSURE BAIL", desc: "...tries to pay for bail with exposure.", func: "Testing: Misunderstanding the currency of law." },
+            { id: 16, title: "THE GENDER ARSON", desc: "...sets the wedding venue on fire for the gender reveal.", func: "Villainy: Collateral damage to the joy of procreation." },
+            { id: 17, title: "THE OPEN-HEART TWEET", desc: "...live-tweets their own open-heart surgery.", func: "Testing: Survival is secondary to engagement metrics." },
+            { id: 18, title: "THE NON-CONSENT BIRTH SUIT", desc: "...sues their parents for giving birth to them without consent.", func: "Counteraction: Against existence itself." },
+            { id: 19, title: "THE GRANDFATHER CATFISH", desc: "...catfishes their own grandfather to get into the will.", func: "Trickery: Incestuous financial elder abuse." },
+            { id: 20, title: "THE VIBE SWAP", desc: "...swaps their baby at the hospital because the new one 'vibes better'.", func: "Villainy: The aestheticization of human life." }
+        ];
+
+        // LOGIC
+        function getRandom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function generateSlop() {
+            const sicko = getRandom(sickos);
+            const filthItem = getRandom(filth);
+
+            // Animate Transitions
+            const sickoEl = document.getElementById('sicko-slot');
+            const filthEl = document.getElementById('filth-slot');
+
+            sickoEl.classList.add('scale-95', 'opacity-50');
+            filthEl.classList.add('scale-95', 'opacity-50');
+
+            setTimeout(() => {
+                // Update Sicko
+                document.getElementById('sicko-title').textContent = sicko.title;
+                document.getElementById('sicko-desc').textContent = sicko.desc;
+                document.getElementById('sicko-func').textContent = sicko.func;
+
+                // Update Filth
+                document.getElementById('filth-title').textContent = filthItem.title;
+                document.getElementById('filth-desc').textContent = filthItem.desc;
+                document.getElementById('filth-func').textContent = filthItem.func;
+
+                // Remove Animation classes
+                sickoEl.classList.remove('scale-95', 'opacity-50');
+                filthEl.classList.remove('scale-95', 'opacity-50');
+            }, 150);
+        }
+
+        function toggleManifesto() {
+            const modal = document.getElementById('manifesto-modal');
+            const body = document.body;
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                body.classList.add('modal-open');
+            } else {
+                modal.classList.add('hidden');
+                body.classList.remove('modal-open');
+            }
+        }
+
+        // GENERATE PRINT DECK
+        function renderPrintDeck() {
+            const container = document.getElementById('print-deck-container');
+            let html = '';
+
+            // Add Sickos
+            sickos.forEach(card => {
+                html += `
+                    <div class="card card-sicko p-4 flex flex-col justify-between h-[350px] border-2 border-black">
+                        <div class="flex justify-between items-center border-b-2 border-black pb-1 mb-2">
+                            <span class="font-bold text-sm">SICKO</span>
+                            <span class="text-xs">PHYSIOLOGY</span>
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-lg leading-tight mb-2 sicko-text">${card.title}</h3>
+                            <p class="text-sm font-mono leading-snug">${card.desc}</p>
+                        </div>
+                        <div class="border-t-2 border-black pt-1 mt-2">
+                             <p class="text-[10px] uppercase font-bold">Function</p>
+                             <p class="text-xs italic">${card.func}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Add Filth
+            filth.forEach(card => {
+                html += `
+                    <div class="card card-filth p-4 flex flex-col justify-between h-[350px] border-2 border-dashed border-black">
+                        <div class="flex justify-between items-center border-b-2 border-black pb-1 mb-2">
+                            <span class="font-bold text-sm">FILTH</span>
+                            <span class="text-xs">ACTION</span>
+                        </div>
+                        <div class="flex-grow">
+                            <h3 class="font-bold text-lg leading-tight mb-2 filth-text">${card.title}</h3>
+                            <p class="text-sm font-mono leading-snug">${card.desc}</p>
+                        </div>
+                        <div class="border-t-2 border-black pt-1 mt-2">
+                             <p class="text-[10px] uppercase font-bold">Propp Function</p>
+                             <p class="text-xs italic">${card.func}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Init
+        renderPrintDeck();
+        generateSlop(); // Initial roll
+
+    </script>
 </body>
 
 </html>
