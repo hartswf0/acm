@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANTI-CRISIS MACHINE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background: #fff;
+            color: #000;
+            line-height: 1.5;
+            padding: 20px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 48px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid #000;
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+        }
+
+        .intro {
+            font-size: 12px;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .stats {
+            font-size: 10px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .game-family {
+            margin-bottom: 48px;
+        }
+
+        .family-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #000;
+        }
+
+        .family-title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .family-type {
+            font-size: 9px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .family-desc {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .protocols {
+            list-style: none;
+        }
+
+        .protocol {
+            display: block;
+            padding: 14px 0;
+            border-bottom: 1px solid #e0e0e0;
+            text-decoration: none;
+            color: #000;
+            transition: all 0.15s ease;
+        }
+
+        .protocol:hover {
+            background: #f5f5f5;
+            padding-left: 12px;
+        }
+
+        .protocol:active {
+            background: #000;
+            color: #fff;
+        }
+
+        .protocol:active .protocol-num,
+        .protocol:active .protocol-desc,
+        .protocol:active .protocol-meta {
+            color: #fff;
+        }
+
+        .protocol-header {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .protocol-num {
+            font-size: 9px;
+            color: #999;
+            font-weight: 700;
+        }
+
+        .protocol-title {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .protocol-desc {
+            font-size: 11px;
+            color: #555;
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .protocol-meta {
+            font-size: 9px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        footer {
+            margin-top: 48px;
+            padding-top: 20px;
+            border-top: 2px solid #000;
+            font-size: 10px;
+            color: #999;
+            text-align: center;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+
+            .intro {
+                font-size: 11px;
+            }
+
+            .family-title {
+                font-size: 13px;
+            }
+
+            .protocol-title {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>ANTI-CRISIS MACHINE</h1>
+        <p class="intro">Satirical tabletop games that turn culture wars, algorithmic feeds, and social panic into
+            playable systems. 4 game families. 8 protocols. Free to play.</p>
+        <div class="stats">166 cards · Play online or print at home</div>
+    </header>
+
+    <!-- PARTY GAMES FAMILY -->
+    <div class="game-family">
+        <div class="family-header">
+            <div class="family-title">EXPLAIN YOURSELF</div>
+            <div class="family-type">Party · Defense</div>
+        </div>
+        <div class="family-desc">You've been caught with suspicious evidence. Explain your innocence before the jury
+            convicts you.</div>
+        <ul class="protocols">
+            <a href="https://gemini.google.com/share/a1ce0c5b8a17" target="_blank" class="protocol">
+                <div class="protocol-header">
+                    <span class="protocol-num">01</span>
+                    <span class="protocol-title">Origins</span>
+                </div>
+                <div class="protocol-desc">2 objects + 1 location. 10 second timer. Jury votes innocent or guilty.</div>
+                <div class="protocol-meta">Core Rules · 50 Cards</div>
+            </a>
+            <a href="https://gemini.google.com/share/cffea067de38" target="_blank" class="protocol">
+                <div class="protocol-header">
+                    <span class="protocol-num">02</span>
+                    <span class="protocol-title">CIRCUMSTANTIAL</span>
+                </div>
+                <div class="protocol-desc">Kinetic defense system. Variants: Speed Trial (7s), Filibuster (talk till 0).
+                </div>
+                <div class="protocol-meta">Advanced Mode · Legal Precedents</div>
+            </a>
+            <a href="https://gemini.google.com/share/d4adaca9131e" target="_blank" class="protocol">
+                <div class="protocol-header">
+                    <span class="protocol-num">03</span>
+                    <span class="protocol-title">Mobile & Print</span>
+                </div>
+                <div class="protocol-desc">Play on phone or download deck. JSON data export for custom builds.</div>
+                <div class="protocol-meta">Production · Digital/Physical</div>
+            </a>
+            <a href="https://gemini.google.com/share/de47d50af1a7" target="_blank" class="protocol">
+                <div class="protocol-header">
+                    <span class="protocol-num">04</span>
+                    <span class="protocol-title">Psychometric Analysis</span>
+                </div>
+                <div class="protocol-desc">Fight the Suspicion Heuristic. Brain defaults to criminal—create benign
+                    schema.</div>
+                <div class="protocol-meta">Research · Dr. Aris Thorne</div>
+            </a>
+        </ul>
+    </div>
+
+    <!-- CULTURE WAR FAMILY -->
+    <div class="game-family">
+        <div class="family-header">
+            <div class="family-title">TOTAL MELTDOWN</div>
+            <div class="family-type">Simulator · Collapse</div>
+        </div>
+        <div class="family-desc">Culture war engine. Force tribal alignment, monetize outrage, accelerate collapse.
+        </div>
+        <ul class="protocols">
+            <a href="https://gemini.google.com/share/63b462a75066" target="_blank" class="protocol">
+                <div class="protocol-header">
+                    <span class="protocol-num">05</span>
+                    <span class="protocol-title">Gamifying Collapse</span>
+                </div>
+                <div class="protocol-desc">Core theory. Play as media platforms extracting value from cultural division.
+                </div>
+                <div class="protocol-meta">Base Game · 40 Cards</div>
+            </a>
+            <a href="https://gemini.google.com/share/a2cbf15ab418" target="_blank" class="protocol">
+                <div class="protocol-header">
+                    <span class="protocol-num">06</span>
+                    <span class="protocol-title">Critique of Pure Gooning</span>
+                </div>
+                <div class="protocol-desc">Protocol 4.0. Draw cards, read theory, lower room IQ. Failure = cringe
+                    status.</div>
+                <div class="protocol-meta">Advanced · The Rules of Rot</div>
+            </a>
+        </ul>
+    </div>
+
+    <!-- NARRATIVE SLOP FAMILY -->
+    <div class="game-family">
+        <div class="family-header">
+            <div class="family-title">TRASH FIRE</div>
+            <div class="family-type">Generator · Narrative</div>
+        </div>
+        <div class="family-desc">4 AM writer's room simulator. Manufacture addictive narrative slop devoid of morality.
+        </div>
+        <ul class="protocols">
+            <a href="https://gemini.google.com/share/317e77e32a80" target="_blank" class="protocol">
+                <div class="protocol-header">
+                    <span class="protocol-num">07</span>
+                    <span class="protocol-title">TRASH FIRE Manifesto</span>
+                </div>
+                <div class="protocol-desc">Draw SICKO + FILTH. 60s pitch. Goal: virality, not quality. Logic
+                    incinerated.</div>
+                <div class="protocol-meta">Philosophy · 37 Cards</div>
+            </a>
+        </ul>
+    </div>
+
+    <!-- SANITIZATION FAMILY -->
+    <div class="game-family">
+        <div class="family-header">
+            <div class="family-title">HISTORY WASHER</div>
+            <div class="family-type">Economic · Remediation</div>
+        </div>
+        <div class="family-desc">Time janitor simulator. Sanitize horrific history into profitable tourist attractions.
+        </div>
+        <ul class="protocols">
+            <a href="https://gemini.google.com/share/ec35ffcb13d9" target="_blank" class="protocol">
+                <div class="protocol-header">
+                    <span class="protocol-num">08</span>
+                    <span class="protocol-title">STREET SWEEPER</span>
+                </div>
+                <div class="protocol-desc">Draw Debris (truth), wash with Sanitizer (spin), rebrand, collect rent. Bag
+                    burst = game over.</div>
+                <div class="protocol-meta">Employee Handbook · 26 Cards</div>
+            </a>
+        </ul>
+    </div>
+
+    <footer>
+        ANTI-CRISIS MACHINE © 2026
+    </footer>
+</body>
+
+</html>
