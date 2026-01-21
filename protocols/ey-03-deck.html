@@ -639,11 +639,11 @@
                             </div>
 
                             {/* Evidence Area */}
-                            <div className="w-full flex justify-center gap-4">
+                            <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4 px-2">
                                 {gameState.evidence.length > 0 ? (
                                     gameState.evidence.map((card, idx) => (
                                         <div key={idx} className="slide-in" style={{ animationDelay: `${idx * 0.1}s` }}>
-                                            <Card data={card} isFaceUp={true} className="scale-75 origin-top" />
+                                            <Card data={card} isFaceUp={true} className="scale-[0.55] sm:scale-75 origin-top" />
                                         </div>
                                     ))
                                 ) : (
