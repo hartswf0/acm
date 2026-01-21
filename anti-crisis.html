@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANTI-CRISIS MACHINE</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=IBM+Plex+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #F5F1E8;
+            color: #0A0B0E;
+            line-height: 1.4;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+
+        header {
+            margin-bottom: 48px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid #0A0B0E;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .tagline {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 16px;
+        }
+
+        .proof {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .family {
+            margin-bottom: 56px;
+        }
+
+        .family-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #0A0B0E;
+        }
+
+        .family-title {
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+
+        .family-type {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .family-pitch {
+            font-size: 13px;
+            color: #0A0B0E;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .protocols {
+            list-style: none;
+            border-top: 1px solid #D0CCC0;
+        }
+
+        .protocol {
+            display: block;
+            padding: 16px 0;
+            border-bottom: 1px solid #D0CCC0;
+            text-decoration: none;
+            color: #0A0B0E;
+            transition: all 0.12s ease;
+        }
+
+        .protocol:hover {
+            padding-left: 12px;
+            background: rgba(10, 11, 14, 0.03);
+        }
+
+        .protocol:active {
+            background: #0A0B0E;
+            color: #F5F1E8;
+        }
+
+        .protocol:active .proto-meta,
+        .protocol:active .proto-hook {
+            color: #F5F1E8;
+        }
+
+        .proto-header {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .proto-num {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9px;
+            color: #999;
+            font-weight: 700;
+        }
+
+        .proto-title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .proto-hook {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 4px;
+        }
+
+        .proto-meta {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        footer {
+            margin-top: 64px;
+            padding-top: 20px;
+            border-top: 2px solid #0A0B0E;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9px;
+            color: #999;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 20px 16px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .family-title {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Anti-Crisis Machine</h1>
+            <p class="tagline">Satirical card systems for culture war panic, feed logic, and spin.</p>
+            <p class="proof">4 families · 8 protocols · 166 cards · free · mobile + print · json export</p>
+        </header>
+
+        <!-- EXPLAIN YOURSELF -->
+        <div class="family">
+            <div class="family-header">
+                <div class="family-title">Explain Yourself</div>
+                <div class="family-type">Party · Defense</div>
+            </div>
+            <p class="family-pitch">You look guilty. Prove otherwise.</p>
+            <ul class="protocols">
+                <a href="ey-01-defense.html" class="protocol">
+                    <div class="proto-header">
+                        <span class="proto-num">01</span>
+                        <span class="proto-title">The Defense</span>
+                    </div>
+                    <div class="proto-hook">2 objects. 1 location. 10 seconds. Jury votes on your innocence.</div>
+                    <div class="proto-meta">Core Game · 50 Cards</div>
+                </a>
+                <a href="ey-02-speed.html" class="protocol">
+                    <div class="proto-header">
+                        <span class="proto-num">02</span>
+                        <span class="proto-title">Speed Trial</span>
+                    </div>
+                    <div class="proto-hook">7 second timer. Filibuster mode. Legal precedents and rapid fire judgments.
+                    </div>
+                    <div class="proto-meta">Variants · Hard Mode</div>
+                </a>
+                <a href="ey-03-deck.html" class="protocol">
+                    <div class="proto-header">
+                        <span class="proto-num">03</span>
+                        <span class="proto-title">The Deck</span>
+                    </div>
+                    <div class="proto-hook">Mobile play. Print sheets. Browse all cards. Export data.</div>
+                    <div class="proto-meta">Production · Digital/Physical</div>
+                </a>
+                <a href="ey-04-heuristic.html" class="protocol">
+                    <div class="proto-header">
+                        <span class="proto-num">04</span>
+                        <span class="proto-title">The Heuristic</span>
+                    </div>
+                    <div class="proto-hook">Why you look guilty. Negativity bias study. How to fight the frame.</div>
+                    <div class="proto-meta">Research · Dr. Thorne</div>
+                </a>
+            </ul>
+        </div>
+
+        <!-- TOTAL MELTDOWN -->
+        <div class="family">
+            <div class="family-header">
+                <div class="family-title">Total Meltdown</div>
+                <div class="family-type">Simulator · Collapse</div>
+            </div>
+            <p class="family-pitch">Monetize outrage. Accelerate collapse.</p>
+            <ul class="protocols">
+                <a href="tm-05-collapse.html" class="protocol">
+                    <div class="proto-header">
+                        <span class="proto-num">05</span>
+                        <span class="proto-title">The Collapse</span>
+                    </div>
+                    <div class="proto-hook">Play as platforms. Extract value from division. Forces tribal alignment.
+                    </div>
+                    <div class="proto-meta">Core Game · 40 Cards</div>
+                </a>
+                <a href="tm-06-rot.html" class="protocol">
+                    <div class="proto-header">
+                        <span class="proto-num">06</span>
+                        <span class="proto-title">The Rot</span>
+                    </div>
+                    <div class="proto-hook">Draw theory cards. Lower room IQ. Embrace cringe.</div>
+                    <div class="proto-meta">Protocol 4.0 · Advanced</div>
+                </a>
+            </ul>
+        </div>
+
+        <!-- SLOP BUCKET -->
+        <div class="family">
+            <div class="family-header">
+                <div class="family-title">Slop Bucket</div>
+                <div class="family-type">Feed · Extraction</div>
+            </div>
+            <p class="family-pitch">Inject crises. Harvest engagement. Extract value.</p>
+            <ul class="protocols">
+                <a href="slop-07-trash.html" class="protocol">
+                    <div class="proto-header">
+                        <span class="proto-num">07</span>
+                        <span class="proto-title">Trash Fire</span>
+                    </div>
+                    <div class="proto-hook">Draw SICKO + FILTH. 60s pitch. Virality over quality.</div>
+                    <div class="proto-meta">Narrative Slop · 37 Cards</div>
+                </a>
+                <a href="slop-08-washer.html" class="protocol">
+                    <div class="proto-header">
+                        <span class="proto-num">08</span>
+                        <span class="proto-title">History Washer</span>
+                    </div>
+                    <div class="proto-hook">Draw Debris. Apply Sanitizer. Rebrand the past. Collect rent.</div>
+                    <div class="proto-meta">Remediation · 26 Cards</div>
+                </a>
+            </ul>
+        </div>
+
+        <footer>
+            <p class="footer-text">ANTI-CRISIS MACHINE © 2026</p>
+        </footer>
+    </div>
+</body>
+
+</html>
