@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Explain Yourself</title>
+    <title>Explain Yourself - Party Game</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -13,22 +13,26 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
 
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #121212;
+            background-color: #0f172a;
             color: #f3f4f6;
-            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
         }
 
         .font-display {
             font-family: 'Anton', sans-serif;
+            letter-spacing: 0.02em;
         }
 
         .font-mono {
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Print Specific Styles */
         @media print {
             @page {
                 size: letter landscape;
@@ -49,91 +53,17 @@
             .print-only {
                 display: block !important;
             }
-
-            .print-grid {
-                display: grid;
-                grid-template-columns: repeat(2, 3.5in);
-                grid-template-rows: repeat(2, 2.5in);
-                gap: 0;
-                justify-content: center;
-                align-content: center;
-                height: 100vh;
-                page-break-after: always;
-            }
-
-            .print-card {
-                width: 3.5in;
-                height: 2.5in;
-                border: 1px dashed #ccc;
-                position: relative;
-                display: flex;
-                flex-direction: column;
-                padding: 0.25in;
-                background: white;
-                overflow: hidden;
-            }
-
-            /* Cut marks */
-            .cut-mark-tl {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 10px;
-                height: 10px;
-                border-top: 1px solid black;
-                border-left: 1px solid black;
-            }
-
-            .cut-mark-tr {
-                position: absolute;
-                top: 0;
-                right: 0;
-                width: 10px;
-                height: 10px;
-                border-top: 1px solid black;
-                border-right: 1px solid black;
-            }
-
-            .cut-mark-bl {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 10px;
-                height: 10px;
-                border-bottom: 1px solid black;
-                border-left: 1px solid black;
-            }
-
-            .cut-mark-br {
-                position: absolute;
-                bottom: 0;
-                right: 0;
-                width: 10px;
-                height: 10px;
-                border-bottom: 1px solid black;
-                border-right: 1px solid black;
-            }
         }
 
-        /* Screen Styles */
         @media screen {
             .print-only {
                 display: none !important;
             }
-
-            .card-shadow {
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-            }
         }
 
-        /* Animation Utilities */
-        .slide-in {
-            animation: slideIn 0.3s ease-out forwards;
-        }
-
-        @keyframes slideIn {
+        @keyframes slideUp {
             from {
-                transform: translateY(20px);
+                transform: translateY(30px);
                 opacity: 0;
             }
 
@@ -142,6 +72,14 @@
                 opacity: 1;
             }
         }
+
+        .slide-up {
+            animation: slideUp 0.4s ease-out forwards;
+        }
+
+        .safe-bottom {
+            padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+        }
     </style>
 </head>
 
@@ -149,351 +87,184 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // --- THE COMPLETE GAME DATA (JSON) ---
         const GAME_DATA = {
             "deck_id": "explain-yourself-core-v1",
-            "version": "1.0.0",
-            "print_spec": {
-                "page_size": "US_LETTER",
-                "orientation": "landscape",
-                "card_size": "POKER_2.5x3.5",
-                "cards_per_page": 4,
-                "bleed": false,
-                "cut_lines": true,
-                "duplex": true
-            },
-            "mobile_spec": {
-                "ui_layout": "swipe_deck",
-                "dark_mode_supported": true,
-                "quick_actions": ["shuffle", "draw", "timer"]
-            },
-            "rules_text": "SETUP: Separate the Scene deck (Dark) and Evidence deck (Light). Give every player 5 Evidence cards. Pick a Judge for the first round.\n\nROUND: 1. Judge draws a Scene card and reads it aloud. This is where you were caught.\n2. Players choose 2 Evidence cards from their hand that were 'found on their person'.\n3. One by one, players become the Suspect. They have 30 seconds to explain why they had those items in that scene WITHOUT admitting guilt.\n4. The Judge awards the Scene card to the best explanation.\n\nWIN: First to 3 Scene cards wins. \n\nAUTO-LOSS: If you stutter, laugh too much, or admit to a crime, the Judge can overrule you immediately.",
-            "modes": ["Classic", "Speed Run", "Filibuster", "Hard Mode"],
             "decks": {
-                "protocol_cards": [
-                    { "id": "PRO-001", "type": "protocol", "title": "HOW TO PLAY", "tags": ["Setup"], "body": ["1. Separate decks.", "2. Deal 5 Evidence to all.", "3. Pick a Judge."], "footer": "Step 1 of 3" },
-                    { "id": "PRO-002", "type": "protocol", "title": "THE TURN", "tags": ["Loop"], "body": ["Judge reveals Scene.", "Players pick 2 items.", "Explain yourself in 30s."], "footer": "Step 2 of 3" },
-                    { "id": "PRO-003", "type": "protocol", "title": "THE VERDICT", "tags": ["Scoring"], "body": ["Judge picks favorite.", "Winner keeps Scene.", "Refill hands to 5."], "footer": "Step 3 of 3" },
-                    { "id": "PRO-004", "type": "protocol", "title": "HARD MODE", "tags": ["Variant"], "body": ["Don't look at Evidence.", "Flip them as you speak.", "Good luck."], "footer": "Optional" },
-                    { "id": "PRO-005", "type": "protocol", "title": "FILIBUSTER", "tags": ["Variant"], "body": ["No time limit.", "Must keep talking.", "Stop talking = Guilt."], "footer": "Optional" },
-                    { "id": "PRO-006", "type": "protocol", "title": "INTERROGATION", "tags": ["Variant"], "body": ["Jury asks questions.", "Suspect must answer.", " sweating = guilt."], "footer": "Optional" },
-                    { "id": "PRO-007", "type": "protocol", "title": "OBJECTION!", "tags": ["Tactic"], "body": ["Other players can yell.", "Interrupt the suspect.", "Throw them off."], "footer": "Advanced" },
-                    { "id": "PRO-008", "type": "protocol", "title": "CREDITS", "tags": ["Meta"], "body": ["Designed by AI.", "Prompted by You.", "Played by Us."], "footer": "Thank you" }
-                ],
                 "scene_cards": [
-                    { "id": "SCN-001", "type": "scene", "title": "TSA CHECKPOINT", "corruptors": ["Long Line", "Rubber Gloves", "Scanning Machine"], "pressure_profile": ["Federal Offense", "Missed Flight"], "prompt_seed": "I swear that's not organic matter.", "footer": "High Security" },
-                    { "id": "SCN-002", "type": "scene", "title": "FIRST DATE", "corruptors": ["Awkward Silence", "Expensive Wine", "Judgy Waiter"], "pressure_profile": ["Romance Killer", "Public Scene"], "prompt_seed": "It's a conversation starter!", "footer": "Social" },
-                    { "id": "SCN-003", "type": "scene", "title": "JOB INTERVIEW", "corruptors": ["CEO Present", "Quiet Office", "Glass Walls"], "pressure_profile": ["Career Ender", "HR Violation"], "prompt_seed": "These show my initiative.", "footer": "Corporate" },
-                    { "id": "SCN-004", "type": "scene", "title": "CRIME SCENE", "corruptors": ["Police Tape", "Chalk Outline", "Flashlights"], "pressure_profile": ["Actual Jail", "Tampering"], "prompt_seed": "I was just passing through!", "footer": "Legal" },
-                    { "id": "SCN-005", "type": "scene", "title": "KINDERGARTEN", "corruptors": ["Nap Time", "Small Chairs", "Juice Boxes"], "pressure_profile": ["Traumatized Kids", "Angry Parents"], "prompt_seed": "It's for a science project.", "footer": "Public" },
-                    { "id": "SCN-006", "type": "scene", "title": "BORDER CROSSING", "corruptors": ["Drug Dogs", "Stern Guards", "X-Ray"], "pressure_profile": ["Deportation", "Cavity Search"], "prompt_seed": "I didn't pack this bag.", "footer": "High Security" },
-                    { "id": "SCN-007", "type": "scene", "title": "CONFESSION BOOTH", "corruptors": ["The Priest", "Whispering", "Screen"], "pressure_profile": ["Eternal Damnation", "Excommunication"], "prompt_seed": "Forgive me father, but...", "footer": "Religious" },
-                    { "id": "SCN-008", "type": "scene", "title": "GRANDMA'S FUNERAL", "corruptors": ["Open Casket", "Crying Relatives", "Organ Music"], "pressure_profile": ["Disrespectful", "Written out of Will"], "prompt_seed": "She would have wanted this.", "footer": "Social" },
-                    { "id": "SCN-009", "type": "scene", "title": "THE OVAL OFFICE", "corruptors": ["The President", "Secret Service", "Red Phone"], "pressure_profile": ["Treason", "National News"], "prompt_seed": "Mr. President, hear me out.", "footer": "Government" },
-                    { "id": "SCN-010", "type": "scene", "title": "ALIEN ABDUCTION", "corruptors": ["Probe", "Bright Light", "Telepathy"], "pressure_profile": ["Galactic Zoo", "Memory Wipe"], "prompt_seed": "Take me to your leader.", "footer": "Sci-Fi" },
-                    { "id": "SCN-011", "type": "scene", "title": "PUBLIC TOILET", "corruptors": ["Stall Gap", "No Paper", "Wet Floor"], "pressure_profile": ["Hygiene", "Indecency"], "prompt_seed": "Occupied!", "footer": "Gross" },
-                    { "id": "SCN-012", "type": "scene", "title": "SURGERY ROOM", "corruptors": ["Open Chest", "Beeping", "Anesthesia"], "pressure_profile": ["Malpractice", "Death"], "prompt_seed": "I'm the specialist.", "footer": "Medical" },
-                    { "id": "SCN-013", "type": "scene", "title": "BANK VAULT", "corruptors": ["Laser Grid", "Time Lock", "Cameras"], "pressure_profile": ["Heist Charge", "Alarm"], "prompt_seed": "Just checking the safety deposit.", "footer": "Crime" },
-                    { "id": "SCN-014", "type": "scene", "title": "NUDE BEACH", "corruptors": ["Sand", "Sunburn", "Eye Contact"], "pressure_profile": ["Exposure", "Judgement"], "prompt_seed": "I'm overdressed.", "footer": "Social" },
-                    { "id": "SCN-015", "type": "scene", "title": "ELEVATOR", "corruptors": ["Stuck Between Floors", "Fart Smell", "Muzak"], "pressure_profile": ["Claustrophobia", "No Escape"], "prompt_seed": "Going down?", "footer": "Confined" },
-                    { "id": "SCN-016", "type": "scene", "title": "ZOOM CALL", "corruptors": ["Unmuted Mic", "Camera On", "Boss Talking"], "pressure_profile": ["Fired", "Viral Video"], "prompt_seed": "Can everyone see my screen?", "footer": "Digital" },
-                    { "id": "SCN-017", "type": "scene", "title": "MUSEUM GALA", "corruptors": ["Red Wine", "Priceless Art", "Tuxedos"], "pressure_profile": ["Vandalism", "Social Suicide"], "prompt_seed": "It's performance art.", "footer": "Fancy" },
-                    { "id": "SCN-018", "type": "scene", "title": "DRUG DEAL", "corruptors": ["Dark Alley", "Black SUV", "Guns"], "pressure_profile": ["Getting Shot", "Arrested"], "prompt_seed": "I'm just buying girl scout cookies.", "footer": "Dangerous" },
-                    { "id": "SCN-019", "type": "scene", "title": "SAUNA", "corruptors": ["Steam", "Towels", "Sweat"], "pressure_profile": ["Heat Stroke", "Privacy"], "prompt_seed": "Is it hot in here?", "footer": "Social" },
-                    { "id": "SCN-020", "type": "scene", "title": "NUCLEAR SILO", "corruptors": ["Launch Key", "Red Button", "Countdown"], "pressure_profile": ["World War 3", "Radiation"], "prompt_seed": "Oops.", "footer": "Military" },
-                    { "id": "SCN-021", "type": "scene", "title": "EX'S WEDDING", "corruptors": ["The Cake", "The Vows", "New Spouse"], "pressure_profile": ["Jealousy", "Scene Causer"], "prompt_seed": "I object!", "footer": "Social" },
-                    { "id": "SCN-022", "type": "scene", "title": "MARS COLONY", "corruptors": ["Low Oxygen", "Red Dust", "Airlock"], "pressure_profile": ["Suffocation", "Mutiny"], "prompt_seed": "Earth rules don't apply here.", "footer": "Sci-Fi" },
-                    { "id": "SCN-023", "type": "scene", "title": "ESCAPE ROOM", "corruptors": ["Timer", "Padlocks", "Clues"], "pressure_profile": ["Feeling Stupid", "Trapped"], "prompt_seed": "This is part of the puzzle.", "footer": "Game" },
-                    { "id": "SCN-024", "type": "scene", "title": "GYM LOCKER", "corruptors": ["Naked Old Men", "Humidity", "Padlocks"], "pressure_profile": ["Theft", "Hygiene"], "prompt_seed": "Wrong locker.", "footer": "Public" },
-                    { "id": "SCN-025", "type": "scene", "title": "UNDERWATER", "corruptors": ["Sharks", "Limited Air", "Pressure"], "pressure_profile": ["Drowning", "The Bends"], "prompt_seed": "Glub glub.", "footer": "Nature" },
-                    { "id": "SCN-026", "type": "scene", "title": "HARRY POTTER WORLD", "corruptors": ["Wands", "Butterbeer", "Tourists"], "pressure_profile": ["Copyright Infringement", "Nerds"], "prompt_seed": "It's magic.", "footer": "Theme Park" },
-                    { "id": "SCN-027", "type": "scene", "title": "HOARDER HOUSE", "corruptors": ["Cats", "Newspapers", "Smell"], "pressure_profile": ["Avalanche", "Disease"], "prompt_seed": "It's a collection.", "footer": "Domestic" },
-                    { "id": "SCN-028", "type": "scene", "title": "VEGAS CASINO", "corruptors": ["Pit Boss", "Chips", "Free Drinks"], "pressure_profile": ["Debt", "Broken Knees"], "prompt_seed": "Double or nothing.", "footer": "Vice" },
-                    { "id": "SCN-029", "type": "scene", "title": "YOGA CLASS", "corruptors": ["Silence", "Spandex", "Namaste"], "pressure_profile": ["Farting", "Balance"], "prompt_seed": "My chakras are aligned.", "footer": "Health" },
-                    { "id": "SCN-030", "type": "scene", "title": "DRIVING TEST", "corruptors": ["Clipboard", "Cones", "Parallel Park"], "pressure_profile": ["Crash", "Failure"], "prompt_seed": "Watch this drift.", "footer": "Legal" },
-                    { "id": "SCN-031", "type": "scene", "title": "AA MEETING", "corruptors": ["Coffee", "Circle", "Sharing"], "pressure_profile": ["Relapse", "Honesty"], "prompt_seed": "My name is...", "footer": "Support" },
-                    { "id": "SCN-032", "type": "scene", "title": "BOMB SQUAD", "corruptors": ["Wires", "Tick Tock", "Suit"], "pressure_profile": ["Boom", "Stress"], "prompt_seed": "Blue wire or red?", "footer": "Danger" }
+                    { "id": "SCN-001", "type": "scene", "title": "TSA CHECKPOINT", "corruptors": ["Long Line", "Rubber Gloves"], "pressure_profile": ["Federal Offense", "Missed Flight"], "prompt_seed": "I swear that's not organic matter", "footer": "High Security" },
+                    { "id": "SCN-002", "type": "scene", "title": "FIRST DATE", "corruptors": ["Awkward Silence", "Expensive Wine"], "pressure_profile": ["Romance Killer", "Public Scene"], "prompt_seed": "It's a conversation starter", "footer": "Social" },
+                    { "id": "SCN-003", "type": "scene", "title": "JOB INTERVIEW", "corruptors": ["CEO Present", "Quiet Office"], "pressure_profile": ["Career Ender", "HR Violation"], "prompt_seed": "These show my initiative", "footer": "Corporate" },
+                    { "id": "SCN-004", "type": "scene", "title": "CRIME SCENE", "corruptors": ["Police Tape", "Chalk Outline"], "pressure_profile": ["Actual Jail", "Tampering"], "prompt_seed": "I was just passing through", "footer": "Legal" },
+                    { "id": "SCN-005", "type": "scene", "title": "KINDERGARTEN", "corruptors": ["Nap Time", "Small Chairs"], "pressure_profile": ["Traumatized Kids", "Angry Parents"], "prompt_seed": "It's for a science project", "footer": "Public" },
+                    { "id": "SCN-006", "type": "scene", "title": "BORDER CROSSING", "corruptors": ["Drug Dogs", "Stern Guards"], "pressure_profile": ["Deportation", "Cavity Search"], "prompt_seed": "I didn't pack this bag", "footer": "High Security" },
+                    { "id": "SCN-007", "type": "scene", "title": "GRANDMA'S FUNERAL", "corruptors": ["Open Casket", "Crying Relatives"], "pressure_profile": ["Disrespectful", "Written out of Will"], "prompt_seed": "She would have wanted this", "footer": "Social" },
+                    { "id": "SCN-008", "type": "scene", "title": "THE OVAL OFFICE", "corruptors": ["The President", "Secret Service"], "pressure_profile": ["Treason", "National News"], "prompt_seed": "Mr. President, hear me out", "footer": "Government" },
+                    { "id": "SCN-009", "type": "scene", "title": "SURGERY ROOM", "corruptors": ["Open Chest", "Beeping"], "pressure_profile": ["Malpractice", "Death"], "prompt_seed": "I'm the specialist", "footer": "Medical" },
+                    { "id": "SCN-010", "type": "scene", "title": "BANK VAULT", "corruptors": ["Laser Grid", "Time Lock"], "pressure_profile": ["Heist Charge", "Alarm"], "prompt_seed": "Just checking the safety deposit", "footer": "Crime" },
+                    { "id": "SCN-011", "type": "scene", "title": "ELEVATOR", "corruptors": ["Stuck Between Floors", "Fart Smell"], "pressure_profile": ["Claustrophobia", "No Escape"], "prompt_seed": "Going down", "footer": "Confined" },
+                    { "id": "SCN-012", "type": "scene", "title": "ZOOM CALL", "corruptors": ["Unmuted Mic", "Camera On"], "pressure_profile": ["Fired", "Viral Video"], "prompt_seed": "Can everyone see my screen", "footer": "Digital" },
+                    { "id": "SCN-013", "type": "scene", "title": "SAUNA", "corruptors": ["Steam", "Towels"], "pressure_profile": ["Heat Stroke", "Privacy"], "prompt_seed": "Is it hot in here", "footer": "Social" },
+                    { "id": "SCN-014", "type": "scene", "title": "NUCLEAR SILO", "corruptors": ["Launch Key", "Red Button"], "pressure_profile": ["World War 3", "Radiation"], "prompt_seed": "Oops", "footer": "Military" },
+                    { "id": "SCN-015", "type": "scene", "title": "ESCAPE ROOM", "corruptors": ["Timer", "Padlocks"], "pressure_profile": ["Feeling Stupid", "Trapped"], "prompt_seed": "This is part of the puzzle", "footer": "Game" },
+                    { "id": "SCN-016", "type": "scene", "title": "VEGAS CASINO", "corruptors": ["Pit Boss", "Chips"], "pressure_profile": ["Debt", "Broken Knees"], "prompt_seed": "Double or nothing", "footer": "Vice" }
                 ],
                 "evidence_cards": []
             }
         };
 
-        // --- PROCEDURAL GENERATION FOR EVIDENCE CARDS (To ensure 80+ unique items) ---
         const evidenceItems = [
-            ["EVD-001", "CHAINSAW", "Gardening", "Murder Weapon", "Just trimming the hedges."],
-            ["EVD-002", "BAG OF LIME", "Construction", "Body Disposal", "For the patio project."],
-            ["EVD-003", "SKI MASK", "Winter Sports", "Robbery", "My face gets cold."],
-            ["EVD-004", "DUCT TAPE", "Repairs", "Kidnapping", "It fixes everything."],
-            ["EVD-005", "BURNER PHONE", "Privacy", "Drug Dealing", "I lose phones a lot."],
-            ["EVD-006", "STACK OF CASH", "Savings", "Laundering", "I don't trust banks."],
-            ["EVD-007", "CLOWN COSTUME", "Parties", "Nightmares", "I do birthdays."],
-            ["EVD-008", "CHLOROFORM", "Science", "Abduction", "It's for my insomnia."],
-            ["EVD-009", "HANDCUFFS", "Magic Trick", "Arrest", "It's a prop."],
-            ["EVD-010", "BLOODY RAG", "Nosebleed", "Evidence", "I cut myself shaving."],
-            ["EVD-011", "LIVE RACCOON", "Pet", "Infestation", "He followed me home."],
-            ["EVD-012", "CROWBAR", "Crates", "Burglary", "I'm a carpenter."],
-            ["EVD-013", "FAKE ID", "Novelty", "Fraud", "It's a joke gift."],
-            ["EVD-014", "BLUEPRINTS", "Architecture", "Heist Plan", "Just admiring the layout."],
-            ["EVD-015", "HACKSAW", "Plumbing", "Dismemberment", "The pipes are old."],
-            ["EVD-016", "JAR OF TEETH", "Tooth Fairy", "Serial Killer", "I'm a collector."],
-            ["EVD-017", "USED SYRINGE", "Insulin", "Heroin", "I'm diabetic... I think."],
-            ["EVD-018", "GOAT", "Farming", "Sacrifice", "Lawn maintenance."],
-            ["EVD-019", "URANIUM", "Science Class", "Nuke", "It's a paperweight."],
-            ["EVD-020", "SEVERED HAND", "Halloween", "Murder", "It's realistic rubber."],
-            ["EVD-021", "BAG OF WHITE POWDER", "Flour", "Cocaine", "I'm baking later."],
-            ["EVD-022", "LOCKPICKS", "Hobby", "Breaking & Entering", "I locked myself out."],
-            ["EVD-023", "PASSPORT STACK", "Travel Agent", "Identity Theft", "Holding them for friends."],
-            ["EVD-024", "GASOLINE CAN", "Car trouble", "Arson", "Running on empty."],
-            ["EVD-025", "MATCHES", "Candles", "Arson", "I like the smell."],
-            ["EVD-026", "ROPE", "Knots", "Bondage", "I'm a scout."],
-            ["EVD-027", "SHOVEL", "Gardening", "Grave Digging", "Planting tulips."],
-            ["EVD-028", "WIRETAP", "Audio Eng.", "Espionage", "Checking the acoustics."],
-            ["EVD-029", "GRENADE", "Paperweight", "Terrorism", "Pin is still in."],
-            ["EVD-030", "HUMAN SKULL", "Anatomy Study", "Trophy", "Alas, poor Yorick."],
-            ["EVD-031", "POISON", "Rats", "Assassination", "Pest control."],
-            ["EVD-032", "USB DRIVE", "Photos", "State Secrets", "Just vacation pics."],
-            ["EVD-033", "BUTCHER KNIFE", "Cooking", "Stabbing", "Cutting steak."],
-            ["EVD-034", "TARPAULIN", "Painting", "Body Wrap", "Renovating."],
-            ["EVD-035", "BINOCULARS", "Bird Watching", "Stalking", "Looking at birds."],
-            ["EVD-036", "VIGILANTE MASK", "Cosplay", "Crime Fighting", "I am the night."],
-            ["EVD-037", "STOLEN ART", "Replica", "Grand Larceny", "Garage sale find."],
-            ["EVD-038", "SATELLITE PHONE", "Hiking", "Smuggling", "Better reception."],
-            ["EVD-039", "TAXIDERMY DOG", "Memorial", "Creepy", "He's still a good boy."],
-            ["EVD-040", "EXPLOSIVES MANUAL", "Chemistry", "Bomb Making", "Light reading."],
-            ["EVD-041", "GLOVES", "Cold Hands", "No Fingerprints", "My hands are dry."],
-            ["EVD-042", "ACID", "Cleaning", "Body Melting", "Deep cleaning."],
-            ["EVD-043", "BASEBALL BAT", "Sports", "Assault", "Home run."],
-            ["EVD-044", "BRICK", "Construction", "Window Breaking", "Building a wall."],
-            ["EVD-045", "TOASTER IN BATHTUB", "Storage", "Suicide/Murder", "Kitchen is full."],
-            ["EVD-046", "MEAT GRINDER", "Sausages", "Disposal", "Making burgers."],
-            ["EVD-047", "WOOD CHIPPER", "Mulch", "Fargo", "Yard work."],
-            ["EVD-048", "KIDNEY IN COOLER", "Donation", "Black Market", "Lunch."],
-            ["EVD-049", "ILLEGAL FIREWORKS", "Celebration", "Hazard", "4th of July early."],
-            ["EVD-050", "TASAR", "Self Defense", "Assault", "Don't touch me."],
-            ["EVD-051", "NIGHT VISION GOGGLES", "Camping", "Peeping Tom", "Owls are cool."],
-            ["EVD-052", "SIGNAL JAMMER", "Quiet", "Heist", "I hate calls."],
-            ["EVD-053", "BOX OF SPIDERS", "Biology", "Torture", "They're cute."],
-            ["EVD-054", "WET SUIT", "Surfing", "SEAL Team", "Chafing."],
-            ["EVD-055", "GRAPPLING HOOK", "Climbing", "Ninja", "Batman fan."],
-            ["EVD-056", "POLYGRAPH", "Truth", "Interrogation", "Party game."],
-            ["EVD-057", "SACK OF DOORKNOBS", "Scrap Metal", "Blunt Weapon", "Renovating doors."],
-            ["EVD-058", "BAG OF HAIR", "Wigs", "Voodoo", "Donating it."],
-            ["EVD-059", "LOVE POTION", "Perfume", "Roofie", "Smells like lavender."],
-            ["EVD-060", "SHRINK RAY", "Toy", "Sci-Fi Weapon", "Batteries not included."],
-            ["EVD-061", "VOODOO DOLL", "Souvenir", "Curse", "It's acupuncture."],
-            ["EVD-062", "INVISIBILITY CLOAK", "Fabric", "Stealth", "See through mesh."],
-            ["EVD-063", "TIME MACHINE", "Clock", "Paradox", "It's a microwave."],
-            ["EVD-064", "CLONE", "Twin", "Illegal Science", "He's my brother."],
-            ["EVD-065", "ALIEN EGG", "Ostrich Egg", "Invasion", "Omelette time."],
-            ["EVD-066", "LASER SWORD", "Toy", "Lethal Weapon", "Larping."],
-            ["EVD-067", "CRYPTOCURRENCY WALLET", "Investment", "Ransom", "HODL."],
-            ["EVD-068", "NFT JEPG", "Art", "Laundering", "Right click save."],
-            ["EVD-069", "DEEPFAKE SOFTWARE", "Editing", "Blackmail", "Face swap."],
-            ["EVD-070", "DRONE", "Photography", "Spying", "Flying toy."],
-            ["EVD-071", "3D PRINTED GUN", "Model", "Felony", "It's resin."],
-            ["EVD-072", "AI CHATBOT", "Assistant", "Hacking", "Hello world."],
-            ["EVD-073", "SMART SPEAKER", "Music", "Wiretap", "Play Despacito."],
-            ["EVD-074", "VR HEADSET", "Gaming", "Reality Escape", "Metaverse."],
-            ["EVD-075", "SELF DRIVING CAR", "Transport", "Runaway Robot", "Look ma no hands."],
-            ["EVD-076", "CYBERDECK", "Retro Computer", "Hacking Rig", "It's vintage."],
-            ["EVD-077", "BIOMETRIC SCANNER", "Security", "Identity Theft", "Unlock phone."],
-            ["EVD-078", "QUANTUM COMPUTER", "Research", "Encryption Break", "Fast math."],
-            ["EVD-079", "ROBOT DOG", "Pet", "Weapon Platform", "No poop to clean."],
-            ["EVD-080", "NEURAL LINK", "Health", "Mind Control", "Headache relief."]
+            ["EVD-001", "CHAINSAW", "Gardening", "Murder Weapon", "Just trimming the hedges"],
+            ["EVD-002", "BAG OF LIME", "Construction", "Body Disposal", "For the patio project"],
+            ["EVD-003", "SKI MASK", "Winter Sports", "Robbery", "My face gets cold"],
+            ["EVD-004", "DUCT TAPE", "Repairs", "Kidnapping", "It fixes everything"],
+            ["EVD-005", "BURNER PHONE", "Privacy", "Drug Dealing", "I lose phones a lot"],
+            ["EVD-006", "STACK OF CASH", "Savings", "Laundering", "I don't trust banks"],
+            ["EVD-007", "CLOWN COSTUME", "Parties", "Nightmares", "I do birthdays"],
+            ["EVD-008", "CHLOROFORM", "Science", "Abduction", "For my insomnia"],
+            ["EVD-009", "HANDCUFFS", "Magic Trick", "Arrest", "It's a prop"],
+            ["EVD-010", "BLOODY RAG", "Nosebleed", "Evidence", "I cut myself shaving"],
+            ["EVD-011", "LIVE RACCOON", "Pet", "Infestation", "He followed me home"],
+            ["EVD-012", "CROWBAR", "Crates", "Burglary", "I'm a carpenter"],
+            ["EVD-013", "FAKE ID", "Novelty", "Fraud", "It's a joke gift"],
+            ["EVD-014", "BLUEPRINTS", "Architecture", "Heist Plan", "Admiring the layout"],
+            ["EVD-015", "HACKSAW", "Plumbing", "Dismemberment", "The pipes are old"],
+            ["EVD-016", "JAR OF TEETH", "Tooth Fairy", "Serial Killer", "I'm a collector"],
+            ["EVD-017", "GOAT", "Farming", "Sacrifice", "Lawn maintenance"],
+            ["EVD-018", "SEVERED HAND", "Halloween", "Murder", "It's realistic rubber"],
+            ["EVD-019", "WHITE POWDER", "Flour", "Cocaine", "I'm baking later"],
+            ["EVD-020", "LOCKPICKS", "Hobby", "Breaking In", "Locked myself out"],
+            ["EVD-021", "GASOLINE CAN", "Car trouble", "Arson", "Running on empty"],
+            ["EVD-022", "ROPE", "Knots", "Bondage", "I'm a scout"],
+            ["EVD-023", "SHOVEL", "Gardening", "Grave Digging", "Planting tulips"],
+            ["EVD-024", "HUMAN SKULL", "Anatomy Study", "Trophy", "Alas poor Yorick"],
+            ["EVD-025", "POISON", "Rats", "Assassination", "Pest control"],
+            ["EVD-026", "BUTCHER KNIFE", "Cooking", "Stabbing", "Cutting steak"],
+            ["EVD-027", "BINOCULARS", "Bird Watching", "Stalking", "Looking at birds"],
+            ["EVD-028", "GLOVES", "Cold Hands", "No Fingerprints", "My hands are dry"],
+            ["EVD-029", "BASEBALL BAT", "Sports", "Assault", "Home run"],
+            ["EVD-030", "TASER", "Self Defense", "Assault", "Don't touch me"],
+            ["EVD-031", "NIGHT VISION", "Camping", "Peeping Tom", "Owls are cool"],
+            ["EVD-032", "DRONE", "Photography", "Spying", "Flying toy"]
         ];
 
         evidenceItems.forEach(item => {
             GAME_DATA.decks.evidence_cards.push({
-                "id": item[0],
-                "type": "evidence",
-                "title": item[1],
-                "innocent_vectors": [item[2], "Misunderstanding", "Prop"],
-                "risk_vectors": [item[3], "Suspicious", "Felony"],
-                "prompt_seed": item[4],
-                "footer": "Item"
+                "id": item[0], "type": "evidence", "title": item[1],
+                "innocent_vectors": [item[2]], "risk_vectors": [item[3]], "prompt_seed": item[4], "footer": "Item"
             });
         });
 
-        // --- REACT COMPONENTS ---
-
-        // Robust Icon component that doesn't rely on DOM mutation
         const Icon = ({ name, size = 24, className = "" }) => {
-            if (!window.lucide || !window.lucide.icons || !window.lucide.icons[name]) {
-                return <span style={{ width: size, height: size, display: 'inline-block' }}>?</span>;
-            }
-
-            // Get SVG string safely without DOM replacement logic
-            const svgHtml = window.lucide.icons[name].toSvg({
-                width: size,
-                height: size,
-                class: className
-            });
-
-            return <span
-                dangerouslySetInnerHTML={{ __html: svgHtml }}
-                className="inline-flex items-center justify-center"
-            />;
+            if (!window.lucide?.icons?.[name]) return <span style={{ width: size, height: size }}>?</span>;
+            return <span dangerouslySetInnerHTML={{ __html: window.lucide.icons[name].toSvg({ width: size, height: size }) }} className="inline-flex items-center justify-center" />;
         };
 
-        // Alias for compatibility if needed, though we will use Icon everywhere
-        const SimpleIcon = Icon;
+        // RESPONSIVE CARD - powerful visual design
+        const Card = ({ data, size = "md", onClick }) => {
+            const isScene = data.type === 'scene';
+            const bgClass = isScene
+                ? "bg-gradient-to-br from-slate-800 to-slate-950 text-white border-2 border-slate-600"
+                : "bg-gradient-to-br from-amber-300 to-amber-500 text-gray-900 border-2 border-amber-600";
 
-        const Card = ({ data, isFaceUp, onClick, className = "" }) => {
-            // Colors based on type
-            let bgClass = "bg-white text-gray-900";
-            let borderClass = "border-gray-200";
-
-            if (data.type === 'scene') {
-                bgClass = "bg-slate-900 text-white";
-                borderClass = "border-slate-700";
-            } else if (data.type === 'protocol') {
-                bgClass = "bg-blue-50 text-blue-900";
-                borderClass = "border-blue-200";
-            } else {
-                // Evidence
-                bgClass = "bg-amber-50 text-amber-900";
-                borderClass = "border-amber-200";
-            }
-
-            if (!isFaceUp) {
-                return (
-                    <div
-                        onClick={onClick}
-                        className={`relative w-64 h-80 rounded-xl shadow-xl border-4 border-white bg-slate-800 flex items-center justify-center cursor-pointer transform transition-transform hover:scale-105 ${className}`}
-                    >
-                        <div className="text-slate-600 font-display text-4xl opacity-20 rotate-45">EXPLAIN</div>
-                    </div>
-                );
-            }
+            // Responsive - bigger on larger screens
+            const sizes = {
+                sm: { card: "w-32 sm:w-40 lg:w-48", title: "text-lg sm:text-xl lg:text-2xl", body: "text-[9px] sm:text-[10px] lg:text-xs" },
+                md: { card: "w-40 sm:w-48 lg:w-56", title: "text-xl sm:text-2xl lg:text-3xl", body: "text-[10px] sm:text-xs lg:text-sm" },
+                lg: { card: "w-48 sm:w-56 lg:w-64", title: "text-2xl sm:text-3xl lg:text-4xl", body: "text-xs sm:text-sm lg:text-base" }
+            };
+            const s = sizes[size];
 
             return (
-                <div
-                    onClick={onClick}
-                    className={`relative w-64 h-80 rounded-xl shadow-xl border-4 ${borderClass} ${bgClass} flex flex-col p-4 select-none cursor-pointer transform transition-transform hover:scale-105 ${className}`}
-                >
+                <div onClick={onClick} className={`${s.card} aspect-[5/7] rounded-2xl shadow-2xl ${bgClass} flex flex-col p-3 cursor-pointer active:scale-95 transition-all`}>
                     {/* Header */}
-                    <div className="flex justify-between items-start mb-2 opacity-50 text-[10px] font-mono uppercase tracking-wider">
+                    <div className="text-[8px] font-mono opacity-50 flex justify-between uppercase tracking-wider">
                         <span>{data.type}</span>
                         <span>{data.id}</span>
                     </div>
 
-                    {/* Title */}
-                    <div className="flex-grow flex flex-col justify-center items-center text-center mb-4">
-                        <h2 className="font-display text-3xl leading-tight mb-2 uppercase break-words w-full">{data.title}</h2>
-                        {data.type === 'scene' && (
-                            <div className="text-xs opacity-75 font-mono bg-slate-800 px-2 py-1 rounded text-white">{data.footer}</div>
+                    {/* Title Area */}
+                    <div className="flex-1 flex flex-col justify-center items-center text-center px-1">
+                        <h2 className={`font-display ${s.title} leading-none uppercase tracking-tight`}>{data.title}</h2>
+                        {isScene && (
+                            <div className="mt-2 px-3 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full uppercase">{data.footer}</div>
                         )}
-                    </div>
-
-                    {/* Body Content */}
-                    <div className="text-xs space-y-2 mb-4 font-sans font-medium">
-                        {data.type === 'evidence' && (
-                            <>
-                                <div className="flex items-center gap-1 opacity-75"><Icon name="check-circle" size={12} /> {data.innocent_vectors[0]}</div>
-                                <div className="flex items-center gap-1 text-red-500 opacity-90"><Icon name="alert-triangle" size={12} /> {data.risk_vectors[0]}</div>
-                                <div className="italic mt-2 opacity-60 text-[10px]">"{data.prompt_seed}"</div>
-                            </>
-                        )}
-                        {data.type === 'scene' && (
-                            <>
-                                <div className="opacity-90">⚠️ {data.corruptors.slice(0, 2).join(", ")}</div>
-                                <div className="text-red-400">Result: {data.pressure_profile[0]}</div>
-                            </>
-                        )}
-                        {data.type === 'protocol' && (
-                            <div className="space-y-1">
-                                {data.body.map((line, i) => <div key={i}>• {line}</div>)}
+                        {!isScene && (
+                            <div className={`mt-3 ${s.body} italic opacity-90 bg-white bg-opacity-30 px-3 py-2 rounded-lg leading-snug`}>
+                                "{data.prompt_seed}"
                             </div>
                         )}
                     </div>
 
-                    {/* Footer */}
-                    <div className="mt-auto border-t border-current border-opacity-20 pt-2 flex justify-between items-center text-[10px] opacity-60 font-mono">
-                        <span>EXPLAIN YOURSELF</span>
-                        <span>{data.footer}</span>
-                    </div>
-                </div>
-            );
-        };
-
-        const PrintCard = ({ data }) => {
-            const isScene = data.type === 'scene';
-            const isProto = data.type === 'protocol';
-
-            return (
-                <div className="print-card">
-                    {/* Cut marks handled by parent container via absolute pos, but we can add inner styling */}
-                    <div className={`w-full h-full border-2 ${isScene ? 'border-black bg-gray-100' : 'border-gray-400'} rounded p-3 flex flex-col relative`}>
-                        <div className="flex justify-between text-[8px] font-mono uppercase mb-1">
-                            <span>{data.type}</span>
-                            <span>{data.id}</span>
-                        </div>
-
-                        <div className="flex-grow flex flex-col justify-center text-center">
-                            <h1 className="font-display text-2xl uppercase mb-1">{data.title}</h1>
-                            {data.type === 'evidence' && <p className="text-[10px] italic">"{data.prompt_seed}"</p>}
-                        </div>
-
-                        <div className="text-[9px] leading-tight space-y-1 mt-2">
-                            {data.type === 'evidence' && (
-                                <>
-                                    <div className="font-bold">✓ {data.innocent_vectors.join(", ")}</div>
-                                    <div className="font-bold">✗ {data.risk_vectors.join(", ")}</div>
-                                </>
-                            )}
-                            {data.type === 'scene' && (
-                                <>
-                                    <div>Loc: {data.corruptors.join(", ")}</div>
-                                    <div>Risk: {data.pressure_profile.join(", ")}</div>
-                                </>
-                            )}
-                            {data.type === 'protocol' && (
-                                data.body.map((l, i) => <div key={i}>- {l}</div>)
-                            )}
-                        </div>
-
-                        <div className="mt-2 pt-1 border-t border-black border-opacity-20 flex justify-between text-[8px] uppercase">
-                            <span>Explain Yourself</span>
-                            <span>{data.footer}</span>
-                        </div>
+                    {/* Footer Details */}
+                    <div className={`${s.body} space-y-1 mt-auto pt-2 border-t-2 border-current border-opacity-30 font-medium`}>
+                        {isScene ? (
+                            <>
+                                <div className="flex items-start gap-1.5">
+                                    <span className="opacity-50 shrink-0">LOC</span>
+                                    <span>{data.corruptors[0]}</span>
+                                </div>
+                                <div className="flex items-start gap-1.5 text-blue-400">
+                                    <span className="opacity-50 shrink-0">RISK</span>
+                                    <span>{data.pressure_profile[0]}</span>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="flex items-start gap-1.5">
+                                    <span className="opacity-50 shrink-0">OK</span>
+                                    <span className="font-bold">{data.innocent_vectors[0]}</span>
+                                </div>
+                                <div className="flex items-start gap-1.5 text-red-800">
+                                    <span className="opacity-50 shrink-0">SUS</span>
+                                    <span className="font-bold">{data.risk_vectors[0]}</span>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             );
         };
 
         const GameApp = () => {
-            const [view, setView] = React.useState('home'); // home, play, print, browse
+            const [view, setView] = React.useState('home');
             const [gameState, setGameState] = React.useState({
                 scene: null,
                 evidence: [],
                 timerActive: false,
-                timeLeft: 30
+                timeLeft: 30,
+                phase: 'draw', // draw, defend, vote, result
+                score: { innocent: 0, guilty: 0 },
+                round: 1
             });
 
-            // Timer Logic
             React.useEffect(() => {
                 let interval = null;
                 if (gameState.timerActive && gameState.timeLeft > 0) {
-                    interval = setInterval(() => {
-                        setGameState(prev => ({ ...prev, timeLeft: prev.timeLeft - 1 }));
-                    }, 1000);
-                } else if (gameState.timeLeft === 0) {
-                    setGameState(prev => ({ ...prev, timerActive: false }));
+                    interval = setInterval(() => setGameState(prev => ({ ...prev, timeLeft: prev.timeLeft - 1 })), 1000);
+                } else if (gameState.timeLeft === 0 && gameState.timerActive) {
+                    setGameState(prev => ({ ...prev, timerActive: false, phase: 'vote' }));
                 }
                 return () => clearInterval(interval);
             }, [gameState.timerActive, gameState.timeLeft]);
 
             const drawScene = () => {
-                const randomScene = GAME_DATA.decks.scene_cards[Math.floor(Math.random() * GAME_DATA.decks.scene_cards.length)];
-                setGameState(prev => ({ ...prev, scene: randomScene, timeLeft: 30, timerActive: false }));
+                const scene = GAME_DATA.decks.scene_cards[Math.floor(Math.random() * GAME_DATA.decks.scene_cards.length)];
+                setGameState(prev => ({ ...prev, scene, timeLeft: 30, timerActive: false, phase: 'draw' }));
             };
 
             const drawEvidence = () => {
-                const newEvidence = [];
-                for (let i = 0; i < 2; i++) {
-                    newEvidence.push(GAME_DATA.decks.evidence_cards[Math.floor(Math.random() * GAME_DATA.decks.evidence_cards.length)]);
-                }
-                setGameState(prev => ({ ...prev, evidence: newEvidence }));
+                const ev = [];
+                for (let i = 0; i < 2; i++) ev.push(GAME_DATA.decks.evidence_cards[Math.floor(Math.random() * GAME_DATA.decks.evidence_cards.length)]);
+                setGameState(prev => ({ ...prev, evidence: ev, phase: 'defend' }));
+            };
+
+            const discardEvidence = (idx) => {
+                const newCard = GAME_DATA.decks.evidence_cards[Math.floor(Math.random() * GAME_DATA.decks.evidence_cards.length)];
+                setGameState(prev => {
+                    const newEvidence = [...prev.evidence];
+                    newEvidence[idx] = newCard;
+                    return { ...prev, evidence: newEvidence };
+                });
             };
 
             const toggleTimer = () => {
@@ -501,184 +272,231 @@
                 setGameState(prev => ({ ...prev, timerActive: !prev.timerActive }));
             };
 
-            const downloadJSON = () => {
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(GAME_DATA, null, 2));
-                const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.setAttribute("href", dataStr);
-                downloadAnchorNode.setAttribute("download", "explain_yourself.json");
-                document.body.appendChild(downloadAnchorNode);
-                downloadAnchorNode.click();
-                downloadAnchorNode.remove();
+            const startDefense = () => {
+                setGameState(prev => ({ ...prev, timerActive: true, phase: 'defend' }));
             };
 
-            // VIEWS
+            const vote = (verdict) => {
+                setGameState(prev => ({
+                    ...prev,
+                    phase: 'result',
+                    score: {
+                        innocent: prev.score.innocent + (verdict === 'innocent' ? 1 : 0),
+                        guilty: prev.score.guilty + (verdict === 'guilty' ? 1 : 0)
+                    }
+                }));
+            };
 
+            const nextRound = () => {
+                setGameState(prev => ({
+                    scene: null,
+                    evidence: [],
+                    timerActive: false,
+                    timeLeft: 30,
+                    phase: 'draw',
+                    score: prev.score,
+                    round: prev.round + 1
+                }));
+            };
+
+            const reset = () => setGameState({ scene: null, evidence: [], timerActive: false, timeLeft: 30, phase: 'draw', score: { innocent: 0, guilty: 0 }, round: 1 });
+
+            // HOME
             if (view === 'home') {
                 return (
-                    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center space-y-8 bg-gradient-to-br from-slate-900 to-slate-800">
-                        <div className="space-y-2 animate-pulse">
-                            <Icon name="help-circle" size={64} className="mx-auto text-amber-400" />
-                            <h1 className="text-6xl font-display text-white tracking-tighter uppercase">Explain<br />Yourself</h1>
-                            <p className="text-slate-400 font-mono">The Party Game of Bad Excuses</p>
+                    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+                        <div className="mb-8">
+                            <h1 className="text-6xl sm:text-7xl font-display text-white uppercase leading-none">Explain<br />Yourself</h1>
+                            <p className="text-slate-400 mt-3">The Party Game of Suspicious Items</p>
                         </div>
 
-                        <div className="w-full max-w-xs space-y-4">
-                            <button onClick={() => setView('play')} className="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-4 rounded-xl shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2">
-                                <Icon name="play" /> Play Mobile Mode
+                        <div className="w-full max-w-sm space-y-4 mb-8">
+                            <button onClick={() => setView('play')} className="w-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-bold py-5 rounded-2xl text-xl shadow-lg shadow-amber-500/25">
+                                START GAME
                             </button>
-                            <button onClick={() => setView('print')} className="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                                <Icon name="printer" /> Print Deck
-                            </button>
-                            <button onClick={() => setView('browse')} className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl border border-slate-600 flex items-center justify-center gap-2">
-                                <Icon name="layers" /> Browse Cards
-                            </button>
-                        </div>
-
-                        <div className="pt-8 opacity-50 text-xs font-mono">
-                            <button onClick={downloadJSON} className="underline hover:text-white">Download JSON Data</button>
-                        </div>
-                    </div>
-                );
-            }
-
-            if (view === 'print') {
-                const allCards = [
-                    ...GAME_DATA.decks.protocol_cards,
-                    ...GAME_DATA.decks.scene_cards,
-                    ...GAME_DATA.decks.evidence_cards
-                ];
-
-                // Chunk into groups of 4 for the grid
-                const pages = [];
-                for (let i = 0; i < allCards.length; i += 4) {
-                    pages.push(allCards.slice(i, i + 4));
-                }
-
-                return (
-                    <div className="min-h-screen bg-white text-black p-4">
-                        <div className="no-print fixed top-0 left-0 right-0 bg-slate-900 text-white p-4 z-50 flex justify-between items-center shadow-lg">
-                            <button onClick={() => setView('home')} className="flex items-center gap-2 text-sm font-bold"><Icon name="arrow-left" /> Back</button>
-                            <div className="text-center hidden sm:block">
-                                <h2 className="font-display uppercase text-xl">Print Preview</h2>
-                                <p className="text-xs text-slate-400">{allCards.length} cards • {pages.length} pages • US Letter Landscape</p>
-                            </div>
-                            <button onClick={() => window.print()} className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-bold flex items-center gap-2">
-                                <Icon name="printer" /> Print Now
-                            </button>
-                        </div>
-
-                        <div className="no-print h-16"></div> {/* Spacer */}
-
-                        <div className="max-w-[11in] mx-auto bg-gray-200 p-8 shadow-inner overflow-auto no-print">
-                            <p className="text-center mb-4 text-gray-600">Scroll down to see all pages. Each block represents one sheet of paper.</p>
-                            {pages.map((page, pIdx) => (
-                                <div key={pIdx} className="bg-white w-[11in] h-[8.5in] mb-8 mx-auto shadow-2xl grid grid-cols-2 grid-rows-2 p-[0.75in] gap-0">
-                                    {page.map(card => (
-                                        <div key={card.id} className="border border-dashed border-gray-300 relative h-full flex items-center justify-center p-4">
-                                            {/* Preview representation */}
-                                            <div className="text-center">
-                                                <div className="font-bold text-xs">{card.title}</div>
-                                                <div className="text-[10px] text-gray-500">{card.type}</div>
-                                            </div>
-                                            {/* Cut marks simulation */}
-                                            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-black"></div>
-                                            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-black"></div>
-                                            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-black"></div>
-                                            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-black"></div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Actual Print Layout (Hidden on Screen, Visible on Print) */}
-                        <div className="print-only">
-                            {pages.map((page, pIdx) => (
-                                <div key={pIdx} className="print-grid">
-                                    {page.map(card => (
-                                        <div key={card.id} className="relative">
-                                            <PrintCard data={card} />
-                                            <div className="cut-mark-tl"></div>
-                                            <div className="cut-mark-tr"></div>
-                                            <div className="cut-mark-bl"></div>
-                                            <div className="cut-mark-br"></div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
-            }
-
-            if (view === 'play') {
-                return (
-                    <div className="min-h-screen bg-slate-900 text-white flex flex-col">
-                        {/* Header */}
-                        <div className="p-4 flex justify-between items-center bg-slate-800 shadow-md z-10">
-                            <button onClick={() => setView('home')}><Icon name="home" /></button>
-                            <span className="font-display tracking-widest text-amber-400">EXPLAIN YOURSELF</span>
-                            <button onClick={() => setGameState({ scene: null, evidence: [], timeLeft: 30, timerActive: false })}><Icon name="refresh-cw" /></button>
-                        </div>
-
-                        {/* Game Area */}
-                        <div className="flex-grow flex flex-col items-center justify-center p-4 gap-6 overflow-hidden relative">
-
-                            {/* Scene Area */}
-                            <div className="z-10 w-full flex justify-center">
-                                {gameState.scene ? (
-                                    <div className="slide-in">
-                                        <Card data={gameState.scene} isFaceUp={true} />
-                                    </div>
-                                ) : (
-                                    <div onClick={drawScene} className="w-64 h-80 rounded-xl border-4 border-dashed border-slate-700 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-800 transition-colors">
-                                        <Icon name="map-pin" size={48} className="text-slate-600 mb-2" />
-                                        <span className="font-display text-xl text-slate-500">TAP TO DRAW SCENE</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Evidence Area */}
-                            <div className="w-full flex justify-center items-start gap-1 px-1">
-                                {gameState.evidence.length > 0 ? (
-                                    gameState.evidence.map((card, idx) => (
-                                        <div key={idx} className="slide-in" style={{ animationDelay: `${idx * 0.1}s` }}>
-                                            <Card data={card} isFaceUp={true} className="scale-[0.45] sm:scale-[0.6] origin-top -mb-32 sm:-mb-24" />
-                                        </div>
-                                    ))
-                                ) : (
-                                    gameState.scene && (
-                                        <button onClick={drawEvidence} className="bg-amber-500 text-black font-bold px-8 py-4 rounded-full shadow-lg hover:bg-amber-400 animate-bounce">
-                                            DRAW EVIDENCE
-                                        </button>
-                                    )
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Controls */}
-                        <div className="bg-slate-800 p-6 pb-8 rounded-t-3xl shadow-2xl">
-                            <div className="flex items-center justify-between max-w-md mx-auto">
-                                <div className="text-center">
-                                    <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">Timer</div>
-                                    <div onClick={toggleTimer} className={`text-4xl font-mono font-bold cursor-pointer ${gameState.timeLeft < 10 ? 'text-red-500' : 'text-white'}`}>
-                                        {gameState.timeLeft}s
-                                    </div>
-                                </div>
-
-                                <button onClick={() => { drawScene(); drawEvidence(); }} className="bg-slate-700 p-4 rounded-full hover:bg-slate-600">
-                                    <Icon name="skip-forward" />
+                            <div className="flex gap-3">
+                                <button onClick={() => setView('rules')} className="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl border border-slate-700">
+                                    How to Play
+                                </button>
+                                <button onClick={() => setView('browse')} className="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl border border-slate-700">
+                                    {GAME_DATA.decks.scene_cards.length + GAME_DATA.decks.evidence_cards.length} Cards
                                 </button>
                             </div>
+                        </div>
 
-                            {gameState.scene && (
-                                <div className="mt-4 text-center text-sm text-slate-400 italic">
-                                    "Explain why you have the
-                                    <span className="text-amber-400 font-bold mx-1">{gameState.evidence[0]?.title || "?"}</span>
-                                    and
-                                    <span className="text-amber-400 font-bold mx-1">{gameState.evidence[1]?.title || "?"}</span>
-                                    at the
-                                    <span className="text-blue-400 font-bold mx-1">{gameState.scene.title}</span>"
+                        <p className="text-slate-600 text-xs max-w-xs">Draw cards, make excuses, survive interrogation. Best played with 3+ players and questionable morals.</p>
+                    </div>
+                );
+            }
+
+            // RULES
+            if (view === 'rules') {
+                return (
+                    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+                        <div className="max-w-md w-full">
+                            <h2 className="font-display text-4xl text-white text-center mb-8">HOW TO PLAY</h2>
+
+                            <div className="space-y-6 mb-8">
+                                <div className="bg-slate-800 rounded-xl p-5 border-l-4 border-blue-500">
+                                    <div className="text-blue-400 font-mono text-sm mb-1">STEP 1 — THE SCENE</div>
+                                    <p className="text-white">Tap to reveal WHERE you were caught. This is the location of your interrogation.</p>
+                                </div>
+                                <div className="bg-slate-800 rounded-xl p-5 border-l-4 border-amber-500">
+                                    <div className="text-amber-400 font-mono text-sm mb-1">STEP 2 — THE EVIDENCE</div>
+                                    <p className="text-white">Draw 2 suspicious items found in your possession. These need explaining.</p>
+                                </div>
+                                <div className="bg-slate-800 rounded-xl p-5 border-l-4 border-red-500">
+                                    <div className="text-red-400 font-mono text-sm mb-1">STEP 3 — THE DEFENSE</div>
+                                    <p className="text-white">You have 30 seconds to explain why an innocent person would have these items at this location.</p>
+                                </div>
+                            </div>
+
+                            <div className="bg-slate-800/50 rounded-xl p-4 mb-8 text-sm text-slate-400">
+                                <div className="font-bold text-white mb-2">MULTIPLAYER VARIANT</div>
+                                <p>Take turns as the suspect. Other players vote: Innocent or Guilty? Most acquittals wins.</p>
+                            </div>
+
+                            <button onClick={() => setView('home')} className="w-full bg-slate-700 text-white font-bold py-4 rounded-xl">
+                                Got It
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // PLAY
+            if (view === 'play') {
+                return (
+                    <div className="h-[100dvh] flex flex-col bg-slate-900 overflow-hidden">
+                        {/* Header with score */}
+                        <div className="p-3 flex justify-between items-center bg-slate-800 shrink-0 border-b border-slate-700">
+                            <button onClick={() => setView('home')} className="text-slate-400"><Icon name="home" size={20} /></button>
+                            <div className="text-center">
+                                <span className="font-display text-amber-400 tracking-wider text-sm">ROUND {gameState.round}</span>
+                                <div className="text-[10px] text-slate-500">
+                                    <span className="text-green-400">{gameState.score.innocent} innocent</span>
+                                    <span className="mx-1">·</span>
+                                    <span className="text-red-400">{gameState.score.guilty} guilty</span>
+                                </div>
+                            </div>
+                            <button onClick={reset} className="text-slate-400"><Icon name="refresh-cw" size={20} /></button>
+                        </div>
+
+                        {/* Cards */}
+                        <div className="flex-1 flex flex-col items-center justify-center gap-3 p-3 overflow-hidden">
+                            {/* Scene */}
+                            {gameState.scene ? (
+                                <div className="slide-up"><Card data={gameState.scene} size="md" /></div>
+                            ) : (
+                                <button onClick={drawScene} className="w-44 sm:w-56 aspect-[5/7] rounded-2xl border-2 border-dashed border-slate-600 flex flex-col items-center justify-center bg-slate-800/50">
+                                    <Icon name="map-pin" size={32} className="text-slate-500 mb-2" />
+                                    <span className="font-display text-slate-400">DRAW SCENE</span>
+                                </button>
+                            )}
+
+                            {/* Evidence with discard option */}
+                            <div className="flex gap-2">
+                                {gameState.evidence.length > 0 ? (
+                                    gameState.evidence.map((card, i) => (
+                                        <div key={i} className="slide-up relative" style={{ animationDelay: `${i * 0.1}s` }}>
+                                            <Card data={card} size="sm" />
+                                            {gameState.phase === 'defend' && !gameState.timerActive && (
+                                                <button onClick={() => discardEvidence(i)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs font-bold shadow-lg">
+                                                    ↻
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))
+                                ) : gameState.scene && (
+                                    <button onClick={drawEvidence} className="bg-gradient-to-r from-amber-400 to-amber-500 text-black font-bold px-6 py-3 rounded-full shadow-lg">
+                                        DRAW EVIDENCE
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Footer - changes based on phase */}
+                        <div className="bg-slate-800 p-4 safe-bottom shrink-0 border-t border-slate-700">
+
+                            {/* DRAW PHASE - waiting for scene */}
+                            {gameState.phase === 'draw' && !gameState.scene && (
+                                <div className="text-center">
+                                    <div className="text-slate-500 text-sm mb-2">Step 1 of 3</div>
+                                    <div className="text-white font-bold">Tap the deck to reveal your SCENE</div>
+                                </div>
+                            )}
+
+                            {/* DRAW PHASE - waiting for evidence */}
+                            {gameState.phase === 'draw' && gameState.scene && !gameState.evidence.length && (
+                                <div className="text-center">
+                                    <div className="text-slate-500 text-sm mb-2">Step 2 of 3</div>
+                                    <div className="text-white font-bold">Tap to draw your EVIDENCE</div>
+                                </div>
+                            )}
+
+                            {/* DEFEND PHASE - timer and controls */}
+                            {gameState.phase === 'defend' && gameState.evidence.length === 2 && (
+                                <div className="space-y-3">
+                                    {/* Prompt */}
+                                    <div className="text-center text-sm text-slate-200 bg-slate-700/50 rounded-lg p-3">
+                                        "Why do you have <span className="text-amber-400 font-bold">{gameState.evidence[0].title}</span> and <span className="text-amber-400 font-bold">{gameState.evidence[1].title}</span> at <span className="text-blue-400 font-bold">{gameState.scene.title}</span>?"
+                                    </div>
+
+                                    {/* Timer display */}
+                                    <div className="flex items-center justify-center gap-4">
+                                        <div className={`text-5xl font-mono font-black tabular-nums ${gameState.timeLeft < 10 ? 'text-red-500' : gameState.timerActive ? 'text-green-400' : 'text-white'}`}>
+                                            {String(gameState.timeLeft).padStart(2, '0')}
+                                        </div>
+                                    </div>
+
+                                    {/* Action buttons */}
+                                    <div className="flex gap-3 justify-center">
+                                        {!gameState.timerActive && gameState.timeLeft > 0 && (
+                                            <button onClick={startDefense} className="flex-1 max-w-[200px] bg-green-500 text-white font-black py-4 rounded-xl text-lg shadow-lg shadow-green-500/30">
+                                                ▶ START TIMER
+                                            </button>
+                                        )}
+                                        {gameState.timerActive && (
+                                            <button onClick={() => setGameState(prev => ({ ...prev, phase: 'vote', timerActive: false }))} className="flex-1 max-w-[200px] bg-blue-500 text-white font-black py-4 rounded-xl text-lg">
+                                                ■ DONE TALKING
+                                            </button>
+                                        )}
+                                        {!gameState.timerActive && gameState.timeLeft === 0 && (
+                                            <button onClick={() => setGameState(prev => ({ ...prev, phase: 'vote' }))} className="flex-1 max-w-[200px] bg-red-500 text-white font-black py-4 rounded-xl text-lg animate-pulse">
+                                                TIME'S UP → VOTE
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* VOTE PHASE */}
+                            {gameState.phase === 'vote' && (
+                                <div className="space-y-3">
+                                    <div className="text-center text-white font-bold text-lg">THE JURY VOTES</div>
+                                    <div className="flex gap-4 justify-center">
+                                        <button onClick={() => vote('innocent')} className="flex-1 max-w-[150px] bg-green-500 text-white font-black py-5 rounded-xl text-xl shadow-lg shadow-green-500/30">
+                                            ✓ INNOCENT
+                                        </button>
+                                        <button onClick={() => vote('guilty')} className="flex-1 max-w-[150px] bg-red-500 text-white font-black py-5 rounded-xl text-xl shadow-lg shadow-red-500/30">
+                                            ✗ GUILTY
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* RESULT PHASE */}
+                            {gameState.phase === 'result' && (
+                                <div className="text-center space-y-3">
+                                    <div className={`text-4xl font-display ${gameState.score.innocent > gameState.score.guilty - 1 ? 'text-green-400' : 'text-red-400'}`}>
+                                        {gameState.score.innocent > gameState.score.guilty - 1 ? 'ACQUITTED!' : 'CONVICTED!'}
+                                    </div>
+                                    <div className="text-slate-400">
+                                        Round {gameState.round} · <span className="text-green-400">{gameState.score.innocent}</span> innocent / <span className="text-red-400">{gameState.score.guilty}</span> guilty
+                                    </div>
+                                    <button onClick={nextRound} className="bg-gradient-to-r from-amber-400 to-amber-500 text-black font-black px-10 py-4 rounded-xl text-lg shadow-lg">
+                                        DRAW AGAIN →
+                                    </button>
                                 </div>
                             )}
                         </div>
@@ -686,32 +504,24 @@
                 );
             }
 
+            // BROWSE
             if (view === 'browse') {
-                const allCards = [
-                    ...GAME_DATA.decks.protocol_cards,
-                    ...GAME_DATA.decks.scene_cards,
-                    ...GAME_DATA.decks.evidence_cards
-                ];
+                const allCards = [...GAME_DATA.decks.scene_cards, ...GAME_DATA.decks.evidence_cards];
                 return (
-                    <div className="min-h-screen bg-slate-900 p-4">
-                        <div className="fixed top-0 left-0 right-0 bg-slate-800 p-4 z-10 flex gap-4 items-center shadow-lg">
-                            <button onClick={() => setView('home')} className="text-white"><Icon name="arrow-left" /></button>
-                            <h2 className="text-white font-display text-xl">Card Browser ({allCards.length})</h2>
+                    <div className="min-h-screen p-4">
+                        <div className="flex items-center gap-4 mb-6">
+                            <button onClick={() => setView('home')}><Icon name="arrow-left" size={24} /></button>
+                            <h2 className="font-display text-xl">Cards ({allCards.length})</h2>
                         </div>
-                        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 pb-10">
-                            {allCards.map(card => (
-                                <div key={card.id} className="scale-[0.8] origin-top-left mb-[-40px]">
-                                    <Card data={card} isFaceUp={true} />
-                                </div>
-                            ))}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 justify-items-center">
+                            {allCards.map(card => <Card key={card.id} data={card} size="sm" />)}
                         </div>
                     </div>
-                )
+                );
             }
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<GameApp />);
+        ReactDOM.createRoot(document.getElementById('root')).render(<GameApp />);
     </script>
 </body>
 
